@@ -1,0 +1,4 @@
+requests
+colorama
+wafw00f
+sslyze
