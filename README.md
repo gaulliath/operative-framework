@@ -7,7 +7,7 @@
     /_/ 
 ```
 
-#Operative - The Fingerprinting Framework
+#Operative - The Fingerprint Framework
 Copyright (c) 2017 written in python with Love
 
 Author: Tristan Granier (graniet)
