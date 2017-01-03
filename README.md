@@ -18,6 +18,9 @@ This is a framework based on fingerprint action, this tool is used for get infor
 + pip install -r requirements.txt
 + python operative.py
 
+##### Youtube
++ [how use fingerprint modules ](https://www.youtube.com/watch?v=3ogNpa8s16g)
+
 ##### Core Modules
 
 + core/modules/cms_gathering
