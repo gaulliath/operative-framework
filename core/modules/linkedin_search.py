@@ -2,7 +2,6 @@
 #description:Linkedin employee search module#
 
 from colorama import Fore,Back,Style
-from core import myparser
 
 import os,sys
 import urllib
