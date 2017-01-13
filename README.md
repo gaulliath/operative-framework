@@ -6,8 +6,9 @@
 \____/ .___/\___/_/   \__,_/\__/_/ |___/\___/ 
     /_/ 
 ```
-
 #Operative - The Fingerprint Framework
+![version](https://img.shields.io/badge/version-1.0a-red.svg) ![twitter](https://img.shields.io/badge/twitter-@graniet75-blue.svg) ![langage](https://img.shields.io/badge/python-with love-green.svg)
+
 Copyright (c) 2017 written in python with Love
 
 Author: Tristan Granier (graniet)
