@@ -1,5 +1,5 @@
 #!/usr/bin/env	python
-#description:read/search common file#
+#description:Read/Search common file#
 
 from colorama import Fore,Back,Style
 
