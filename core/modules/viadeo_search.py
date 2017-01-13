@@ -1,5 +1,5 @@
 #!/usr/bin/env	python
-#description:Module sample#
+#description:Viadeo employee search module#
 
 from colorama import Fore,Back,Style
 
