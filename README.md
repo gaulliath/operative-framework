@@ -35,6 +35,7 @@ This is a framework based on fingerprint action, this tool is used for get infor
 + core/modules/whois_domain
 + core/modules/generate_email
 + core/modules/viadeo_search
++ core/modules/file_common
 
 ##### SQL File forensics
 + import database in core/dbs/
