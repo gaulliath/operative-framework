@@ -28,8 +28,8 @@ def use_module(module, argv=False):
 			print "..."
 			action = 1
 			break
-		if ":" in user_input:
-			user_input = user_input.replace(':','')
+		if ":" in user_input[:1]:
+			user_input = user_input[1:]
 		if module_class == "":
 			module_path = module_name.replace("/",".")
 			mod = __import__(module_path, fromlist=['module_element'])
