@@ -84,9 +84,18 @@ def show_help():
 :load_db		Load SQL database
 :search_db		Search information on database
 :use <module>		Use module
+:update			Update operative framework
 :clear			Clear current screen
 :help			Show this bullet & close
 :quit			Close operative framework"""
+
+def update_framework():
+	print Fore.GREEN + "[information] checking update..." + Style.RESET_ALL
+	try:
+		os.system('git pull')
+		print Fore.YELLOW + "[warning] please reboot a framework" + Style.RESET_ALL
+	except:
+		print Fore.RED + "[error] can't start update please use <git pull>" + Style.RESET_ALL
 
 def clear_screen():
 	os.system('clear')
