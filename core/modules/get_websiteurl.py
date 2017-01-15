@@ -2,7 +2,7 @@
 #description:Extract url on website domain#
 
 from colorama import Fore,Back,Style
-from BeautifulSoup import BeautifulSoup
+from bs4 import BeautifulSoup
 
 import os,sys
 import time
@@ -109,7 +109,7 @@ class module_element(object):
 				url = url[:-1]
 			if url not in self.already and self.parse_domain(self.get_options('website_url')) in url:
 				html = req.content
-				soup = BeautifulSoup(html)
+				soup = BeautifulSoup(html, "html.parser")
 				link_count = len(soup.findAll('a'))
 				print Fore.YELLOW + "* Load : " + str(url) + " with " + str(link_count) + " total link" + Style.RESET_ALL
 				for a in soup.findAll('a'):
