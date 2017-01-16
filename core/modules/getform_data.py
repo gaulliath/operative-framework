@@ -11,7 +11,7 @@ import time
 class module_element(object):
 
 	def __init__(self):
-		self.title = "Domain gathering : \n"
+		self.title = "extract form gathering : \n"
 		self.require = {"url_list_file":[{"value":"","required":"yes"}],"sqlmap_format":[{"value":"false","required":"no"}]}
 		self.export = []
 		self.export_file = ""
