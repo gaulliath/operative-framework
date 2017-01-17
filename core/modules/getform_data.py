@@ -119,7 +119,7 @@ class module_element(object):
 		sqlmap_format = self.get_options('sqlmap_format')
 		print Fore.GREEN + "* try to load file url" + Style.RESET_ALL
 		if os.path.isfile(file_link):
-			total_link = len(open(file_link).read().split('\n'))
+			total_link = len(open(file_link).read().split('\n'))-1
 			for line in open(file_link):
 				try:
 					current += 1
