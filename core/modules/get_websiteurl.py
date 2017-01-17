@@ -116,11 +116,15 @@ class module_element(object):
 					try:
 						if a['href'] != "":
 							total_link = a['href']
+							if total_link[:1] == "?":
+								total_link = url + "/" + str(total_link)
 							if total_link[:1] == "/":
 								total_link = url + total_link
 							elif total_link[:2] == "//":
 								total_link = total_link.replace('//',url + "/")
 							elif total_link[:1] == "#":
+								total_link = url + "/" + total_link
+							elif "://" not in total_link[:8]:
 								total_link = url + "/" + total_link
 							if "mailto:" not in total_link:
 								if total_link not in self.export_file and a['href'] not in self.linked:
@@ -128,7 +132,7 @@ class module_element(object):
 										self.export.append(total_link)
 								self.linked.append(a['href'])
 					except:
-						print Fore.RED + "Can't read link" + Style.RESET_ALL
+						err = 1
 				if self.current_load <= int(self.get_options('page_limit')):
 					if len(self.export) > 0:
 						next_page = self.export[self.current_load]

@@ -100,8 +100,12 @@ class module_element(object):
 			method = ""
 		if 'action="' in form:
 			action = form.split('action="')[1].split('"')[0]
-			if action[:1] == "/" or action == "#":
+			if action[:1] == "/":
 				action = domain + action
+			elif action[:1] == "?" or action == "#":
+				action = domain + "/" + action
+			elif "://" not in total_link[:8]:
+				action = domain + "/" + action
 		else:
 			action = ""
 		array = {'action':str(action),'method':str(method)}
