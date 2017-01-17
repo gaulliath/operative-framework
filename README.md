@@ -30,6 +30,7 @@ This is a framework based on fingerprint action, this tool is used for get infor
 + core/modules/viadeo_search
 + core/modules/file_common
 + core/modules/get_websiteurl
++ core/modules/getform_data
 
 ##### SQL File forensics
 + import database in core/dbs/
