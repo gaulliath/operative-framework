@@ -1,6 +1,6 @@
 <img src="https://s30.postimg.org/t64sh7kyp/operative4.png" width="450">
 
-![version](https://img.shields.io/badge/version-1.0a-red.svg) [![twitter](https://img.shields.io/badge/twitter-@graniet75-blue.svg)](https://twitter.com/graniet75)  ![langage](https://img.shields.io/badge/python-with love-green.svg)
+![version](https://img.shields.io/badge/version-1.0b-red.svg) [![twitter](https://img.shields.io/badge/twitter-@graniet75-blue.svg)](https://twitter.com/graniet75)  ![langage](https://img.shields.io/badge/python-with love-green.svg)
 
 Copyright (c) 2017 written in python with Love
 
