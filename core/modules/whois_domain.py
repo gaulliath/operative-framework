@@ -87,8 +87,10 @@ class module_element(object):
 
 	def main(self):
 		detail = None
+		if "://" in self.get_options('website'):
+			website = self.get_options('website').split('://')[1]
 		try:
-			whois_information = pythonwhois.get_whois(self.get_options('website'))
+			whois_information = pythonwhois.get_whois(website)
 			detail = whois_information['contacts']['registrant']
 		except:
 			print Fore.RED + "Please use correct name without http(s)://" + Style.RESET_ALL

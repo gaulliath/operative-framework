@@ -4,6 +4,9 @@ import sys,os
 import time
 import glob
 import urllib
+import string
+import random
+import json
 from colorama import Fore,Back,Style
 
 total_dbs = []
@@ -81,6 +84,7 @@ def show_module():
 		print Back.RED + Fore.BLACK + "Modules directory not found"+ Style.RESET_ALL
 def show_help():
 	print """:modules		Show module listing
+:campaign 		Start Gath/Fingerprint campaign
 :load_db		Load SQL database
 :search_db		Search information on database
 :use <module>		Use module
@@ -164,11 +168,61 @@ def load_db():
 				total_dbs.append(line)
 			else:
 				print "Already loaded : "+Fore.YELLOW + line + Style.RESET_ALL
-def campaign():
-	user_input = raw_input('operative (enterprise name?) > ')
-	if user_input != "":
-		print Fore.GREEN + "Start campaign : "+Style.BRIGHT + user_input + Style.RESET_ALL
+
+def start_campaign():
+	if os.path.isfile('config.json'):
+		with open('config.json') as json_file:
+			data_json = json.load(json_file)
+		check_modules_exists(data_json)
+		check_require(data_json)
+		load_campaign_(data_json)
 	else:
-		print Fore.RED + "Enterprise name is empty" + Style.RESET_ALL
+		print Fore.RED + "Can't locate a config.json" + Style.RESET_ALL
+
+def check_modules_exists(modules):
+	for item in modules["campaign"]["modules"]:
+		module_name = item['name']
+		if not os.path.isfile('core/modules/' + module_name + '.py'):
+			print Fore.RED + "Can't load a 'core/modules/"+module_name+".py'" + Style.RESET_ALL
+			sys.exit()
+def check_require(config):
+	require_modules = []
+	for item in config['campaign']['modules']:
+		for item_require in item['require']:
+			if item_require != '' and not item_require in require_modules:
+				require_modules.append(item_require)
+	for item in config['campaign']['required']:
+		if not item['name'] in require_modules:
+			print Fore.RED + Style.DIM + "can't locate requirement : " + item['name'] + Style.RESET_ALL
+			sys.exit()
+		if item['value'] == "":
+			print Fore.RED + Style.DIM + "required value can't be null" + Style.RESET_ALL
+			sys.exit()
+def load_campaign_(config):
+	action = 0
+	while action == 0:
+		export_name = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(16))+ ".txt"
+		if not os.path.isfile("export/" + export_name):
+			action = 1
+	requirement = config['campaign']['required']
+	modules = config['campaign']['modules']
+	for module in modules:
+		require_module = module['require']
+		module_path = "core/modules/"+module['name']+".py"
+		if os.path.isfile(module_path):
+			print Fore.GREEN + Style.DIM + "[load] " + module_path + Style.RESET_ALL
+			mod = __import__(module_path.replace("/",".").split('.py')[0], fromlist=['module_element'])
+			module_class = mod.module_element()
+			for item_required in require_module:
+				for item_requirement in requirement:
+					if item_requirement['name'] == item_required:
+						required = item_requirement['value']
+				module_class.set_options(item_required,required)
+				print Fore.BLUE + Style.DIM + "[setup] argument " + item_required + ":" + required + Style.RESET_ALL
+			module_class.run_module()
+			module_class.export_data(export_name)
+
+
+
 
 	
