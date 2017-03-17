@@ -18,7 +18,9 @@ This is a framework based on fingerprint action, this tool is used for get infor
 ##### Campaign
 
 You can start a (gathering/fingerprinting) campaign with :campaign command.
+
 Update a value of YOURWEBSITE.COM / ENTERPRISE_NAME in config.json file.
+
 You can add a module process for a customized campaign.
 
 ##### Core Modules
