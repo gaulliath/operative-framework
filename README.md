@@ -38,6 +38,7 @@ This is a framework based on fingerprint action, this tool is used for get infor
 + core/modules/get_websiteurl
 + core/modules/getform_data
 + core/modules/subdomain_search
++ core/modules/vhost_IPchecker
 
 ##### SQL File forensics
 + import database in core/dbs/
