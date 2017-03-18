@@ -4,6 +4,7 @@
 
 + Campaign function
 + XML schema export
++ Shortcut launching
 
 ##### 1.0a
 
