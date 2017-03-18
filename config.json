@@ -1,11 +1,12 @@
 {
 	"campaign":{
+		"export":"XML",
 		"required":[
 			{"name":"website","value":"http://YOURWEBSITE.COM"},
 			{"name":"domain","value":"http://YOURWEBSITE.COM"},
 			{"name":"enterprise","value":"ENTERPRISE_NAME"},
 			{"name":"limit_search","value":"100"},
-			{"name":"ip_address","value":"IP_SERVER"}
+			{"name":"ip_address","value":"SERVER_IP"}
 		],
 		"modules":[
 			{

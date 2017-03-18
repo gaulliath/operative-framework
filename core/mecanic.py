@@ -191,6 +191,7 @@ def check_require(config):
 		for item_require in item['require']:
 			if item_require != '' and not item_require in require_modules:
 				require_modules.append(item_require)
+	print require_modules
 	for item in config['campaign']['required']:
 		if not item['name'] in require_modules:
 			print Fore.RED + Style.DIM + "can't locate requirement : " + item['name'] + Style.RESET_ALL
@@ -198,11 +199,39 @@ def check_require(config):
 		if item['value'] == "":
 			print Fore.RED + Style.DIM + "required value can't be null" + Style.RESET_ALL
 			sys.exit()
+def export_module_XML(export_name,export_array,output_name):
+	first_open = 0
+	if len(export_array) > 0:
+		if ":" in export_name:
+			export_name= export_name.replace(':', '')
+		if '(' in export_name:
+			export_name = export_name.replace('(','')
+			export_name = export_name.replace(')','')
+		export_name = export_name.strip()
+		if " " in export_name:
+			export_name = export_name.replace(' ', '-')
+		export_name_first = "<" + export_name + ">"
+		export_name_end = "</" + export_name + ">"
+		file_open = open("export/"+output_name,'a+')
+		file_open.write(export_name_first+"\n")
+		for line in export_array:
+			if "-" in line[0]:
+				line = line[0].replace('-','')
+			line = "<value>"+line.strip()+"</value>"
+			file_open.write("	"+line+"\n")
+		file_open.write(export_name_end +"\n")
 def load_campaign_(config):
 	action = 0
+	first_use = 0
 	while action == 0:
 		export_name = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(16))+ ".txt"
 		if not os.path.isfile("export/" + export_name):
+			if config['campaign']['export'] == "XML":
+				file_open = open("export/" + export_name,'a+')
+				file_open.write('<?xml version="1.0" encoding="UTF-8"?>\n')
+				file_open.write('<operative-framework-report>\n')
+				file_open.close()
+				first_use = 1
 			action = 1
 	requirement = config['campaign']['required']
 	modules = config['campaign']['modules']
@@ -220,7 +249,15 @@ def load_campaign_(config):
 				module_class.set_options(item_required,required)
 				print Fore.BLUE + Style.DIM + "[setup] argument " + item_required + ":" + required + Style.RESET_ALL
 			module_class.run_module()
-			module_class.export_data(export_name)
+			if config['campaign']['export'] == "XML":
+				export_module_XML(module_class.title, module_class.export,export_name) # XML export function
+			else:
+				module_class.export_data(export_name) # modules export function
+	if first_use == 1 and config['campaign']['export'] == "XML":
+		file_open = open("export/" + export_name,'a+')
+		file_open.write('</operative-framework-report>')
+		file_open.close()
+
 
 
 
