@@ -16,3 +16,7 @@ menu_list = {
 		"campaign":"start_campaign"
 		}
 
+menu_shortcut = {
+	"--campaign":"start_campaign"
+}
+

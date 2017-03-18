@@ -226,6 +226,7 @@ def load_campaign_(config):
 		export_name = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(16))+ ".txt"
 		if not os.path.isfile("export/" + export_name):
 			if config['campaign']['export'] == "XML":
+				export_name = export_name.replace('.txt','.xml')
 				file_open = open("export/" + export_name,'a+')
 				file_open.write('<?xml version="1.0" encoding="UTF-8"?>\n')
 				file_open.write('<operative-framework-report>\n')

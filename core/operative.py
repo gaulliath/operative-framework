@@ -33,8 +33,15 @@ def loading():
 	os.system('clear')
 	return True
 
+def shortcut_loading():
+	for line in sys.argv:
+		if line in menu.menu_shortcut:
+			mecanic.load(menu.menu_shortcut[line])
+			sys.exit()
 
 def user_put():
+	shortcut_loading()
+	loading()
 	version = "1.0b"
 	print """                               __  _          
   ____  ____  ___  _________ _/ /_(_)   _____ 
@@ -45,6 +52,7 @@ def user_put():
 	action = 0
 	print Fore.YELLOW + "        If you don't know how run it use :help" + Style.RESET_ALL
 	print ""
+	shortcut_loading()
 	while action == 0:
 		try:
 			user_input = raw_input("$ operative > ")
