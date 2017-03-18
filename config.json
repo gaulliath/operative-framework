@@ -4,7 +4,8 @@
 			{"name":"website","value":"http://YOURWEBSITE.COM"},
 			{"name":"domain","value":"http://YOURWEBSITE.COM"},
 			{"name":"enterprise","value":"ENTERPRISE_NAME"},
-			{"name":"limit_search","value":"100"}
+			{"name":"limit_search","value":"100"},
+			{"name":"ip_address","value":"IP_SERVER"}
 		],
 		"modules":[
 			{
@@ -14,6 +15,10 @@
 			{
 				"name":"subdomain_search",
 				"require":["website"]
+			},
+			{
+				"name":"vhost_IPchecker",
+				"require":["ip_address"]
 			},
 			{
 				"name":"domain_search",
