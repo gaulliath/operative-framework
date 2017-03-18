@@ -10,6 +10,7 @@ import json
 from colorama import Fore,Back,Style
 
 total_dbs = []
+total_report = 0
 
 def load(name):
 	if "use" in name:
@@ -199,8 +200,10 @@ def check_require(config):
 			print Fore.RED + Style.DIM + "required value can't be null" + Style.RESET_ALL
 			sys.exit()
 def export_module_XML(export_name,export_array,output_name):
+	global total_report
 	first_open = 0
 	if len(export_array) > 0:
+		total_report += 1
 		nb = 1
 		if ":" in export_name:
 			export_name= export_name.replace(':', '')
@@ -210,10 +213,14 @@ def export_module_XML(export_name,export_array,output_name):
 		export_name = export_name.strip()
 		if " " in export_name:
 			export_name = export_name.replace(' ', '-')
-		export_name_first = "<" + export_name + ">"
-		export_name_end = "</" + export_name + ">"
+		# export_name_first = "<" + export_name + ">"
+		# export_name_end = "</" + export_name + ">"
+		export_name_first = "<report"+str(total_report)+">"
+		export_name_end = "</report"+str(total_report)+">"
 		file_open = open("export/"+output_name,'a+')
 		file_open.write(export_name_first+"\n")
+		file_open.write("	<name>"+export_name+"</name>\n")
+		file_open.write("	<count>"+str(len(export_array))+"</count>\n")
 		for line in export_array:
 			if "-" in line[0]:
 				line = line[0].replace('-','')
@@ -222,6 +229,7 @@ def export_module_XML(export_name,export_array,output_name):
 			nb+=1
 		file_open.write(export_name_end +"\n")
 def load_campaign_(config):
+	global total_report
 	action = 0
 	first_use = 0
 	while action == 0:
