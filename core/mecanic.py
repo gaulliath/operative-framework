@@ -201,6 +201,7 @@ def check_require(config):
 def export_module_XML(export_name,export_array,output_name):
 	first_open = 0
 	if len(export_array) > 0:
+		nb = 1
 		if ":" in export_name:
 			export_name= export_name.replace(':', '')
 		if '(' in export_name:
@@ -216,8 +217,9 @@ def export_module_XML(export_name,export_array,output_name):
 		for line in export_array:
 			if "-" in line[0]:
 				line = line[0].replace('-','')
-			line = "<value>"+line.strip()+"</value>"
+			line = "<value"+str(nb)+">"+line.strip()+"</value"+str(nb)+">"
 			file_open.write("	"+line+"\n")
+			nb+=1
 		file_open.write(export_name_end +"\n")
 def load_campaign_(config):
 	action = 0
