@@ -191,7 +191,6 @@ def check_require(config):
 		for item_require in item['require']:
 			if item_require != '' and not item_require in require_modules:
 				require_modules.append(item_require)
-	print require_modules
 	for item in config['campaign']['required']:
 		if not item['name'] in require_modules:
 			print Fore.RED + Style.DIM + "can't locate requirement : " + item['name'] + Style.RESET_ALL
