@@ -21,10 +21,7 @@ menu_shortcut = {
 }
 
 menu_export = {
-	"XML":{
-		"BEGIN":"begin_module_XML",
-		"EXPORT":"export_module_XML",
-		"END":"end_module_XML"
-	}
+	"XML":"core/exports/XML",
+	"JSON":"core/exports/JSON"
 }
 

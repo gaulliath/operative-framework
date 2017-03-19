@@ -204,10 +204,15 @@ def load_campaign_(config):
 	global total_report
 	action = 0
 	first_use = 0
+	module = __import__("core.export", fromlist=['export'])
+	export_module = module.export()
+	export_module.set_export_type(config['campaign']['export'])
+	extension = export_module.extension
 	while action == 0:
-		export_name = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(16))+ ".txt"
+		export_name = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(16))+ "." + extension
 		if not os.path.isfile("export/" + export_name):
-			if export.begin(config['campaign']['export'],export_name) == True:
+			export_module.set_export_name(export_name)
+			if export_module.begin() == True:
 				first_use = 1
 			action = 1
 	requirement = config['campaign']['required']
@@ -228,9 +233,12 @@ def load_campaign_(config):
 			module_class.run_module()
 			if len(module_class.export) > 0:
 				total_report += 1
-			export_value = export.to(config['campaign']['export'],module_class.title,module_class.export,export_name,total_report)
+			export_module.set_module_name(module_class.title)
+			export_module.set_report_value(module_class.export)
+			export_module.set_total(total_report)
+			export_value = export_module.now()
 			if export_value == False:
 				module_class.export_data(export_name) # modules export function
 	if first_use == 1:
-		export.end(config['campaign']['export'],export_name)
-	print Fore.GREEN + "Report written here 'export/"+export_name+"'" + Style.RESET_ALL
+		export_module.end()
+	print Fore.GREEN + "Report written here 'export/"+export_module.output_name+"'" + Style.RESET_ALL

@@ -4,74 +4,60 @@ import os,sys
 from core import menu
 from colorama import Fore,Back,Style
 
-# global function
-def begin(export_type,export_name):
-	if export_type.upper() in menu.menu_export:
+class export(object):
+	def __init__(self):
+		self.export_type = ""
+		self.module_name = ""
+		self.export_module = ""
+		self.report_array = []
+		self.output_name = ""
+		self.total_report = False
+		self.module_class = ""
+		self.extension = "txt"
+
+	def set_export_name(self,export_name):
+		self.output_name = export_name
+		self.module_class.set_export(export_name)
+
+	def set_module_name(self,name):
+		self.module_name = name
+		self.module_class.set_name(name)
+
+	def set_report_value(self,value):
+		self.report_array = value
+		self.module_class.set_report(value)
+
+	def set_total(self,value):
+		self.total_report = value
+		self.module_class.set_total(value)
+
+	def set_export_type(self,export_type):
+		self.export_type = export_type
+		self.export_module = menu.menu_export[export_type.upper()]
 		try:
-			globals()[menu.menu_export[export_type.upper()]["BEGIN"]](export_name)
+			mod = __import__(self.export_module.replace("/","."), fromlist=['export_module'])
+			self.module_class = mod.export_module()
+			self.extension = self.module_class.extension
+		except:
+			print Fore.RED + "Can't read export module '" + str(self.export_module) + "'" + Style.RESET_ALL
+			sys.exit()
+	def begin(self):
+		try:
+			self.module_class.begin_file()
 			return True
 		except:
 			return False
-	return False
 
-def to(export_type,module_name,report_array,output_name,total_report=False):
-	if export_type.upper() in menu.menu_export:
-		globals()[menu.menu_export[export_type.upper()]["EXPORT"]](module_name,report_array,output_name,total_report)
-		return True
-	else:
-		return False
-
-def end(export_type,export_name):
-	if export_type.upper() in menu.menu_export:
+	def now(self):
 		try:
-			globals()[menu.menu_export[export_type.upper()]["END"]](export_name)
+			self.module_class.core_file()
 			return True
 		except:
 			return False
-	return False
-# global function
 
-# XML module function
-def begin_module_XML(export_name):
-	export_name = export_name.replace('.txt','.xml')
-	file_open = open("export/" + export_name,'a+')
-	file_open.write('<?xml version="1.0" encoding="UTF-8"?>\n')
-	file_open.write('<operative-framework-report>\n')
-	file_open.close()
-	return True
-
-def end_module_XML(export_name):
-	export_name = export_name.replace('.txt','.xml')
-	file_open = open("export/" + export_name,'a+')
-	file_open.write('</operative-framework-report>')
-	file_open.close()
-
-def export_module_XML(export_name,export_array,output_name,total_report=False):
-	output_name = output_name.replace('.txt','.xml')
-	first_open = 0
-	if len(export_array) > 0:
-		nb = 1
-		if ":" in export_name:
-			export_name= export_name.replace(':', '')
-		if '(' in export_name:
-			export_name = export_name.replace('(','')
-			export_name = export_name.replace(')','')
-		export_name = export_name.strip()
-		if " " in export_name:
-			export_name = export_name.replace(' ', '-')
-		# export_name_first = "<" + export_name + ">"
-		# export_name_end = "</" + export_name + ">"
-		export_name_first = "<report"+str(total_report)+">"
-		export_name_end = "</report"+str(total_report)+">"
-		file_open = open("export/"+output_name,'a+')
-		file_open.write(export_name_first+"\n")
-		file_open.write("	<name>"+export_name+"</name>\n")
-		file_open.write("	<count>"+str(len(export_array))+"</count>\n")
-		for line in export_array:
-			if "-" in line[0]:
-				line = line[0].replace('-','')
-			line = "<value"+str(nb)+">"+line.strip()+"</value"+str(nb)+">"
-			file_open.write("	"+line+"\n")
-			nb+=1
-		file_open.write(export_name_end +"\n")
-# XML module function
+	def end(self):
+		try:
+			self.module_class.end_file()
+			return True
+		except:
+			return False
