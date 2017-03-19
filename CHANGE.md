@@ -3,7 +3,9 @@
 ##### 1.0b
 
 + Campaign function
-+ XML schema export
++ Import of 'export module'
++ JSON export module
++ XML export module
 + Shortcut launching
 
 ##### 1.0a
