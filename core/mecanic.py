@@ -232,6 +232,5 @@ def load_campaign_(config):
 			if export_value == False:
 				module_class.export_data(export_name) # modules export function
 	if first_use == 1:
-		print "okokokokoko"
 		export.end(config['campaign']['export'],export_name)
-	print Fore.GREEN + "Report written here 'export/"+export_name+"'"
+	print Fore.GREEN + "Report written here 'export/"+export_name+"'" + Style.RESET_ALL
