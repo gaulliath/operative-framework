@@ -8,6 +8,7 @@ import string
 import random
 import json
 from colorama import Fore,Back,Style
+from core import export
 
 total_dbs = []
 total_report = 0
@@ -199,35 +200,6 @@ def check_require(config):
 		if item['value'] == "":
 			print Fore.RED + Style.DIM + "required value can't be null" + Style.RESET_ALL
 			sys.exit()
-def export_module_XML(export_name,export_array,output_name):
-	global total_report
-	first_open = 0
-	if len(export_array) > 0:
-		total_report += 1
-		nb = 1
-		if ":" in export_name:
-			export_name= export_name.replace(':', '')
-		if '(' in export_name:
-			export_name = export_name.replace('(','')
-			export_name = export_name.replace(')','')
-		export_name = export_name.strip()
-		if " " in export_name:
-			export_name = export_name.replace(' ', '-')
-		# export_name_first = "<" + export_name + ">"
-		# export_name_end = "</" + export_name + ">"
-		export_name_first = "<report"+str(total_report)+">"
-		export_name_end = "</report"+str(total_report)+">"
-		file_open = open("export/"+output_name,'a+')
-		file_open.write(export_name_first+"\n")
-		file_open.write("	<name>"+export_name+"</name>\n")
-		file_open.write("	<count>"+str(len(export_array))+"</count>\n")
-		for line in export_array:
-			if "-" in line[0]:
-				line = line[0].replace('-','')
-			line = "<value"+str(nb)+">"+line.strip()+"</value"+str(nb)+">"
-			file_open.write("	"+line+"\n")
-			nb+=1
-		file_open.write(export_name_end +"\n")
 def load_campaign_(config):
 	global total_report
 	action = 0
@@ -235,12 +207,7 @@ def load_campaign_(config):
 	while action == 0:
 		export_name = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(16))+ ".txt"
 		if not os.path.isfile("export/" + export_name):
-			if config['campaign']['export'] == "XML":
-				export_name = export_name.replace('.txt','.xml')
-				file_open = open("export/" + export_name,'a+')
-				file_open.write('<?xml version="1.0" encoding="UTF-8"?>\n')
-				file_open.write('<operative-framework-report>\n')
-				file_open.close()
+			if export.begin(config['campaign']['export'],export_name) == True:
 				first_use = 1
 			action = 1
 	requirement = config['campaign']['required']
@@ -259,17 +226,12 @@ def load_campaign_(config):
 				module_class.set_options(item_required,required)
 				print Fore.BLUE + Style.DIM + "[setup] argument " + item_required + ":" + required + Style.RESET_ALL
 			module_class.run_module()
-			if config['campaign']['export'] == "XML":
-				export_module_XML(module_class.title, module_class.export,export_name) # XML export function
-			else:
+			if len(module_class.export) > 0:
+				total_report += 1
+			export_value = export.to(config['campaign']['export'],module_class.title,module_class.export,export_name,total_report)
+			if export_value == False:
 				module_class.export_data(export_name) # modules export function
-	if first_use == 1 and config['campaign']['export'] == "XML":
-		file_open = open("export/" + export_name,'a+')
-		file_open.write('</operative-framework-report>')
-		file_open.close()
-
-
-
-
-
-	
+	if first_use == 1:
+		print "okokokokoko"
+		export.end(config['campaign']['export'],export_name)
+	print Fore.GREEN + "Report written here 'export/"+export_name+"'"

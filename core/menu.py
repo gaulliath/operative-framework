@@ -20,3 +20,11 @@ menu_shortcut = {
 	"--campaign":"start_campaign"
 }
 
+menu_export = {
+	"XML":{
+		"BEGIN":"begin_module_XML",
+		"EXPORT":"export_module_XML",
+		"END":"end_module_XML"
+	}
+}
+
