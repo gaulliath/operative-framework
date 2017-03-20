@@ -22,6 +22,7 @@ menu_shortcut = {
 
 menu_export = {
 	"XML":"core/exports/XML",
-	"JSON":"core/exports/JSON"
+	"JSON":"core/exports/JSON",
+	"HTML":"core/exports/HTML"
 }
 
