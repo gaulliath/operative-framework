@@ -6,6 +6,7 @@
 + Import of 'export module'
 + JSON export module
 + XML export module
++ HTML export module
 + Shortcut launching
 
 ##### 1.0a
