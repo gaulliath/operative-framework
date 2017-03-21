@@ -8,6 +8,7 @@
 + XML export module
 + HTML export module
 + Shortcut launching
++ core/modules/tools_suggester
 
 ##### 1.0a
 
