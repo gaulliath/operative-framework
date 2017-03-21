@@ -86,8 +86,13 @@ class module_element(object):
 			self.main()
 
 	def main(self):
+		domain = self.get_options('domain')
+		if "://" in domain:
+			domain = domain.split("://")[1]
+		if domain[:-1] == "/":
+			domain = domain[-1]
 		try:
-		    response = subprocess.check_output(["sslyze", "--regular", self.get_options("domain")])
+		    response = subprocess.check_output(["sslyze", "--regular", domain])
 		    if response != "":
 		    	explode = response.split('\n')
 		    	for line in explode:
