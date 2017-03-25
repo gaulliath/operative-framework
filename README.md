@@ -40,8 +40,8 @@ This is a framework based on fingerprint action, this tool is used for get infor
 + core/modules/subdomain_search
 + core/modules/vhost_IPchecker
 + core/modules/tools_suggester
-+ core/modules/metatag_look.py
-+ core/modules/header_retrieval.py
++ core/modules/metatag_look
++ core/modules/header_retrieval
 
 ##### SQL File forensics
 + import database in core/dbs/
