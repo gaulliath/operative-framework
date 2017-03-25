@@ -1,6 +1,6 @@
 {
 	"campaign":{
-		"export":"XML",
+		"export":"HTML",
 		"required":[
 			{"name":"website","value":"http://YOURWEBSITE.COM"},
 			{"name":"domain","value":"http://YOURWEBSITE.COM"},
@@ -11,6 +11,14 @@
 		"modules":[
 			{
 				"name":"whois_domain",
+				"require":["website"]
+			},
+			{
+				"name":"header_retrieval",
+				"require":["website"]
+			},
+			{
+				"name":"metatag_look",
 				"require":["website"]
 			},
 			{
@@ -32,6 +40,14 @@
 			{
 				"name":"cms_gathering",
 				"require":["website"]
+			},
+			{
+				"name":"tools_suggester",
+				"require":["website"]
+			},
+			{
+				"name":"https_gathering",
+				"require":["domain"]
 			},
 			{
 				"name":"waf_gathering",
