@@ -1,4 +1,5 @@
 #!/usr/bin/env	python
+# -*- coding: utf-8 -*-
 
 import sys,os
 import time
@@ -22,17 +23,28 @@ def load(name):
 def exit_operative():
 	sys.exit()
 
+def banner():
+	version = "1.0b"
+	print """                               __  _          
+  ____  ____  ___  _________ _/ /_(_)   _____ 
+ / __ \/ __ \/ _ \/ ___/ __ `/ __/ / | / / _ \\
+/ /_/ / /_/ /  __/ /  / /_/ / /_/ /| |/ /  __/
+\____/ .___/\___/_/   \__,_/\__/_/ |___/\___/ 
+    /_/ """+Fore.RED+"Version: "+Style.RESET_ALL+version+" | "+Fore.RED+"Twitter: "+Style.RESET_ALL+"""@graniet75"""
+	print Fore.YELLOW + "        If you don't know how run it use :help\n" + Style.RESET_ALL
+
 def use_module(module, argv=False):
 	action = 0
 	module_class = ""
 	module_name = module.split(".py")[0]
 	while action == 0:
 		try:
-			user_input = raw_input("$ operative ("+Fore.YELLOW+module_name+Style.RESET_ALL+") > ")
+			user_input = raw_input("$ operative ("+Fore.YELLOW+module_name+Style.RESET_ALL+")› ")
 		except:
 			print "..."
 			action = 1
 			break
+		
 		if ":" in user_input[:1]:
 			user_input = user_input[1:]
 		if module_class == "":
@@ -41,31 +53,33 @@ def use_module(module, argv=False):
 			module_class = mod.module_element()
 		if argv != False:
 			module_class.set_agv(argv)
-		if user_input == "show_options":
+		if user_input == "show options":
 			module_class.show_options()
 		elif "set" in user_input and "=" in user_input:
 			value = user_input.split(" ",1)[1].split("=")
 			module_class.set_options(value[0],value[1])
 		elif user_input == "help":
-			print """:show_options		Show module options
+			print """:show options		Show module options
 :set option=value	Set value from element
 :run			Run current  module
 :export			Export module return data
 :quit			Exit current module"""
 		elif user_input == "quit":
 			break
+		elif user_input == "clear":
+			os.system('clear')
 		elif user_input == "run":
 			module_class.run_module()
 		elif user_input == "export":
 			module_class.export_data()
-				
 	print Fore.YELLOW + "Stop module : " + module_name + "..." + Style.RESET_ALL
 
 def load_module(name):
 	if "use " in name:
 		module = name.split("use")[1].strip() + ".py"
+		module = "core/modules/" + module
 		if os.path.exists(module):
-			print Fore.GREEN + "Loading : " + name + Style.RESET_ALL
+			print Fore.GREEN + "Loading : " + module + Style.RESET_ALL
 			use_module(module)
 		else:
 			print Back.RED + "Module not found" + Style.RESET_ALL
@@ -76,12 +90,13 @@ def show_module():
 		for module in list_module:
 			if ".py" in module:
 				module_name = module.split(".py")[0]
+				module_name = module_name.replace('core/modules/','')
 			if "__init__" not in module:
 				description = "No module description found"
 				if "#description:" in open(module).read():
 					description = open(module).read().split("#description:")[1]
 					description = description.split("#")[0]
-				print Fore.BLUE + "* "+ Style.RESET_ALL  + module_name + "		" + description
+				print Fore.BLUE + " * "+ Style.RESET_ALL  + module_name + "		" + description
 	else:
 		print Back.RED + Fore.BLACK + "Modules directory not found"+ Style.RESET_ALL
 def show_help():
