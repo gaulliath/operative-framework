@@ -1,5 +1,5 @@
 #!/usr/bin/env	python
-#description:Whois information for domain#
+#description:	Whois information for domain#
 
 from colorama import Fore,Back,Style
 
@@ -27,9 +27,15 @@ class module_element(object):
 			else:
 				value = self.require[line][0]["value"]
 			if self.require[line][0]["required"] == "yes":
-				print Fore.RED + Style.BRIGHT + "- "+Style.RESET_ALL + line + ":" + Fore.RED + "is_required" + Style.RESET_ALL + ":" + value
+				if self.require[line][0]["value"] != "":
+					print Fore.GREEN+Style.BRIGHT+ "+ " +Style.RESET_ALL+line+ ": " +value
+				else:
+					print Fore.RED+Style.BRIGHT+ "- " +Style.RESET_ALL+line+ "(" +Fore.RED+ "is_required" +Style.RESET_ALL+ "):" +value
 			else:
-				print Fore.WHITE + Style.BRIGHT + "* "+Style.RESET_ALL + line + "(" + Fore.GREEN + "not_required" + Style.RESET_ALL + "):" + value
+				if self.require[line][0]["value"] != "":
+					print Fore.GREEN+Style.BRIGHT+ "+ " +Style.RESET_ALL+line + ": " +value
+				else:
+					print Fore.WHITE+Style.BRIGHT+ "* " +Style.RESET_ALL+line + "(" +Fore.GREEN+ "optional" +Style.RESET_ALL+ "):" +value
 		#print Back.WHITE + Fore.WHITE + "End parameters" + Style.RESET_ALL
 
 	def export_data(self, argv=False):
@@ -87,6 +93,7 @@ class module_element(object):
 
 	def main(self):
 		detail = None
+		website = self.require["website"][0]["value"]
 		if "://" in self.get_options('website'):
 			website = self.get_options('website').split('://')[1]
 		try:
@@ -103,5 +110,3 @@ class module_element(object):
 				self.export.append(total)
 		else:
 			print Fore.RED + "Can't get whois information for : " +self.get_options('website') + Style.RESET_ALL
-
-

@@ -14,10 +14,13 @@ menu_list = {
 		"clear":"clear_screen",
 		"search_domain":"domain_module",
 		"campaign":"start_campaign"
-		}
+}
 
 menu_shortcut = {
-	"--campaign":"start_campaign"
+	"--campaign":"start_campaign",
+	"--update":"update_framework",
+	"--modules":"show_module",
+	"--version":"banner"
 }
 
 menu_export = {

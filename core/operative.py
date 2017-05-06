@@ -8,29 +8,23 @@ from core import mecanic
 from colorama import Fore,Back,Style
 
 def loading():
+	red_bold = Style.BRIGHT + Fore.RED
+	reset = Style.RESET_ALL
+	loading = "loading the fingerprinting framework"
 	action = 0
-	base = "loading the fingerprinting framework"
-	loading = base
-	while action < 100:
-		os.system('clear')
-		if loading == base:
-			loading = loading[0].upper() + loading[1:]
-		print loading
-		next = 0
-		new_loading = ""
-		for char in loading:
-			if char.isupper():
-				char = char.lower()
-				next = 1
-			elif next == 1 and char != " " and char != "*":
-				char = char.upper()
-				next = 0
-			new_loading = new_loading + char
-		if new_loading != "":
-			loading = new_loading
-		time.sleep(0.1)
+	while action < 1:
+		for i,char in enumerate(loading):
+			if i == 0:
+				print "%s%s%s%s" %(red_bold,char.upper(),reset,loading[1:])
+			elif i == 1:
+				old_loading = loading[0].lower()
+				print "%s%s%s%s%s" %(old_loading,red_bold,char.upper(),reset,loading[2:])
+			elif i == i:
+				old_loading = loading[-0:i].lower()
+				print "%s%s%s%s%s" %(old_loading,red_bold,char.upper(),reset,loading[i+1:])
+			time.sleep(0.1)
+			os.system('clear')
 		action += 1
-	os.system('clear')
 	return True
 
 def shortcut_loading():
@@ -42,20 +36,12 @@ def shortcut_loading():
 def user_put():
 	shortcut_loading()
 	loading()
-	version = "1.0b"
-	print """                               __  _          
-  ____  ____  ___  _________ _/ /_(_)   _____ 
- / __ \/ __ \/ _ \/ ___/ __ `/ __/ / | / / _ \\
-/ /_/ / /_/ /  __/ /  / /_/ / /_/ /| |/ /  __/
-\____/ .___/\___/_/   \__,_/\__/_/ |___/\___/ 
-    /_/ """+Fore.RED+"Version: "+Style.RESET_ALL+version+" | "+Fore.RED+"Twitter: "+Style.RESET_ALL+"""@graniet75                               """
-	action = 0
-	print Fore.YELLOW + "        If you don't know how run it use :help" + Style.RESET_ALL
-	print ""
+	mecanic.banner()
 	shortcut_loading()
+	action = 0
 	while action == 0:
 		try:
-			user_input = raw_input("$ operative > ")
+			user_input = raw_input("$ operative › ")
 		except:
 			print "..."
 			sys.exit()
