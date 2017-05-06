@@ -53,4 +53,8 @@ This is a framework based on fingerprint action, this tool is used for get infor
 
 For write module look core/modules/sample_module class
 
+### Thanks
+
++ @qwartz2 : Code update - multiple shortcut ...
+
 #### This is only for testing purposes and can only be used where strict consent has been given. Do not use this for illegal purposes, period.
