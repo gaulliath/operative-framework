@@ -102,6 +102,7 @@ def show_module():
 def show_help():
 	print """:modules		Show module listing
 :campaign 		Start Gath/Fingerprint campaign
+:new_module		Generate a new module class
 :load_db		Load SQL database
 :search_db		Search information on database
 :use <module>		Use module
@@ -195,6 +196,37 @@ def start_campaign():
 		load_campaign_(data_json)
 	else:
 		print Fore.RED + "Can't locate a config.json" + Style.RESET_ALL
+
+def generate_module_class():
+	action = 0
+	if os.path.isfile('core/modules/sample_module.py'):
+		while action == 0:
+			module_name = raw_input('(operative) New module name > ')
+			if module_name != "":
+				if ".py" in module_name:
+					module_name = module_name.split('.py')[0]
+				if not os.path.isfile('core/modules/'+module_name+'.py'):
+					module_description = raw_input('(operative) New module description > ')
+					if module_name != "":
+						new_module_file = open('core/modules/'+module_name+'.py','w')
+						sample_module_source = open('core/modules/sample_module.py').read()
+						if "#description:" in sample_module_source:
+							sample_module_source = sample_module_source.replace('#description:Module sample#',
+																				'#description:'+str(module_description)+"#")
+						new_module_file.write(sample_module_source)
+						new_module_file.close()
+						print Fore.GREEN + "Module as been written '"+str('core/modules/'+module_name+'.py')+"'" + Style.RESET_ALL
+						print "Now add argument on self.require & write your code in main(), Good luck"
+						action = 1
+					else:
+						print Fore.RED + "- " + Style.RESET_ALL + "Please enter a description"
+
+			else:
+				print Fore.RED + "- " + Style.RESET_ALL + " Please enter new module name..."
+
+	else:
+		print Fore.RED + "-" + Style.RESET_ALL + " Can't find sample_module file"
+		sys.exit()
 
 def check_modules_exists(modules):
 	for item in modules["campaign"]["modules"]:

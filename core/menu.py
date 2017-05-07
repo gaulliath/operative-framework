@@ -13,14 +13,16 @@ menu_list = {
         "update":"update_framework",
 		"clear":"clear_screen",
 		"search_domain":"domain_module",
-		"campaign":"start_campaign"
+		"campaign":"start_campaign",
+		"new_module":"generate_module_class"
 }
 
 menu_shortcut = {
 	"--campaign":"start_campaign",
 	"--update":"update_framework",
 	"--modules":"show_module",
-	"--version":"banner"
+	"--version":"banner",
+	"--generate_module":"generate_module_class"
 }
 
 menu_export = {
