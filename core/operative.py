@@ -51,4 +51,6 @@ def user_put():
 			mecanic.load(menu.menu_list[user_input])
 		if "use " in user_input:
 			mecanic.load(user_input)
+		if "helper" in user_input:
+			mecanic.use_helper(user_input)
 		

@@ -102,7 +102,7 @@ class module_element(object):
 		try:
 			requests.get(website)
 			action = 1
-			print Fore.GREEN + "* website / url is stable"
+			print Fore.GREEN + "* website / url is stable" + Style.RESET_ALL
 		except:
 			print Fore.RED + "* website / url not found" + Style.RESET_ALL
 		for line in self.common_file:

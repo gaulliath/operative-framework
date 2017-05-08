@@ -103,6 +103,7 @@ def show_help():
 	print """:modules		Show module listing
 :campaign 		Start Gath/Fingerprint campaign
 :new_module		Generate a new module class
+:helper			Use helper class
 :load_db		Load SQL database
 :search_db		Search information on database
 :use <module>		Use module
@@ -227,6 +228,62 @@ def generate_module_class():
 	else:
 		print Fore.RED + "-" + Style.RESET_ALL + " Can't find sample_module file"
 		sys.exit()
+
+def use_helper(user_input):
+	if not " " in user_input.strip():
+		if os.path.exists('core/helpers/'):
+			print Fore.YELLOW + " !" + Style.RESET_ALL + " use helper with :helper helper_name"
+			for helper in glob.glob('core/helpers/*.py'):
+				if not "__init__" in helper:
+					helper_source = open(helper).read()
+					helper_description = "No helper description"
+					helper_name = helper.split('core/helpers/')[1].split('.py')[0]
+					if "#description:" in helper_source:
+						helper_description = helper_source.split('#description:')[1].split('#')[0]
+					print Fore.BLUE + " * " + Style.RESET_ALL + str(helper_name) + "		" + str(helper_description)
+		else:
+			print Fore.RED + "- " + Style.RESET_ALL + "Helper folder not found"
+	else:
+		helper_name = user_input.strip().split(' ')[1]
+		if not "core/helpers/" in helper_name:
+			helper_name = "core/helpers/" + str(helper_name)
+		if os.path.isfile(str(helper_name) + ".py"):
+			try:
+				module_path = helper_name.replace("/", ".")
+				mod = __import__(module_path, fromlist=['helper_class'])
+				helper_class = mod.helper_class()
+				action = 0
+				while action == 0:
+					try:
+						user_put = raw_input('operative helper ('+Fore.YELLOW+helper_name+Style.RESET_ALL+') > ')
+					except:
+						print "..."
+						action = 1
+						break
+					if ":" in user_put:
+						user_put = user_put.replace(':','')
+					if user_put == "show options":
+						helper_class.show_options()
+					elif user_put == "resume":
+						helper_class.get_resume()
+					elif user_put == "run":
+						helper_class.run_module()
+					elif "set" in user_put and "=" in user_put:
+						value = user_put.split(" ", 1)[1].split("=")
+						helper_class.set_options(value[0], value[1])
+					elif user_put == "help":
+						print """:show options		Show module options
+:set option=value	Set value from element
+:resume			Get helper resume
+:run			Run current  module
+:quit			Exit current module"""
+					elif "quit" == user_put:
+						break
+			except:
+				print Fore.RED + "- " + Style.RESET_ALL + "Can't load helper"
+
+		else:
+			print Fore.RED + "- " + Style.RESET_ALL + "Helper not found"
 
 def check_modules_exists(modules):
 	for item in modules["campaign"]["modules"]:
