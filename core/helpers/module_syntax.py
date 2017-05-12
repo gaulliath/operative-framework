@@ -13,7 +13,8 @@ class helper_class(object):
             'Desc': 'Check syntax for operative framework modules',
             'Author': 'Tristan Granier'
         }
-        self.require = {"module_path": [{"value": "", "required": "yes"}]}
+        self.param_type = []
+        self.require = {"module_path": [{"value": "", "required": "yes"}],"param_monitor":[{"value":"True/False", "required": "no"}]}
 
     def set_agv(self, argv):
         self.argv = argv
@@ -75,8 +76,28 @@ class helper_class(object):
         if user_put == "" or user_put == "Y" or user_put == "y":
             self.run_module()
 
+    def param_monitor(self, module_current):
+        for line in module_current.require:
+            if not line in self.param_type:
+                action = 0
+                while action == 0:
+                    type_of_param = raw_input('(' + Fore.YELLOW + str(line) + Style.RESET_ALL + ") [INTEGER/STRING/ALL] : ")
+                    if str(type_of_param).lower() == "str" or str(type_of_param).lower() == "string":
+                        self.param_type.append({'name':str(line),'param':[{'type':'STRING'}]})
+                        action = 1
+                    elif str(type_of_param).lower() == "int" or str(type_of_param).lower() == "integer":
+                        self.param_type.append({'name':str(line),'param':[{'type':'INTEGER'}]})
+                        action = 1
+                    elif str(type_of_param).lower() == "all":
+                        self.param_type.append({'name':str(line),'param':[{'type':'ALL'}]})
+                        action = 1
+                    else:
+                        print Fore.YELLOW + "Please enter correct parameter" + Style.RESET_ALL
+
+
     def main(self):
         module_name = self.get_options('module_path')
+        param_monitor = self.get_options('param_monitor')
         success = 0
         if os.path.isfile(module_name):
             if "/" in module_name:
@@ -87,6 +108,8 @@ class helper_class(object):
                     module_class = mod.module_element()
                     success = 1
                     if success == 1:
+                        if str(param_monitor) == "true" or str(param_monitor) == "True":
+                            self.param_monitor(module_class)
                         print "------------------------"
                         try:
                             success = 0
@@ -98,9 +121,23 @@ class helper_class(object):
                                 try:
                                     success = 0
                                     print Fore.YELLOW + "Information: " + Style.RESET_ALL + " :set options=value"
-                                    for line in module_class.require:
-                                        print "- set " + str(line)
-                                        module_class.set_options(line,'val_debug')
+                                    if len(self.param_type) > 0:
+                                        for line in self.param_type:
+                                            base_value = ""
+                                            #print str(line['name']) + Fore.BLUE + " => " + Style.RESET_ALL + str(line['param'][0]['type'])
+                                            if str(line['param'][0]['type']) == "STRING":
+                                                base_value = "DEBUGSYNTAX"
+                                            elif str(line['param'][0]['type']) == "INTEGER":
+                                                base_value = 123
+                                            elif str(line['param'][0]['type']) == "ALL":
+                                                base_value = "D3BUG_S1NT4X"
+                                            module_class.set_options(str(line['name']), str(base_value))
+                                            for line in module_class.require:
+                                                print "* " + str(line) + Fore.BLUE + " => " + Style.RESET_ALL + module_class.require[line][0]["value"]
+                                    else:
+                                        for line in module_class.require:
+                                            print "- set " + str(line)
+                                            module_class.set_options(line,'val_debug')
                                     print "+ status: " + Fore.GREEN + "OK" + Style.RESET_ALL
                                     success = 1
                                 except Exception, e:
