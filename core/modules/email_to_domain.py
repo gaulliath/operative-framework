@@ -2,6 +2,7 @@
 #description:Get domain with email#
 
 from colorama import Fore,Back,Style
+from core import load
 
 import os,sys
 import requests
@@ -21,23 +22,7 @@ class module_element(object):
 		self.argv = argv
 
 	def show_options(self):
-		#print Back.WHITE + Fore.WHITE + "Module parameters" + Style.RESET_ALL
-		for line in self.require:
-			if self.require[line][0]["value"] == "":
-				value = "No value"
-			else:
-				value = self.require[line][0]["value"]
-			if self.require[line][0]["required"] == "yes":
-				if self.require[line][0]["value"] != "":
-					print Fore.GREEN+Style.BRIGHT+ "+ " +Style.RESET_ALL+line+ ": " +value
-				else:
-					print Fore.RED+Style.BRIGHT+ "- " +Style.RESET_ALL+line+ "(" +Fore.RED+ "is_required" +Style.RESET_ALL+ "):" +value
-			else:
-				if self.require[line][0]["value"] != "":
-					print Fore.GREEN+Style.BRIGHT+ "+ " +Style.RESET_ALL+line + ": " +value
-				else:
-					print Fore.WHITE+Style.BRIGHT+ "* " +Style.RESET_ALL+line + "(" +Fore.GREEN+ "optional" +Style.RESET_ALL+ "):" +value
-		#print Back.WHITE + Fore.WHITE + "End parameters" + Style.RESET_ALL
+                load.show_options(self.require)
 
 	def export_data(self, argv=False):
 		if len(self.export) > 0:
