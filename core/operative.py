@@ -41,7 +41,7 @@ def user_put():
 	action = 0
 	while action == 0:
 		try:
-			user_input = raw_input("$ operative › ")
+			user_input = raw_input("$ operative > ")
 		except:
 			print "..."
 			sys.exit()

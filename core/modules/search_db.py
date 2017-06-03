@@ -31,27 +31,7 @@ class module_element(object):
                 load.show_options(self.require)
 
 	def export_data(self):
-		if len(self.export) > 0:
-			if self.export_file == "":
-				user_input = raw_input("operative (export file name ?) > ")
-				if os.path.exists("export/"+user_input):
-					self.export_file = "export/"+user_input
-				elif os.path.exists(user_input):
-					self.export_file = user_input
-				else:
-					print Fore.GREEN + "Writing " + user_input + " file" + Style.RESET_ALL
-					self.export_file = "export/"+user_input
-				self.export_data()
-			elif self.export_status == False:
-				file_open = open(self.export_file,"a+")
-				file_open.write(self.title)
-				for line in self.export:
-					file_open.write("- " + line +"\n")
-				print Fore.GREEN + "File writed : " + self.export_file + Style.RESET_ALL
-				file_open.close()
-				self.export_status = True
-		else:
-			print Back.YELLOW + Fore.BLACK + "Module empty result" + Style.RESET_ALL
+                load.export_data_search_db(self.export, self.export_file, self.export_status, self.title)
 	
 	def set_options(self,name,value):
 		if name in self.require:

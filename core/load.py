@@ -23,3 +23,53 @@ def show_options(require):
 		print Fore.WHITE+Style.BRIGHT+ "* " +Style.RESET_ALL+line + "(" +Fore.GREEN+ "optional" +Style.RESET_ALL+ "):" +value
     #print Back.WHITE + Fore.WHITE + "End parameters" + Style.RESET_ALL
 
+def export_data(export, export_file, export_status, title, argv):
+    if len(export) > 0:
+        if export_file == "":
+	    if argv == False:
+	        user_input = raw_input("operative (export file name ?) > ")
+	    else:
+		user_input = argv
+	    if os.path.exists("export/"+user_input):
+		export_file = "export/"+user_input
+	    elif os.path.exists(user_input):
+		export_file = user_input
+	    else:
+	        print Fore.GREEN + "Writing " + user_input + " file" + Style.RESET_ALL
+		export_file = "export/"+user_input
+	    export_data(export, export_file, export_status, title, argv)
+	elif export_status == False:
+	    file_open = open(export_file,"a+")
+	    file_open.write(title)
+	    for line in export:
+	        file_open.write("- " + line +"\n")
+	    print Fore.GREEN + "File writed : " + export_file + Style.RESET_ALL
+	    file_open.close()
+	    export_status = True
+	else:
+	    print Back.YELLOW + Fore.BLACK + "Module empty result" + Style.RESET_ALL
+
+
+def export_data_search_db(export, export_file, export_status, title):
+    if len(export) > 0:
+        if export_file == "":
+	    user_input = raw_input("operative (export file name ?) > ")
+	    if os.path.exists("export/"+user_input):
+	        export_file = "export/"+user_input
+	    elif os.path.exists(user_input):
+	        export_file = user_input
+	    else:
+	        print Fore.GREEN + "Writing " + user_input + " file" + Style.RESET_ALL
+		export_file = "export/"+user_input
+	    export_data(export, export_file, export_status, title)
+	elif export_status == False:
+	    file_open = open(export_file,"a+")
+	    file_open.write(title)
+	    for line in export:
+	        file_open.write("- " + line +"\n")
+	    print Fore.GREEN + "File writed : " + export_file + Style.RESET_ALL
+	    file_open.close()
+	    export_status = True
+    else:
+        print Back.YELLOW + Fore.BLACK + "Module empty result" + Style.RESET_ALL
+
