@@ -1,7 +1,6 @@
 #!/usr/bin/env	python
 
 from colorama import Fore,Back,Style
-
 import os, sys
 
 def show_options(require):
@@ -72,4 +71,19 @@ def export_data_search_db(export, export_file, export_status, title):
 	    export_status = True
     else:
         print Back.YELLOW + Fore.BLACK + "Module empty result" + Style.RESET_ALL
+
+
+def set_options(require, name, value):
+    if name in require:
+        require[name][0]["value"] = value
+    else:
+        print Fore.RED + "Option not found" + Style.RESET_ALL
+
+def check_require(require):
+    for line in require:
+        for option in require[line]:
+            if option["required"] == "yes":
+                if option["value"] == "":
+                    return False
+    return True
 
