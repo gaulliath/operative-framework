@@ -39,7 +39,7 @@ def use_module(module, argv=False):
 	module_name = module.split(".py")[0]
 	while action == 0:
 		try:
-			user_input = raw_input("$ operative ("+Fore.YELLOW+module_name+Style.RESET_ALL+")› ")
+			user_input = raw_input("$ operative ("+Fore.YELLOW+module_name+Style.RESET_ALL+") > ")
 		except:
 			print "..."
 			action = 1

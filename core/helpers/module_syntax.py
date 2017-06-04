@@ -4,6 +4,7 @@
 
 import os,sys
 from colorama import Fore, Style, Back
+from core import load
 
 class helper_class(object):
 
@@ -25,38 +26,13 @@ class helper_class(object):
         print Fore.YELLOW + "Author        " + Style.RESET_ALL + ": (c) " + self.resume['Author']
 
     def show_options(self):
-        # print Back.WHITE + Fore.WHITE + "Module parameters" + Style.RESET_ALL
-        for line in self.require:
-            if self.require[line][0]["value"] == "":
-                value = "No value"
-            else:
-                value = self.require[line][0]["value"]
-            if self.require[line][0]["required"] == "yes":
-                if self.require[line][0]["value"] != "":
-                    print Fore.GREEN + Style.BRIGHT + "+ " + Style.RESET_ALL + line + ": " + value
-                else:
-                    print Fore.RED + Style.BRIGHT + "- " + Style.RESET_ALL + line + "(" + Fore.RED + "is_required" + Style.RESET_ALL + "):" + value
-            else:
-                if self.require[line][0]["value"] != "":
-                    print Fore.GREEN + Style.BRIGHT + "+ " + Style.RESET_ALL + line + ": " + value
-                else:
-                    print Fore.WHITE + Style.BRIGHT + "* " + Style.RESET_ALL + line + "(" + Fore.GREEN + "optional" + Style.RESET_ALL + "):" + value
-                    # print Back.WHITE + Fore.WHITE + "End parameters" + Style.RESET_ALL
-
+        load.show_options(self.require)
 
     def set_options(self, name, value):
-        if name in self.require:
-            self.require[name][0]["value"] = value
-        else:
-            print Fore.RED + "Option not found" + Style.RESET_ALL
+	load.set_options(self.require, name, value)
 
     def check_require(self):
-        for line in self.require:
-            for option in self.require[line]:
-                if option["required"] == "yes":
-                    if option["value"] == "":
-                        return False
-        return True
+        load.check_require(self.require)
 
     def get_options(self, name):
         if name in self.require:

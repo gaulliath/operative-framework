@@ -35,13 +35,13 @@ def shortcut_loading():
 
 def user_put():
 	shortcut_loading()
-	loading()
+        loading() # Comment to omit loading
 	mecanic.banner()
 	shortcut_loading()
 	action = 0
 	while action == 0:
 		try:
-			user_input = raw_input("$ operative › ")
+			user_input = raw_input("$ operative > ")
 		except:
 			print "..."
 			sys.exit()
