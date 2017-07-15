@@ -21,16 +21,16 @@ class module_element(object):
 		self.argv = argv
 
 	def show_options(self):
-                load.show_options(self.require)
+                return load.show_options(self.require)
 
 	def export_data(self, argv=False):
-                load.export_data(self.export, self.export_file, self.export_status, self.title, argv)
+                return load.export_data(self.export, self.export_file, self.export_status, self.title, argv)
 	
 	def set_options(self,name,value):
-	        load.set_options(self.require, name, value)
+	        return load.set_options(self.require, name, value)
 
 	def check_require(self):
-                load.check_require(self.require)
+                return load.check_require(self.require)
 
 	def get_options(self,name):
 		if name in self.require:
@@ -53,6 +53,8 @@ class module_element(object):
 			website = website.replace('http//','http://')
 			if website[-1:] == "/":
 				website = website[:-1]
+		elif "http" not in website or "https" not in website:
+			website = "http://"+website
 		try:
 			requests.get(website)
 			action = 1

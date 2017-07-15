@@ -38,24 +38,16 @@ class module_element(object):
 		self.argv = argv
 
 	def show_options(self):
-                load.show_options(self.require)
+                return load.show_options(self.require)
 
 	def export_data(self, argv=False):
-                load.export_data(self.export, self.export_file, self.export_status, self.title, argv)
+                return load.export_data(self.export, self.export_file, self.export_status, self.title, argv)
 	
 	def set_options(self,name,value):
-		if name in self.require:
-			self.require[name][0]["value"] = value
-		else:
-			print Fore.RED + "Option not found" + Style.RESET_ALL
+		return load.set_options(self.require, name, value)
 	
 	def check_require(self):
-		for line in self.require:
-			for option in self.require[line]:
-				if option["required"] == "yes":
-					if option["value"] == "":
-						return False
-		return True
+		return load.check_require(self.require)
 
 	def get_options(self,name):
 		if name in self.require:
@@ -75,6 +67,8 @@ class module_element(object):
 		website = self.get_options('website')
 		if website[-1] == "/":
 			website = website[:-1]
+		if "http" not in website or "https" not in website:
+			website = "http://"+website
 		for element in self.directory:
 			complet = website + element['file']
 			req = requests.get(complet)
