@@ -84,6 +84,16 @@ def load_module(name):
 		else:
 			print Back.RED + "Module not found" + Style.RESET_ALL
 
+def shortcut_load_module():
+    if len(sys.argv) == 3:
+        module = sys.argv[2]
+        module = "core/modules/" + module + ".py"
+        if os.path.exists(module):
+            print Fore.GREEN + "Loading: " + module + Style.RESET_ALL
+            use_module(module)
+        else:
+	    print Back.RED + "Module not found" + Style.RESET_ALL
+
 def show_module():
 	if os.path.exists("core/modules/"):
 		list_module = glob.glob("core/modules/*.py")
