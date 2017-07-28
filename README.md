@@ -33,7 +33,7 @@ This is a framework based on fingerprint action, this tool is used for get infor
 
 ##### JSON api
 
-+ List all operative framework from JSON API
++ List all operative framework modules from JSON API
 + Get required element from module from JSON API
 + use module from JSON API
 
