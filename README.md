@@ -9,7 +9,7 @@ Author: Tristan Granier (graniet)
 This is a framework based on fingerprint action, this tool is used for get information on website or enterprise target
 
 ##### Dependency & launching
-
++ for webinterface php cli needed
 + pip install -r requirements.txt
 + python operative.py
 
