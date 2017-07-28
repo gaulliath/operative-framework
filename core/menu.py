@@ -5,14 +5,17 @@ import sys
 menu_list = {	
 	"quit":"exit_operative",
 	"modules":"show_module",
+	"browser_hack": "browser_hacks",
 	"help":"show_help",
 	"set":"set_enterprise",
 	"run":"run_enterprise",
 	"load_db":"load_db",
 	"search_db":"search_dbs",
-        "update":"update_framework",
+    "update":"update_framework",
 	"clear":"clear_screen",
 	"search_domain":"domain_module",
+	"json_api": "load_api_json",
+	"webserver": 'run_webserver',
 	"campaign":"start_campaign",
 	"new_module":"generate_module_class"
 }
@@ -22,8 +25,10 @@ menu_shortcut = {
 	"--update":"update_framework",
 	"--modules":"show_module",
 	"--version":"banner",
-        "--generate_module":"generate_module_class",
-        "--use":"shortcut_load_module"
+    "--generate_module":"generate_module_class",
+    "--use":"shortcut_load_module",
+	"--api": "load_api_json",
+	"--web" : "run_webserver"
 }
 
 menu_export = {

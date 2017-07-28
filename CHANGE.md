@@ -1,5 +1,12 @@
 # Operative Framework (VERSION)
 
+##### 2.0a
+
++ search default password from manufactor
++ operative framework json API
++ operative framework webserver
++ Browser hacking database (dork...)
+
 ##### 1.0b
 
 + Campaign function

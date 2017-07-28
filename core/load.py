@@ -2,6 +2,9 @@
 
 from colorama import Fore,Back,Style
 import os, sys
+import requests
+import re
+from bs4 import BeautifulSoup
 
 def show_options(require):
     #print Back.WHITE + Fore.WHITE + "Module parameters" + Style.RESET_ALL
@@ -87,3 +90,41 @@ def check_require(require):
                     return False
     return True
 
+def getDork(website, dorkName, browser):
+	Valid = False
+	if browser.strip().lower() == "google":
+		server = "www.google.com"
+	elif browser.strip().lower() == "bing":
+		server = "www.bing.com"
+	limit = 100
+	url = "http://" + server + "/search?num=" + str(limit) + "&start=0&hl=en&meta=&q=" + str(dorkName)
+	try:
+		r = requests.get(url)
+		valid = True
+	except:
+		valid = False
+	if valid == True:
+		print Fore.YELLOW + "Reading results of: " + str(dorkName) + Style.RESET_ALL
+		result = r.content
+		soup = BeautifulSoup(result, "html.parser")
+		links = soup.findAll("a")
+		if len(links) > 0:
+			print Fore.YELLOW + "result: " + Style.RESET_ALL + str(len(links)) + " links found"
+			correct_result = soup.find_all("a", href=re.compile("(?<=/url\?q=)(htt.*://.*)"))
+			if len(correct_result) > 0:
+				for link in soup.find_all("a", href=re.compile("(?<=/url\?q=)(htt.*://.*)")):
+					print Fore.BLUE + " * " + Style.RESET_ALL +  re.split(":(?=http)", link["href"].replace("/url?q=", ""))[0]
+				return correct_result
+			else:
+				print Fore.YELLOW + "result:" + Style.RESET_ALL + " No good links found"
+				user_put = raw_input('$ operative (show '+str(len(links))+' other links? [N/y]) ')
+				if user_put.lower() == "y":
+					for link in links:
+						print Fore.BLUE + " * " + Style.RESET_ALL + str(re.split(":(?=http)", link["href"].replace("/url?q=", ""))[0])
+					return links
+				else:
+					return False
+		else:
+			print Fore.YELLOW + "result:" + Style.RESET_ALL + " No links found"
+		return valid
+	return valid

@@ -1,4 +1,8 @@
 {
+	"webserver":{
+		"api_port": "9090",
+		"interface": "9091"
+	},
 	"campaign":{
 		"export":"HTML",
 		"required":[

@@ -10,6 +10,8 @@ import random
 import json
 from colorama import Fore,Back,Style
 from core import export
+from core.api import loadwebserverapi
+from core.web import loadwebserver
 
 total_dbs = []
 total_report = 0
@@ -76,23 +78,27 @@ def use_module(module, argv=False):
 
 def load_module(name):
 	if "use " in name:
-		module = name.split("use")[1].strip() + ".py"
-		module = "core/modules/" + module
+		module_name = name.split("use")[1].strip() + ".py"
+		module = "core/modules/" + module_name
+		module_browser = "core/BHDB/" + str(module_name)
 		if os.path.exists(module):
 			print Fore.GREEN + "Loading : " + module + Style.RESET_ALL
 			use_module(module)
+		elif os.path.exists(module_browser):
+			print Fore.GREEN + "Loading browser hacking : " + module_browser + Style.RESET_ALL
+			use_module(module_browser)
 		else:
 			print Back.RED + "Module not found" + Style.RESET_ALL
 
 def shortcut_load_module():
-    if len(sys.argv) == 3:
-        module = sys.argv[2]
-        module = "core/modules/" + module + ".py"
-        if os.path.exists(module):
-            print Fore.GREEN + "Loading: " + module + Style.RESET_ALL
-            use_module(module)
-        else:
-	    print Back.RED + "Module not found" + Style.RESET_ALL
+	if len(sys.argv) == 3:
+		module = sys.argv[2]
+		module = "core/modules/" + module + ".py"
+		if os.path.exists(module):
+			print Fore.GREEN + "Loading: " + module + Style.RESET_ALL
+			use_module(module)
+		else:
+			print Back.RED + "Module not found" + Style.RESET_ALL
 
 def show_module():
 	if os.path.exists("core/modules/"):
@@ -113,6 +119,9 @@ def show_help():
 	print """:modules		Show module listing
 :campaign 		Start Gath/Fingerprint campaign
 :new_module		Generate a new module class
+:browser_hack		Use google/bing hacking module
+:json_api		Load operative json api
+:webserver		Run web interface
 :helper			Use helper class
 :load_db		Load SQL database
 :search_db		Search information on database
@@ -239,6 +248,23 @@ def generate_module_class():
 		print Fore.RED + "-" + Style.RESET_ALL + " Can't find sample_module file"
 		sys.exit()
 
+def browser_hacks():
+	print Fore.YELLOW + " ! For use module please use :use moduleName" + Style.RESET_ALL
+	if os.path.exists("core/BHDB/"):
+		list_module = glob.glob("core/BHDB/*.py")
+		for module in list_module:
+			if ".py" in module:
+				module_name = module.split(".py")[0]
+				module_name = module_name.replace('core/BHDB/','')
+			if "__init__" not in module:
+				description = "No module description found"
+				if "#description:" in open(module).read():
+					description = open(module).read().split("#description:")[1]
+					description = description.split("#")[0]
+				print Fore.BLUE + " * "+ Style.RESET_ALL  + module_name + "		" + description
+	else:
+		print Back.RED + Fore.BLACK + "Browserhacking directory not found" + Style.RESET_ALL
+
 def use_helper(user_input):
 	if not " " in user_input.strip():
 		if os.path.exists('core/helpers/'):
@@ -356,3 +382,9 @@ def load_campaign_(config):
 	if first_use == 1:
 		export_module.end()
 	print Fore.GREEN + "Report written here 'export/"+export_module.output_name+"'" + Style.RESET_ALL
+
+def load_api_json():
+	loadwebserverapi()
+
+def run_webserver():
+	loadwebserver()

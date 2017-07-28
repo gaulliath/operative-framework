@@ -18,16 +18,16 @@ class module_element(object):
 		self.export_status = False
 
 	def show_options(self):
-                return load.show_options(self.require)
+		return load.show_options(self.require)
 
 	def export_data(self, argv=False):
-                return load.export_data(self.export, self.export_file, self.export_status, self.title, argv)
+		return load.export_data(self.export, self.export_file, self.export_status, self.title, argv)
 	
 	def set_options(self,name,value):
-	        return load.set_options(self.require, name, value)
+		return load.set_options(self.require, name, value)
 
 	def check_require(self):
-                return load.check_require(self.require)
+		return load.check_require(self.require)
 
 	def get_options(self,name):
 		if name in self.require:
@@ -46,33 +46,30 @@ class module_element(object):
 			self.main()
 
 	def main(self):
-            server = "encrypted.google.com"
-            limit = self.get_options("limit_search")
-            enterprise = self.get_options("enterprise")
-            counter = ""
-            url = "https://" + server + "/search?num=" + limit + "&start=0&hl=en&q=site:linkedin.com/in+" + enterprise
-            print Fore.GREEN + "Search Linkedin research" + Style.RESET_ALL
-            request = requests.get(url)
-	    status_code = request.status_code
-
-	    if status_code == 200:
-                html = BeautifulSoup(request.text, "html.parser")
-        	results = html.find_all('div', { 'class' : 'g' })
-		
-		for i, result in enumerate(results):
-                    employee = result.find('h3', { 'class' : 'r' }).getText()
-		    if "| LinkedIn" or "on LinkedIn" or "LinkedIn" in employee:
-		        employee = employee.replace('| LinkedIn', '')
-		        employee = employee.replace('LinkedIn', '')
-		        employee = employee.replace('on LinkedIn', '')
-		
-		    profile = result.find('cite').getText()
-                    print Fore.BLUE + "* "+ Style.RESET_ALL + employee + " < " + Fore.GREEN + profile + Style.RESET_ALL
-                    counter = i
-
-                if counter == "":
-                    print Fore.RED + "Nothing on linkedin." + Style.RESET_ALL
-                else:
-                    print "\n Total results:", counter+1
-	    else:
-                print Fore.RED + "Can't get response" + Style.RESET_ALL
+		server = "encrypted.google.com"
+		limit = self.get_options("limit_search")
+		enterprise = self.get_options("enterprise")
+		counter = ""
+		url = "https://" + server + "/search?num=" + limit + "&start=0&hl=en&q=site:linkedin.com/in+" + enterprise
+		print Fore.GREEN + "Search Linkedin research" + Style.RESET_ALL
+		request = requests.get(url)
+		status_code = request.status_code
+		if status_code == 200:
+			html = BeautifulSoup(request.text, "html.parser")
+			results = html.find_all('div', { 'class' : 'g' })
+			for i, result in enumerate(results):
+				employee = result.find('h3', { 'class' : 'r' }).getText()
+				if "| LinkedIn" or "on LinkedIn" or "LinkedIn" in employee:
+					employee = employee.replace('| LinkedIn', '')
+					employee = employee.replace('LinkedIn', '')
+					employee = employee.replace('on LinkedIn', '')
+				profile = result.find('cite').getText()
+				print Fore.BLUE + "* "+ Style.RESET_ALL + employee + " < " + Fore.GREEN + profile + Style.RESET_ALL
+				self.export.append({'employee':employee.encode('utf-8'),'link':profile.encode('utf-8')})
+				counter = i
+				if counter == "":
+					print Fore.RED + "Nothing on linkedin." + Style.RESET_ALL
+				else:
+					print "\n Total results:", counter+1
+		else:
+			print Fore.RED + "Can't get response" + Style.RESET_ALL
