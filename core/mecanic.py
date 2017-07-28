@@ -26,7 +26,7 @@ def exit_operative():
 	sys.exit()
 
 def banner():
-	version = "1.0b"
+	version = "2.0 BETA"
 	print """                               __  _          
   ____  ____  ___  _________ _/ /_(_)   _____ 
  / __ \/ __ \/ _ \/ ___/ __ `/ __/ / | / / _ \\
