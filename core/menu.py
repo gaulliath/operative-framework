@@ -22,7 +22,8 @@ menu_shortcut = {
 	"--update":"update_framework",
 	"--modules":"show_module",
 	"--version":"banner",
-	"--generate_module":"generate_module_class"
+        "--generate_module":"generate_module_class",
+        "--use":"shortcut_load_module"
 }
 
 menu_export = {
