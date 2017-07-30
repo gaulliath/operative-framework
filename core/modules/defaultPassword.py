@@ -48,31 +48,35 @@ class module_element(object):
 	def main(self):
 		manufactor = str(self.get_options("manufactor"))
 		search_link = "http://www.defaultpassword.com/?action=dpl&char="+manufactor
+		print Fore.GREEN + "Searching for passwords" + Style.RESET_ALL
 		req = requests.get(search_link)
 		html = req.content
 		result = html.split('<TR VALIGN="top">')
-		result.pop(0)
-		result.pop(0)
-		print Back.BLACK + Fore.YELLOW + " ! Manufactor	|	Product		|	Protocol	|	User	|	Password" + Style.RESET_ALL
-		for line in result:
-			spliting = line.split('<TD NOWRAP>')
-			string = ''
-			for element in spliting:
-				if "</TD>" in element and element.strip() != '':
-					string = Fore.BLUE + " * " + Style.RESET_ALL + spliting[1].split('</TD>')[0] \
-							 + Fore.YELLOW + "	|	" + Style.RESET_ALL + spliting[2].split('</TD>')[0] \
-							 + Fore.YELLOW + "	|	" + Style.RESET_ALL + spliting[4].split('</TD>')[0] \
-							 + Fore.YELLOW + "	|	" + Style.RESET_ALL + spliting[5].split('</TD>')[0] \
-							 + Fore.YELLOW + "	|	" + Style.RESET_ALL + spliting[6].split('</TD>')[0]
-					manufactor = spliting[1].split('</TD>')[0]
-					product = spliting[2].split('</TD>')[0]
-					protocol = spliting[4].split('</TD>')[0]
-					user = spliting[5].split('</TD>')[0]
-					password = spliting[6].split('</TD>')[0]
-					string_export = {'manufactor':manufactor,'product':product,'protocol':protocol,'user':user,'password':password}
-					self.export.append(string_export)
-			if string != '':
-				print string
+		try:
+			result.pop(0)
+			result.pop(0)
+			print Back.BLACK + Fore.YELLOW + " ! Manufactor	|	Product		|	Protocol	|	User	|	Password" + Style.RESET_ALL
+			for line in result:
+				spliting = line.split('<TD NOWRAP>')
+				string = ''
+				for element in spliting:
+					if "</TD>" in element and element.strip() != '':
+						string = Fore.BLUE + " * " + Style.RESET_ALL + spliting[1].split('</TD>')[0] \
+								 + Fore.YELLOW + "	|	" + Style.RESET_ALL + spliting[2].split('</TD>')[0] \
+								 + Fore.YELLOW + "	|	" + Style.RESET_ALL + spliting[4].split('</TD>')[0] \
+								 + Fore.YELLOW + "	|	" + Style.RESET_ALL + spliting[5].split('</TD>')[0] \
+								 + Fore.YELLOW + "	|	" + Style.RESET_ALL + spliting[6].split('</TD>')[0]
+						manufactor = spliting[1].split('</TD>')[0]
+						product = spliting[2].split('</TD>')[0]
+						protocol = spliting[4].split('</TD>')[0]
+						user = spliting[5].split('</TD>')[0]
+						password = spliting[6].split('</TD>')[0]
+						string_export = {'manufactor':manufactor,'product':product,'protocol':protocol,'user':user,'password':password}
+						self.export.append(string_export)
+				if string != '':
+					print string
+		except IndexError:
+			print Fore.RED + "No results were found for this manufacturer." + Style.RESET_ALL
 
 
 
