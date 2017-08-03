@@ -220,6 +220,7 @@ header('Access-Control-Allow-Origin: *');
             {
                 $.each(result.data, function(index, value){
                     var required = value[0]['required'];
+                    var value_field = value[0]['value'];
                     if(required == 'yes')
                     {
                         required = 'required'
@@ -230,7 +231,7 @@ header('Access-Control-Allow-Origin: *');
                     }
                     var tpl = '<div class="field">\
                         <label>'+index+'<span class="required"> '+required+' </span></label>\
-                        <input type="text" name="'+index+'" class="opt" />\
+                        <input type="text" name="'+index+'" class="opt" value="'+value_field+'" />\
                         </div>';
                     $('#field_list').append(tpl)
                     console.log(required)
