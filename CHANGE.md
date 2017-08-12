@@ -6,6 +6,7 @@
 + operative framework json API
 + operative framework webserver
 + Browser hacking database (dork...)
++ Implementation of filters scripts
 
 ##### 1.0b
 
