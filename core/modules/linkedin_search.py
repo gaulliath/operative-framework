@@ -67,9 +67,9 @@ class module_element(object):
 				print Fore.BLUE + "* "+ Style.RESET_ALL + employee + " < " + Fore.GREEN + profile + Style.RESET_ALL
 				self.export.append({'employee':employee.encode('utf-8'),'link':profile.encode('utf-8')})
 				counter = i
-				if counter == "":
-					print Fore.RED + "Nothing on linkedin." + Style.RESET_ALL
-				else:
-					print "\n Total results:", counter+1
+			if counter == "":
+				print Fore.RED + "Nothing on linkedin." + Style.RESET_ALL
+			else:
+				print "\n Total results:", counter+1
 		else:
 			print Fore.RED + "Can't get response" + Style.RESET_ALL

@@ -39,6 +39,7 @@ def use_module(module, argv=False):
 	action = 0
 	module_class = ""
 	module_name = module.split(".py")[0]
+	current_filter = ""
 	while action == 0:
 		try:
 			user_input = raw_input("$ operative ("+Fore.YELLOW+module_name+Style.RESET_ALL+") > ")
@@ -57,6 +58,14 @@ def use_module(module, argv=False):
 			module_class.set_agv(argv)
 		if user_input == "show options":
 			module_class.show_options()
+		elif "set" in user_input and "filter" in user_input and "=" in user_input:
+			filter_name = user_input.strip().split('=')[1]
+			current_filter = use_filter(filter_name)
+			if current_filter != False:
+				print Fore.GREEN + "+" + Style.RESET_ALL + " filter used: " + str(filter_name)
+			else:
+				current_filter = ""
+				print Fore.RED + "-" + Style.RESET_ALL + " filter do not exist"
 		elif "set" in user_input and "=" in user_input:
 			value = user_input.split(" ",1)[1].split("=")
 			module_class.set_options(value[0],value[1])
@@ -65,6 +74,7 @@ def use_module(module, argv=False):
 :set option=value	Set value from element
 :run			Run current  module
 :export			Export module return data
+:set filter=filter_name
 :quit			Exit current module"""
 		elif user_input == "quit":
 			break
@@ -72,9 +82,48 @@ def use_module(module, argv=False):
 			os.system('clear')
 		elif user_input == "run":
 			module_class.run_module()
+			if current_filter != "":
+				run_filter(current_filter, module_class.export, module_name)
 		elif user_input == "export":
 			module_class.export_data()
+
 	print Fore.YELLOW + "Stop module : " + module_name + "..." + Style.RESET_ALL
+
+def use_filter(filter_name):
+	if filter_name == " " or filter_name == "":
+		return False
+	filter_path = "core/filters/"+filter_name+".py"
+	if os.path.exists(filter_path):
+		return filter_path
+	else:
+		return False
+
+def run_filter(filter_path, exported, module_name):
+	if "/" in module_name:
+		module_name = module_name.rsplit('/', 1)[1]
+	success = 0
+	try:
+		filter_path = filter_path.replace("/", ".")
+		filter_path = filter_path.split('.py')[0]
+		mod = __import__(filter_path, fromlist=['module_element'])
+		filter_run = mod.Filters()
+		success = 1
+	except:
+		print Fore.RED + "-" + Style.RESET_ALL + " Can\'t run a filter"
+	if success == 1:
+		success = 0
+		if filter_run.work_with[0] == "*":
+			print Fore.YELLOW + "* running : " + Style.RESET_ALL + str(filter_path)
+			filter_run.run(exported)
+		else:
+			for line in filter_run.work_with:
+				if line.strip() == module_name.strip():
+					success = 1
+			if success == 1:
+				print Fore.YELLOW + "* running : " + Style.RESET_ALL  + str(filter_path)
+				filter_run.run(exported)
+			else:
+				print Fore.RED + "-" + Style.RESET_ALL + " This filter ("+str(filter_path)+") doesn't work with the module: " + str(module_name)
 
 def load_module(name):
 	if "use " in name:
