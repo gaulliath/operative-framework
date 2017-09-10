@@ -69,7 +69,5 @@ class module_element(object):
 				counter = i
 			if counter == "":
 				print Fore.RED + "Nothing on linkedin." + Style.RESET_ALL
-			else:
-				print "\n Total results:", counter+1
 		else:
 			print Fore.RED + "Can't get response" + Style.RESET_ALL

@@ -44,13 +44,18 @@ def export_data(export, export_file, export_status, title, argv):
 	    file_open = open(export_file,"a+")
 	    file_open.write(title)
 	    for line in export:
-	        file_open.write("- " + line +"\n")
+	    	aux = type(line)
+	    	if str(aux) == "<type 'dict'>":
+	    		for item in line.items():
+	    			file_open.write("- " + item[0] + ": " + item[1], )
+	    		file_open.write("\n")
+	    	else:
+	    		file_open.write("- " + line +"\n")
 	    print Fore.GREEN + "File writed : " + export_file + Style.RESET_ALL
 	    file_open.close()
 	    export_status = True
 	else:
 	    print Back.YELLOW + Fore.BLACK + "Module empty result" + Style.RESET_ALL
-
 
 def export_data_search_db(export, export_file, export_status, title):
     if len(export) > 0:
@@ -74,7 +79,6 @@ def export_data_search_db(export, export_file, export_status, title):
 	    export_status = True
     else:
         print Back.YELLOW + Fore.BLACK + "Module empty result" + Style.RESET_ALL
-
 
 def set_options(require, name, value):
     if name in require:

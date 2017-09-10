@@ -55,26 +55,26 @@ class module_element(object):
 		try:
 			result.pop(0)
 			result.pop(0)
-			print Back.BLACK + Fore.YELLOW + " ! Manufactor	|	Product		|	Protocol	|	User	|	Password" + Style.RESET_ALL
+			print ('{}{} ! {:^17}| {:^20}| {:^10}| {:^15}| {:^15}{}' \
+				.format(Back.BLACK, Fore.YELLOW, 'Manufactor', 'Product', 'Protocol', 'User', 'Password', Style.RESET_ALL))
 			for line in result:
 				spliting = line.split('<TD NOWRAP>')
 				string = ''
 				for element in spliting:
 					if "</TD>" in element and element.strip() != '':
-						string = Fore.BLUE + " * " + Style.RESET_ALL + spliting[1].split('</TD>')[0] \
-								 + Fore.YELLOW + "	|	" + Style.RESET_ALL + spliting[2].split('</TD>')[0] \
-								 + Fore.YELLOW + "	|	" + Style.RESET_ALL + spliting[4].split('</TD>')[0] \
-								 + Fore.YELLOW + "	|	" + Style.RESET_ALL + spliting[5].split('</TD>')[0] \
-								 + Fore.YELLOW + "	|	" + Style.RESET_ALL + spliting[6].split('</TD>')[0]
 						manufactor = spliting[1].split('</TD>')[0]
 						product = spliting[2].split('</TD>')[0]
 						protocol = spliting[4].split('</TD>')[0]
 						user = spliting[5].split('</TD>')[0]
 						password = spliting[6].split('</TD>')[0]
-						string_export = {'manufactor':manufactor,'product':product,'protocol':protocol,'user':user,'password':password}
-						self.export.append(string_export)
-				if string != '':
-					print string
+				string_export = {'manufactor':manufactor,'product':product,'protocol':protocol,'user':user,'password':password}
+				self.export.append(string_export)
+				print('{} * {}{:17}{}|{} {:^20}{}|{} {:^10}{}|{} {:^15}{}|{} {:^15}' \
+						.format(Fore.BLUE, Style.RESET_ALL, manufactor, \
+							Fore.YELLOW, Style.RESET_ALL, product, \
+							Fore.YELLOW, Style.RESET_ALL, protocol, \
+							Fore.YELLOW, Style.RESET_ALL, user,
+							Fore.YELLOW, Style.RESET_ALL, password))
 		except IndexError:
 			print Fore.RED + "No results were found for this manufacturer." + Style.RESET_ALL
 
