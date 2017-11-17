@@ -3,6 +3,9 @@
 		"api_port": "9090",
 		"interface": "9091"
 	},
+	"external_api":{
+		"fullcontact":""
+	},
 	"campaign":{
 		"export":"HTML",
 		"required":[

@@ -12,6 +12,7 @@ from colorama import Fore,Back,Style
 from core import export
 from core.api import loadwebserverapi
 from core.web import loadwebserver
+from core.socialnetworks.core import SocialNetwork
 
 total_dbs = []
 total_report = 0
@@ -169,6 +170,7 @@ def show_help():
 :campaign 		Start Gath/Fingerprint campaign
 :new_module		Generate a new module class
 :browser_hack		Use google/bing hacking module
+:social_network		Search personnal information
 :json_api		Load operative json api
 :webserver		Run web interface
 :helper			Use helper class
@@ -437,3 +439,7 @@ def load_api_json():
 
 def run_webserver():
 	loadwebserver()
+
+def social_network_gathering():
+	run = SocialNetwork()
+	run.run()

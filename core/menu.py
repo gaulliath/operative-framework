@@ -17,7 +17,8 @@ menu_list = {
 	"json_api": "load_api_json",
 	"webserver": 'run_webserver',
 	"campaign":"start_campaign",
-	"new_module":"generate_module_class"
+	"new_module":"generate_module_class",
+	"social_network":"social_network_gathering",
 }
 
 menu_shortcut = {
@@ -28,7 +29,8 @@ menu_shortcut = {
     "--generate_module":"generate_module_class",
     "--use":"shortcut_load_module",
 	"--api": "load_api_json",
-	"--web" : "run_webserver"
+	"--web" : "run_webserver",
+	"--social_networl":"social_network_gathering",
 }
 
 menu_export = {
