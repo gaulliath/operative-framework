@@ -1,5 +1,5 @@
 #!/usr/bin/env	python
-# description:Module sample#
+#description:Check if email as been hacked#
 
 from colorama import Fore, Back, Style
 from core import load
