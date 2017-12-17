@@ -62,6 +62,7 @@ class module_element(object):
                             try:
                                 print Fore.BLUE + " * " + Style.RESET_ALL + " found in : " + Fore.GREEN + str(line['title']) + Style.RESET_ALL + \
                                       " (" + Fore.YELLOW + str(line['date_leaked']) + Style.RESET_ALL + ")"
+                                self.export.append(line['title'])
                             except:
                                 print Fore.BLUE + " * " + Style.RESET_ALL + " found in : ( can't parse leaks title)"
                     else:
