@@ -48,7 +48,6 @@ class module_element(object):
 
 	def main(self):
 		error = 0
-		req = ""
 		domain_name = str(self.get_options('domain'))
 		from_date = str(self.get_options('from_date'))
 		to_date = str(self.get_options('to_date'))
@@ -60,27 +59,25 @@ class module_element(object):
 		url = "http://web.archive.org/cdx/search/cdx?url="+domain_name+"&matchType=domain&limit="+limit_result+"&output=json&from="+from_date+"&to="+to_date
 		try:
 			req = requests.get(url)
+			json_data = json.loads(req.text)
+			if len(json_data) == 0:
+				print Fore.YELLOW + "output: " + Style.RESET_ALL + "No result found"
+				self.export.append("no result in archive")
+				error = 1
 		except:
 			print Fore.RED + "error: " + Style.RESET_ALL + " Can't open url"
 			error = 1
 		if error == 0:
-			json_data = json.loads(req.text)
 			try:
-				if len(json_data) > 1:
-					for line in json_data:
-						if line[2] != "original":
-							timestamp = line[1]
-							website = line[2]
-							total_link = "https://web.archive.org/web/" + str(timestamp) + "/" + str(website)
-							string_date = str(timestamp[:4]) + "/" + str(timestamp[4:6]) + "/" + str(timestamp[6:8])
-							self.export.append(total_link)
-							print str(string_date) + "	" + str(
-								website) + "	" + Fore.YELLOW + "(" + Style.RESET_ALL + str(
-								total_link) + Fore.YELLOW + ")" + Style.RESET_ALL
-				else:
-					self.export.append("no result in archive")
-					print Fore.YELLOW + "output: " + Style.RESET_ALL + "No result found"
+				result = [ x for x in json_data if x[2] != 'original']
+				result.sort(key=lambda x: x[1])
+				for line in result:
+					timestamp = line[1]
+					website   = line[2]
+					total_link  = "https://web.archive.org/web/" + str(timestamp) + "/" + str(website)
+					string_date = str(timestamp[:4]) + "/" + str(timestamp[4:6]) + "/" + str(timestamp[6:8])
+					self.export.append(total_link)
+					print " {}   {}  {}({}{}{}){}".format(string_date, website, Fore.YELLOW, \
+						Style.RESET_ALL, total_link, Fore.YELLOW, Style.RESET_ALL)
 			except:
 				print Fore.RED + "error: " + Style.RESET_ALL + "Error found please retry"
-
-
