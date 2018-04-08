@@ -11,8 +11,10 @@ import json
 from colorama import Fore,Back,Style
 from core import export
 
+
 def SetError(value):
-    return {'error':value}
+    return {'error': value}
+
 
 def API_listmodule(argument):
     total_module = {'module_list':[]}
@@ -27,11 +29,12 @@ def API_listmodule(argument):
                 if "#description:" in open(module).read():
                     description = open(module).read().split("#description:")[1]
                     description = description.split("#")[0]
-                    total_module['module_list'].append({'name':module_name,'description':description})
+                    total_module['module_list'].append({'name': module_name,'description':description})
     if len(total_module['module_list']) > 0:
         return total_module
     else:
         return False
+
 
 def API_startmodule(arguments):
     module_path = ''
@@ -71,6 +74,7 @@ def API_startmodule(arguments):
             print "nop"
     else:
         return False
+
 
 def API_requirementModule(arguments):
     module_path = ''

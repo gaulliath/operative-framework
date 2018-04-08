@@ -35,7 +35,7 @@ def shortcut_loading():
 
 def user_put():
 	shortcut_loading()
-        loading() # Comment to omit loading
+	loading() # Comment to omit loading
 	mecanic.banner()
 	shortcut_loading()
 	action = 0

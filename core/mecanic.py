@@ -66,10 +66,10 @@ def use_module(module, argv=False):
 				print Fore.GREEN + "+" + Style.RESET_ALL + " filter used: " + str(filter_name)
 			else:
 				current_filter = ""
-				print Fore.RED + "-" + Style.RESET_ALL + " filter do not exist"
+				print Fore.RED + "ERROR: " + Style.RESET_ALL + " filter do not exist"
 		elif "set" in user_input and "=" in user_input:
-			value = user_input.split(" ",1)[1].split("=")
-			module_class.set_options(value[0],value[1])
+			value = user_input.split(" ", 1)[1].split("=")
+			module_class.set_options(value[0], value[1])
 		elif user_input == "help":
 			print """:show options		Show module options
 :set option=value	Set value from element
@@ -88,7 +88,7 @@ def use_module(module, argv=False):
 		elif user_input == "export":
 			module_class.export_data()
 
-	print Fore.YELLOW + "Stop module : " + module_name + "..." + Style.RESET_ALL
+	print Fore.YELLOW + "Exit module : " + module_name + "..." + Style.RESET_ALL
 
 def use_filter(filter_name):
 	if filter_name == " " or filter_name == "":
@@ -182,16 +182,19 @@ def show_help():
 :help			Show this bullet & close
 :quit			Close operative framework"""
 
+
 def update_framework():
-	print Fore.GREEN + "[information] checking update..." + Style.RESET_ALL
+	print Fore.GREEN + "INFO: " + Style.RESET_ALL + "checking update..."
 	try:
 		os.system('git pull')
-		print Fore.YELLOW + "[warning] please reboot a framework" + Style.RESET_ALL
+		print Fore.YELLOW + "WARNING: " + Style.RESET_ALL +  "please reboot a framework"
 	except:
-		print Fore.RED + "[error] can't start update please use <git pull>" + Style.RESET_ALL
+		print Fore.RED + "ERROR: " + Style.RESET_ALL + "can't start update please use <git pull>"
+
 
 def clear_screen():
 	os.system('clear')
+
 
 def generate_session(name):
 	time_day = time.strftime("%Y-%m-%d")
@@ -200,11 +203,13 @@ def generate_session(name):
 	file_open.close()
 	print Fore.GREEN + "Session generated " + Style.RESET_ALL
 
+
 def search_dbs():
 	if len(total_dbs) > 0:
 		use_module('core/modules/search_db.py',total_dbs)
 	else:
-		print Fore.RED + "Please before use :load_db"+ Style.RESET_ALL
+		print Fore.RED + "ERROR: " + Style.RESET_ALL + "Please before use :load_db"
+
 
 def check_session(name):
 	time_day = time.strftime("%Y-%m-%d")
@@ -215,10 +220,12 @@ def check_session(name):
 		if user_input == "" or user_input == "Y" or user_input == "y":
 			generate_session(name)		
 
+
 def set_enterprise():
 	user_input = raw_input("operative (enterprise name) > ")
 	check_session(user_input)
 	run_enterprise()
+
 
 def run_enterprise():
 	time_day = time.strftime("%Y-%m-%d")
@@ -228,6 +235,7 @@ def run_enterprise():
 	else:
 		print Fore.RED + "Please run <set> for make session" + Style.RESET_ALL
 
+
 def get_current():
 	filename = "."+time.strftime("%Y-%m-%d")
 	if os.path.exists(filename):
@@ -236,6 +244,7 @@ def get_current():
 	else:
 		set_enterprise()
 		get_current()
+
 
 def load_db():
 	global total_dbs
@@ -258,6 +267,7 @@ def load_db():
 			else:
 				print "Already loaded : "+Fore.YELLOW + line + Style.RESET_ALL
 
+
 def start_campaign():
 	if os.path.isfile('config.json'):
 		with open('config.json') as json_file:
@@ -267,6 +277,7 @@ def start_campaign():
 		load_campaign_(data_json)
 	else:
 		print Fore.RED + "Can't locate a config.json" + Style.RESET_ALL
+
 
 def generate_module_class():
 	action = 0
@@ -286,18 +297,19 @@ def generate_module_class():
 																				'#description:'+str(module_description)+"#")
 						new_module_file.write(sample_module_source)
 						new_module_file.close()
-						print Fore.GREEN + "Module as been written '"+str('core/modules/'+module_name+'.py')+"'" + Style.RESET_ALL
+						print Fore.GREEN + "SUCCESS: " + Style.RESET_ALL + "Module as been written '"+str('core/modules/'+module_name+'.py')+"'"
 						print "Now add argument on self.require & write your code in main(), Good luck"
 						action = 1
 					else:
-						print Fore.RED + "- " + Style.RESET_ALL + "Please enter a description"
+						print Fore.RED + "ERROR: " + Style.RESET_ALL + "Please enter a description"
 
 			else:
-				print Fore.RED + "- " + Style.RESET_ALL + " Please enter new module name..."
+				print Fore.RED + "ERROR: " + Style.RESET_ALL + " Please enter new module name..."
 
 	else:
-		print Fore.RED + "-" + Style.RESET_ALL + " Can't find sample_module file"
+		print Fore.RED + "ERROR: " + Style.RESET_ALL + " Can't find sample_module file"
 		sys.exit()
+
 
 def browser_hacks():
 	print Fore.YELLOW + " ! For use module please use :use moduleName" + Style.RESET_ALL
@@ -312,9 +324,10 @@ def browser_hacks():
 				if "#description:" in open(module).read():
 					description = open(module).read().split("#description:")[1]
 					description = description.split("#")[0]
-				print Fore.BLUE + " * "+ Style.RESET_ALL  + module_name + "		" + description
+				print Fore.BLUE + " * " + Style.RESET_ALL + module_name + "		" + description
 	else:
 		print Back.RED + Fore.BLACK + "Browserhacking directory not found" + Style.RESET_ALL
+
 
 def use_helper(user_input):
 	if not " " in user_input.strip():
@@ -367,17 +380,20 @@ def use_helper(user_input):
 					elif "quit" == user_put:
 						break
 			except:
-				print Fore.RED + "- " + Style.RESET_ALL + "Can't load helper"
+				print Fore.RED + "ERROR: " + Style.RESET_ALL + "Can't load helper"
 
 		else:
-			print Fore.RED + "- " + Style.RESET_ALL + "Helper not found"
+			print Fore.RED + "ERROR: " + Style.RESET_ALL + "Helper not found"
+
 
 def check_modules_exists(modules):
 	for item in modules["campaign"]["modules"]:
 		module_name = item['name']
 		if not os.path.isfile('core/modules/' + module_name + '.py'):
-			print Fore.RED + "Can't load a 'core/modules/"+module_name+".py'" + Style.RESET_ALL
+			print Fore.RED + "ERROR: " + Style.RESET_ALL + "Can't load a 'core/modules/"+module_name+".py'"
 			sys.exit()
+
+
 def check_require(config):
 	require_modules = []
 	for item in config['campaign']['modules']:
@@ -391,6 +407,8 @@ def check_require(config):
 		if item['value'] == "":
 			print Fore.RED + Style.DIM + "required value can't be null" + Style.RESET_ALL
 			sys.exit()
+
+
 def load_campaign_(config):
 	global total_report
 	action = 0
@@ -412,7 +430,7 @@ def load_campaign_(config):
 		require_module = module['require']
 		module_path = "core/modules/"+module['name']+".py"
 		if os.path.isfile(module_path):
-			print Fore.GREEN + Style.DIM + "[load] " + module_path + Style.RESET_ALL
+			print Fore.GREEN + Style.DIM + "LOAD: " + module_path + Style.RESET_ALL
 			mod = __import__(module_path.replace("/",".").split('.py')[0], fromlist=['module_element'])
 			module_class = mod.module_element()
 			for item_required in require_module:
@@ -421,7 +439,10 @@ def load_campaign_(config):
 						required = item_requirement['value']
 				module_class.set_options(item_required,required)
 				print Fore.BLUE + Style.DIM + "[setup] argument " + item_required + ":" + required + Style.RESET_ALL
-			module_class.run_module()
+			try:
+				module_class.run_module()
+			except:
+				print Fore.RED + "ERROR: " + Style.RESET_ALL + "Operative can't continue module."
 			if len(module_class.export) > 0:
 				total_report += 1
 			export_module.set_module_name(module_class.title)
@@ -429,16 +450,19 @@ def load_campaign_(config):
 			export_module.set_total(total_report)
 			export_value = export_module.now()
 			if export_value == False:
-				module_class.export_data(export_name) # modules export function
+				module_class.export_data(export_name)  # modules export function
 	if first_use == 1:
 		export_module.end()
 	print Fore.GREEN + "Report written here 'export/"+export_module.output_name+"'" + Style.RESET_ALL
 
+
 def load_api_json():
 	loadwebserverapi()
 
+
 def run_webserver():
 	loadwebserver()
+
 
 def social_network_gathering():
 	run = SocialNetwork()
