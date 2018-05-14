@@ -1,4 +1,4 @@
-<img src="https://s30.postimg.org/t64sh7kyp/operative4.png" width="450">
+<img src="https://image.ibb.co/jQXqyy/logo_operative.png" width="450">
 
 ![version](https://img.shields.io/badge/version-2.0a-red.svg) [![twitter](https://img.shields.io/badge/twitter-@graniet75-blue.svg)](https://twitter.com/graniet75)
 
