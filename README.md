@@ -2,11 +2,16 @@
 
 ![version](https://img.shields.io/badge/version-2.0a-red.svg) [![twitter](https://img.shields.io/badge/twitter-@graniet75-blue.svg)](https://twitter.com/graniet75)
 
+### HD version available now !
+
+https://github.com/graniet/operative-framework-HD
+
 Copyright (c) 2017 written in python with Love
 
 Author: Tristan Granier (graniet)
 
 This is a framework based on fingerprint action, this tool is used for get information on website or enterprise target
+
 
 ##### Dependency & launching
 
