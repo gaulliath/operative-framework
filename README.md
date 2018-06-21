@@ -31,8 +31,6 @@ This is a framework based on fingerprint action, this tool is used for get infor
 
 ##### Web Interface
 
-<img src="https://s4.postimg.org/gbpzopih9/Capture_d_e_cran_2017-07-28_a_19.07.17.png" width="250">
-
 + Load operative web interface
 + use all module with web interface
 
