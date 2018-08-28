@@ -1,6 +1,7 @@
 #!/usr/bin/env	python
 
 import sys,os
+import readline
 from core import operative
 
 if __name__ == "__main__":
