@@ -3,12 +3,10 @@ package session
 import (
 	"github.com/chzyer/readline"
 	"github.com/graniet/go-pretty/table"
-	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/pkg/errors"
 	"os"
 	"strings"
-	"time"
 )
 
 type Session struct{
@@ -26,32 +24,6 @@ func (Session) TableName() string{
 	return "sessions"
 }
 
-
-
-func New() *Session{
-	db, err := gorm.Open("sqlite3", "./opf.db")
-	if err != nil {
-		panic(err.Error())
-	}
-
-	t := time.Now()
-	timeText := t.Format("2006-01-02 15:04:05")
-
-	s := Session{
-		SessionName: "opf_" + timeText,
-		Version: "1.00 (reborn)",
-		Stream:Stream{
-			Verbose: true,
-		},
-		Connection: Connection{
-			ORM: db,
-			Migrations: make(map[string]interface{}),
-		},
-	}
-	s.Connection.Migrate()
-	db.Create(&s)
-	return &s
-}
 
 func (s *Session) GetId() int{
 	return s.Id
