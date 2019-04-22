@@ -104,10 +104,10 @@ func main(){
 		}
 
 		line = strings.TrimSpace(line)
-		if line == "api.run"{
+		if line == "api run"{
 			go apiRest.Start()
 			sess.Information.SetApi(true)
-		} else if line == "api.stop"{
+		} else if line == "api stop"{
 			_ = apiRest.Server.Close()
 			sess.Information.SetApi(false)
 		} else {
