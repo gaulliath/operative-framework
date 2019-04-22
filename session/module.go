@@ -52,9 +52,14 @@ type ModuleInformation struct{
 	Parameters []Param `json:"parameters"`
 }
 
-type ModuleResult struct{
-	Key string
-	Value string
+type TargetResults struct{
+	Id int `json:"-" gorm:"primary_key:yes;column:id;AUTO_INCREMENT"`
+	SessionId int `json:"-" gorm:"session_id"`
+	ModuleName string `json:"module_name"`
+	ResultId string `json:"result_id" gorm:"primary_key:yes;column:result_id"`
+	TargetId string `json:"target_id" gorm:"target_id"`
+	Header string `json:"key" gorm:"result_header"`
+	Value string `json:"value" gorm:"result_value"`
 }
 
 func (s *Session) SearchModule(name string)(Module, error){

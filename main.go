@@ -4,7 +4,6 @@ import (
 	"github.com/chzyer/readline"
 	"github.com/fatih/color"
 	"github.com/graniet/operative-framework/api"
-	"github.com/graniet/operative-framework/migrations"
 	"github.com/graniet/operative-framework/modules"
 	"github.com/graniet/operative-framework/session"
 	"github.com/joho/godotenv"
@@ -26,8 +25,6 @@ func main(){
 	sess.PushPrompt()
 	apiRest := api.PushARestFul(sess)
 	modules.LoadModules(sess)
-	migrations.LoadMigrations(sess)
-	sess.Connection.Migrate()
 
 	l, err := readline.NewEx(sess.Prompt)
 	if err != nil {

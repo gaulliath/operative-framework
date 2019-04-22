@@ -9,10 +9,11 @@ import (
 
 func (s *Session) AddTarget(t string, name string) (string, error){
 	subject := Target{
-		Id: ksuid.New().String(),
+		SessionId: s.GetId(),
+		TargetId: ksuid.New().String(),
 		Name: name,
 		Type: t,
-		Results: make(map[string][]interface{}),
+		Results: make(map[string][]TargetResults),
 		Sess: s,
 	}
 	if !subject.CheckType(){
@@ -50,6 +51,10 @@ func (s *Session) RemoveTarget(id string) (bool, error){
 			newSubject = append(newSubject, subject)
 		}
 	}
+	t, err := s.GetTarget(id)
+	if err == nil{
+		s.Connection.ORM.Delete(t)
+	}
 	s.Targets = newSubject
 	return true, nil
 }
@@ -76,18 +81,19 @@ func (s *Session) ListTargets(){
 
 func (s *Session) UpdateTarget(id string, value string){
 	for k, t := range s.Targets{
-		if t.GetId() != id{
+		if t.GetId() == id{
 			s.Targets[k].Name = value
+			s.Connection.ORM.Save(t)
 		}
 	}
 }
 
-func (s *Session) FindLinked(m string, res interface{}) ([]string, error){
+func (s *Session) FindLinked(m string, res TargetResults) ([]string, error){
 	var targets []string
 	for _,t := range s.Targets{
 		targetId := t.GetId()
 		for _, targetRes := range t.Results[m]{
-			if res == targetRes{
+			if res.Header == targetRes.Header && res.Value == targetRes.Value{
 				targets = append(targets, targetId)
 			}
 		}

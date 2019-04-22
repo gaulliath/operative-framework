@@ -111,7 +111,10 @@ func (module *MetaTagModule) Start(){
 					Value: tagContent,
 				}
 				module.Export = append(module.Export, tagResult)
-				target.Save(module, tagResult)
+				target.Save(module, session.TargetResults{
+					Header: "name",
+					Value: tagContent,
+				})
 			}
 		}
 	})

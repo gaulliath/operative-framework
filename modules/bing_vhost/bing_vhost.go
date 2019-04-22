@@ -1,12 +1,12 @@
 package bing_vhost
 
 import (
+	"github.com/PuerkitoBio/goquery"
+	"github.com/graniet/go-pretty/table"
 	"github.com/graniet/operative-framework/session"
 	"net/http"
-	"github.com/PuerkitoBio/goquery"
-	"strings"
-	"github.com/graniet/go-pretty/table"
 	"os"
+	"strings"
 )
 
 type BingVirtualHostModule struct{
@@ -113,7 +113,10 @@ func (module *BingVirtualHostModule) Start(){
 			Link: line,
 		}
 		module.Export = append(module.Export, result)
-		target.Save(module, result)
+		target.Save(module, session.TargetResults{
+			Header: "Link",
+			Value: line,
+		})
 	})
 	module.Stream.Render(t)
 

@@ -8,15 +8,22 @@ import (
 	"github.com/pkg/errors"
 	"os"
 	"strings"
+	"time"
 )
 
 type Session struct{
-	Connection Connection
-	Version string            `json:"version"`
-	Targets []*Target   `json:"subjects"`
-	Modules []Module          `json:"modules"`
-	Prompt *readline.Config
-	Stream Stream
+	Id int `json:"-" gorm:"primary_key:yes;column:id;AUTO_INCREMENT"`
+	SessionName string `json:"session_name"`
+	Connection Connection `json:"-" sql:"-"`
+	Version string            `json:"version" sql:"-"`
+	Targets []*Target   `json:"subjects" sql:"-"`
+	Modules []Module          `json:"modules" sql:"-"`
+	Prompt *readline.Config `json:"-" sql:"-"`
+	Stream Stream `json:"-" sql:"-"`
+}
+
+func (Session) TableName() string{
+	return "sessions"
 }
 
 
@@ -27,7 +34,11 @@ func New() *Session{
 		panic(err.Error())
 	}
 
-	return &Session{
+	t := time.Now()
+	timeText := t.Format("2006-01-02 15:04:05")
+
+	s := Session{
+		SessionName: "opf_" + timeText,
 		Version: "1.00 (reborn)",
 		Stream:Stream{
 			Verbose: true,
@@ -36,8 +47,14 @@ func New() *Session{
 			ORM: db,
 			Migrations: make(map[string]interface{}),
 		},
-
 	}
+	s.Connection.Migrate()
+	db.Create(&s)
+	return &s
+}
+
+func (s *Session) GetId() int{
+	return s.Id
 }
 
 func (s *Session) PushPrompt(){

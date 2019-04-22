@@ -1,21 +1,38 @@
 package session
 
 import (
+	"encoding/base64"
 	"github.com/graniet/go-pretty/table"
+	"github.com/segmentio/ksuid"
 	"os"
 )
 
 type Target struct{
-	Id string `json:"id" gorm:"primary_key:yes;column:target_id"`
+	Id int `json:"-" gorm:"primary_key:yes;column:id;AUTO_INCREMENT"`
+	SessionId int `json:"-" gorm:"column:session_id"`
+	TargetId string `json:"id" gorm:"column:target_id"`
 	Sess *Session `json:"-" gorm:"-"`
 	Name string `json:"name" gorm:"column:target_name"`
 	Type string `json:"type" gorm:"column:target_type"`
-	Results map[string][]interface{} `sql:"-"`
-	TargetLinked []*Target `json:"target_linked" sql:"-"`
+	Results map[string][]TargetResults `sql:"-"`
+	TargetLinked []Linking `json:"target_linked" sql:"-"`
+}
+
+type Linking struct{
+	LinkingId int `json:"-" gorm:"primary_key:yes;column:id;AUTO_INCREMENT"`
+	TargetBase string `json:"target_base"`
+	TargetId string `json:"target_id"`
+	TargetName string `json:"target_name"`
+	TargetType string `json:"target_type"`
+	TargetResultId string `json:"target_result_id"`
+}
+
+func (Linking) TableName() string{
+	return "target_links"
 }
 
 func (sub *Target) GetId() string{
-	return sub.Id
+	return sub.TargetId
 }
 
 func (sub *Target) GetName() string{
@@ -26,15 +43,15 @@ func (sub *Target) GetType() string{
 	return sub.Type
 }
 
-func (sub *Target) GetResults() map[string][]interface{}{
+func (sub *Target) GetResults() map[string][]TargetResults{
 	return sub.Results
 }
 
-func (sub *Target) GetLinked() []*Target{
+func (sub *Target) GetLinked() []Linking{
 	return sub.TargetLinked
 }
 
-func (sub *Target) PushLinked(t *Target){
+func (sub *Target) PushLinked(t Linking){
 	sub.TargetLinked = append(sub.TargetLinked, t)
 }
 
@@ -58,23 +75,40 @@ func (target *Target) CheckType() bool{
 	return false
 }
 
-func (target *Target) Link(target2 string){
-	if target.GetId() == target2{
+func (target *Target) Link(target2 Linking){
+	if target.GetId() == target2.TargetId{
 		return
 	}
-	t2, err := target.Sess.GetTarget(target2)
+	t2, err := target.Sess.GetTarget(target2.TargetId)
 	if err != nil{
 		target.Sess.Stream.Error(err.Error())
 		return
 	}
 
 	for _, trg := range target.TargetLinked{
-		if trg.GetId() == t2.GetId(){
+		if trg.TargetId == t2.GetId(){
 			return
 		}
 	}
-	target.PushLinked(t2)
-	t2.PushLinked(target)
+	target2.TargetType = t2.GetType()
+	target2.TargetName = t2.GetName()
+	target2.TargetBase = target.GetId()
+	target.PushLinked(target2)
+	t2.PushLinked(Linking{
+		TargetBase: t2.GetId(),
+		TargetName: target.GetName(),
+		TargetId: target.GetId(),
+		TargetType: target.GetType(),
+		TargetResultId: target2.TargetResultId,
+	})
+	target.Sess.Connection.ORM.Create(&target2)
+	target.Sess.Connection.ORM.Create(&Linking{
+		TargetBase: t2.GetId(),
+		TargetName: target.GetName(),
+		TargetId: target.GetId(),
+		TargetType: target.GetType(),
+		TargetResultId: target2.TargetResultId,
+	})
 }
 
 func (target *Target) Linked(){
@@ -83,23 +117,39 @@ func (target *Target) Linked(){
 	t.AppendHeader(table.Row{
 		"TARGET",
 		"NAME",
+		"TYPE",
+		"RESULT ID",
 
 	})
 	for _, element := range target.TargetLinked{
 		t.AppendRow(table.Row{
-			element.GetId(),
-			element.GetName(),
+			element.TargetId,
+			element.TargetName,
+			element.TargetType,
+			element.TargetResultId,
 		})
 	}
 	target.Sess.Stream.Render(t)
 }
 
-func (target *Target) Save(module Module, result interface{}) bool{
+func (target *Target) GetSeparator() string{
+	return base64.StdEncoding.EncodeToString([]byte(";operativeframewor;"))[0:5]
+}
+
+func (target *Target) Save(module Module, result TargetResults) bool{
+	result.ResultId = ksuid.New().String()
+	result.TargetId = target.GetId()
+	result.SessionId = target.Sess.GetId()
+	result.ModuleName = module.Name()
 	target.Results[module.Name()] = append(target.Results[module.Name()], result)
+	target.Sess.Connection.ORM.Create(&result).Table("target_results")
 	targets, err := target.Sess.FindLinked(module.Name(), result)
 	if err == nil {
 		for _, id := range targets {
-			target.Link(id)
+			target.Link(Linking{
+				TargetId: id,
+				TargetResultId: result.ResultId,
+			})
 		}
 	}
 	return true

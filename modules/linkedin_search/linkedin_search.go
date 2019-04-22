@@ -112,6 +112,7 @@ func (module *LinkedinSearchModule) Start(){
 			name := strings.Split(strings.TrimSpace(line), "-")[0]
 			work := strings.Split(strings.TrimSpace(line), "-")[1]
 			link := s.Find("cite").Text()
+			separator := target.GetSeparator()
 			t.AppendRow([]interface{}{name, work, link})
 			result := LinkedinSearchExport{
 				Name: name,
@@ -119,7 +120,10 @@ func (module *LinkedinSearchModule) Start(){
 				Link: link,
 			}
 			module.Export = append(module.Export, result)
-			target.Save(module, result)
+			target.Save(module, session.TargetResults{
+				Header: "Name" + separator + "Work" + separator + "Link",
+				Value: name + separator + work + separator + link,
+			})
 			resultFound = resultFound + 1
 
 		}

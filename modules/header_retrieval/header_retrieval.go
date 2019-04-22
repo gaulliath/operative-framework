@@ -103,7 +103,15 @@ func (module *HeaderRetrievalModule) Start(){
 			Value: header,
 		}
 		module.Export = append(module.Export, result)
-		target.Save(module, result)
+		separator := target.GetSeparator()
+		if len(header) > 0{
+			for _, l := range header{
+				target.Save(module, session.TargetResults{
+					Header: "Index" + separator + "Header",
+					Value: index + separator + l,
+				})
+			}
+		}
 	}
 	module.Stream.Render(t)
 }
