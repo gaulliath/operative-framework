@@ -19,6 +19,7 @@ func (stream *Stream) Standard(text string){
 		t := time.Now()
 		timeText := t.Format("2006-01-02 15:04:05")
 		fmt.Printf("[%s] : %s\n", timeText, text)
+		stream.Sess.Information.AddEvent()
 	}
 }
 
@@ -27,6 +28,7 @@ func (stream *Stream) Error(text string){
 		t := time.Now()
 		timeText := t.Format("2006-01-02 15:04:05")
 		color.Red("[%s] : %s\n", timeText, text)
+		stream.Sess.Information.AddEvent()
 	}
 }
 
@@ -35,6 +37,7 @@ func (stream *Stream) Success(text string) {
 		t := time.Now()
 		timeText := t.Format("2006-01-02 15:04:05")
 		color.Green("[%s] : %s\n", timeText, text)
+		stream.Sess.Information.AddEvent()
 	}
 }
 

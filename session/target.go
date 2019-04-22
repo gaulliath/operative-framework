@@ -21,11 +21,12 @@ type Target struct{
 
 type Linking struct{
 	LinkingId int `json:"-" gorm:"primary_key:yes;column:id;AUTO_INCREMENT"`
-	TargetBase string `json:"target_base"`
-	TargetId string `json:"target_id"`
-	TargetName string `json:"target_name"`
-	TargetType string `json:"target_type"`
-	TargetResultId string `json:"target_result_id"`
+	SessionId int `json:"session_id" gorm:"column:session_id"`
+	TargetBase string `json:"target_base" gorm:"column:target_base"`
+	TargetId string `json:"target_id" gorm:"column:target_id"`
+	TargetName string `json:"target_name" gorm:"column:target_name"`
+	TargetType string `json:"target_type" gorm:"column:target_type"`
+	TargetResultId string `json:"target_result_id" gorm:"column:target_result_id"`
 }
 
 func (Linking) TableName() string{
@@ -83,8 +84,10 @@ func (target *Target) Link(target2 Linking){
 	target2.TargetType = t2.GetType()
 	target2.TargetName = t2.GetName()
 	target2.TargetBase = target.GetId()
+	target2.SessionId = target.Sess.GetId()
 	target.PushLinked(target2)
 	t2.PushLinked(Linking{
+		SessionId: target.Sess.GetId(),
 		TargetBase: t2.GetId(),
 		TargetName: target.GetName(),
 		TargetId: target.GetId(),
@@ -93,6 +96,7 @@ func (target *Target) Link(target2 Linking){
 	})
 	target.Sess.Connection.ORM.Create(&target2)
 	target.Sess.Connection.ORM.Create(&Linking{
+		SessionId: target.Sess.GetId(),
 		TargetBase: t2.GetId(),
 		TargetName: target.GetName(),
 		TargetId: target.GetId(),
@@ -134,7 +138,7 @@ func (target *Target) Linked(){
 }
 
 func (target *Target) GetSeparator() string{
-	return base64.StdEncoding.EncodeToString([]byte(";operativeframewor;"))[0:5]
+	return base64.StdEncoding.EncodeToString([]byte(";operativeframework;"))[0:5]
 }
 
 func (target *Target) Save(module Module, result TargetResults) bool{

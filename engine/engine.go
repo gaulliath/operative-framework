@@ -19,6 +19,11 @@ func New() *session.Session{
 	s := session.Session{
 		SessionName: "opf_" + timeText,
 		Version: "1.00 (reborn)",
+		Information:session.Information{
+			ApiStatus: false,
+			ModuleLaunched: 0,
+			Event: 0,
+		},
 		Stream:session.Stream{
 			Verbose: true,
 		},
@@ -27,6 +32,7 @@ func New() *session.Session{
 			Migrations: make(map[string]interface{}),
 		},
 	}
+	s.Stream.Sess = &s
 	s.Connection.Migrate()
 	modules.LoadModules(&s)
 	db.Create(&s)
@@ -43,6 +49,11 @@ func Load(id int) *session.Session{
 		Stream:session.Stream{
 			Verbose: true,
 		},
+		Information:session.Information{
+			ApiStatus: false,
+			ModuleLaunched: 0,
+			Event: 0,
+		},
 		Connection: session.Connection{
 			ORM: db,
 			Migrations: make(map[string]interface{}),
@@ -51,6 +62,7 @@ func Load(id int) *session.Session{
 	s.Connection.ORM.Where(&session.Session{
 		Id: id,
 	}).First(&s)
+	s.Stream.Sess = &s
 	s.Connection.Migrate()
 	modules.LoadModules(&s)
 
@@ -62,17 +74,22 @@ func Load(id int) *session.Session{
 
 	// Load target result now
 	if len(s.Targets) > 0{
-		for _, target := range s.Targets{
+		for k, target := range s.Targets{
+			var linked []session.Linking
 			target.Results = make(map[string][]session.TargetResults)
-			for _, module := range s.Modules{
-				var results []session.TargetResults
-				s.Connection.ORM.Where("session_id = ?", id).Where("module_name = ?", module.Name()).Where("target_id = ?", target.GetId()).Find(&results)
-				if len(results) > 0 {
-					target.Results[module.Name()] = results
+			s.Connection.ORM.Where("session_id = ?", id).Where("target_base = ?", target.GetId()).Find(&linked)
+			s.Targets[k].TargetLinked = linked
+			s.Targets[k].Sess = &s
+			if len(s.Modules) > 0 {
+				for _, module := range s.Modules {
+					var results []session.TargetResults
+					s.Connection.ORM.Where("session_id = ?", id).Where("module_name = ?", module.Name()).Where("target_id = ?", target.GetId()).Find(&results)
+					if len(results) > 0 {
+						target.Results[module.Name()] = results
+					}
 				}
 			}
 		}
 	}
-
 	return &s
 }

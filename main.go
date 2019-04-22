@@ -67,11 +67,13 @@ func main(){
 		if *cli{
 			sess.Stream.Standard("running operative framework api...")
 			sess.Stream.Standard("available at : " + apiRest.Server.Addr)
+			sess.Information.SetApi(true)
 			apiRest.Start()
 		} else{
 			sess.Stream.Standard("running operative framework api...")
 			go apiRest.Start()
 			sess.Stream.Standard("available at : " + apiRest.Server.Addr)
+			sess.Information.SetApi(true)
 		}
 	}
 
@@ -104,8 +106,14 @@ func main(){
 		line = strings.TrimSpace(line)
 		if line == "api.run"{
 			go apiRest.Start()
+			sess.Information.SetApi(true)
+		} else if line == "api.stop"{
+			_ = apiRest.Server.Close()
+			sess.Information.SetApi(false)
 		} else {
-			sess.ParseCommand(line)
+			if !engine.CommandBase(line, sess) {
+				sess.ParseCommand(line)
+			}
 		}
 	}
 }

@@ -52,6 +52,7 @@ func (s *Session) PushPrompt(){
 			readline.PcItem("run"),
 		),
 		readline.PcItem("help"),
+		readline.PcItem("info"),
 	)
 	s.Prompt = &readline.Config{
 		Prompt:          "\033[90m[OPF v"+s.Version+"]:\033[0m ",
