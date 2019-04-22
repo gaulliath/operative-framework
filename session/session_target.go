@@ -22,7 +22,7 @@ func (s *Session) AddTarget(t string, name string) (string, error){
 		t.AppendHeader(table.Row{
 			"TYPE",
 		})
-		for _, sType := range subject.ListType(){
+		for _, sType := range s.ListType(){
 			t.AppendRow(table.Row{
 				sType,
 			})

@@ -3,6 +3,7 @@ package session
 import (
 	"encoding/base64"
 	"github.com/graniet/go-pretty/table"
+	"github.com/pkg/errors"
 	"github.com/segmentio/ksuid"
 	"os"
 )
@@ -55,19 +56,8 @@ func (sub *Target) PushLinked(t Linking){
 	sub.TargetLinked = append(sub.TargetLinked, t)
 }
 
-func (target *Target) ListType() []string{
-	return []string{
-		"enterprise",
-		"ip_address",
-		"website",
-		"url",
-		"person",
-		"social_network",
-	}
-}
-
 func (target *Target) CheckType() bool{
-	for _, sType := range target.ListType(){
+	for _, sType := range target.Sess.ListType(){
 		if sType == target.GetType(){
 			return true
 		}
@@ -111,6 +101,17 @@ func (target *Target) Link(target2 Linking){
 	})
 }
 
+func (target *Target) GetResult(id string) (TargetResults, error){
+	for _, module := range target.Results{
+		for _, result := range module{
+			if result.ResultId == id{
+				return result, nil
+			}
+		}
+	}
+	return TargetResults{}, errors.New("Result as been not found.")
+}
+
 func (target *Target) Linked(){
 	t := target.Sess.Stream.GenerateTable()
 	t.SetOutputMirror(os.Stdout)
@@ -152,5 +153,6 @@ func (target *Target) Save(module Module, result TargetResults) bool{
 			})
 		}
 	}
+	module.SetExport(result)
 	return true
 }

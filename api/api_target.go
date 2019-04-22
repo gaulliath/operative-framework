@@ -76,3 +76,40 @@ func (api *ARestFul) Target(w http.ResponseWriter, r *http.Request){
 	_ = json.NewEncoder(w).Encode(message)
 
 }
+
+func (api *ARestFul) Results(w http.ResponseWriter, r *http.Request){
+	w.Header().Set("Content-Type", "application/json")
+	get := mux.Vars(r)
+	target, err := api.sess.GetTarget(get["target_id"])
+	if err != nil{
+		message := api.Core.PrintMessage("This target as been not found.", true)
+		_ = json.NewEncoder(w).Encode(message)
+		return
+	}
+
+	message := api.Core.PrintData("request executed", false, target.GetResults())
+	_ = json.NewEncoder(w).Encode(message)
+
+}
+
+func (api *ARestFul) Result(w http.ResponseWriter, r *http.Request){
+	w.Header().Set("Content-Type", "application/json")
+	get := mux.Vars(r)
+	target, err := api.sess.GetTarget(get["target_id"])
+	if err != nil{
+		message := api.Core.PrintMessage("This target as been not found.", true)
+		_ = json.NewEncoder(w).Encode(message)
+		return
+	}
+
+	result, err := target.GetResult(get["result_id"])
+	if err != nil{
+		message := api.Core.PrintMessage(err.Error(), true)
+		_ = json.NewEncoder(w).Encode(message)
+		return
+	}
+
+	message := api.Core.PrintData("request executed", false, result)
+	_ = json.NewEncoder(w).Encode(message)
+	return
+}

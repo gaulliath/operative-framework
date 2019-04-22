@@ -13,12 +13,6 @@ type MetaTagModule struct{
 	session.SessionModule
 	sess *session.Session
 	Stream *session.Stream
-	Export []MetaTagExport `json:"export"`
-}
-
-type MetaTagExport struct{
-	Key string `json:"key"`
-	Value string `json:"value"`
 }
 
 func PushMetaTagModule(s *session.Session) *MetaTagModule{
@@ -55,10 +49,6 @@ func (module *MetaTagModule) GetInformation() session.ModuleInformation{
 		Parameters: module.Parameters,
 	}
 	return information
-}
-
-func (module *MetaTagModule) GetExport() interface{}{
-	return module.Export
 }
 
 func (module *MetaTagModule) Start(){
@@ -106,15 +96,11 @@ func (module *MetaTagModule) Start(){
 		if _, ok := tagFound[tagName]; !ok{
 			if tagName != "" {
 				tagFound[tagName] = tagContent
-				tagResult := MetaTagExport{
-					Key: tagName,
-					Value: tagContent,
-				}
-				module.Export = append(module.Export, tagResult)
-				target.Save(module, session.TargetResults{
+				result := session.TargetResults{
 					Header: "name",
 					Value: tagContent,
-				})
+				}
+				target.Save(module, result)
 			}
 		}
 	})

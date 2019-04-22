@@ -57,13 +57,14 @@ func (s *Session) GetId() int{
 	return s.Id
 }
 
-func (s *Session) PushPrompt(){
-	s.Prompt = &readline.Config{
-		Prompt:          "\033[90m[OPF v"+s.Version+"]:\033[0m ",
-		HistoryFile:     os.Getenv("OPERATIVE_HISTORY"),
-		InterruptPrompt: "^C",
-		EOFPrompt:       "exit",
-		HistorySearchFold:   true,
+func (s *Session) ListType() []string{
+	return []string{
+		"enterprise",
+		"ip_address",
+		"website",
+		"url",
+		"person",
+		"social_network",
 	}
 }
 

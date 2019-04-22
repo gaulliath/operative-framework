@@ -13,11 +13,6 @@ type BingVirtualHostModule struct{
 	session.SessionModule
 	sess *session.Session
 	Stream *session.Stream
-	Export []BingVirtualHostExport
-}
-
-type BingVirtualHostExport struct{
-	Link string
 }
 
 func PushBingVirtualHostModule(s *session.Session) *BingVirtualHostModule{
@@ -56,10 +51,6 @@ func (module *BingVirtualHostModule) GetInformation() session.ModuleInformation{
 		Parameters: module.Parameters,
 	}
 	return information
-}
-
-func (module *BingVirtualHostModule) GetExport() interface{}{
-	return module.Export
 }
 
 func (module *BingVirtualHostModule) Start(){
@@ -109,14 +100,11 @@ func (module *BingVirtualHostModule) Start(){
 	doc.Find("cite").Each(func(i int, s *goquery.Selection) {
 		line := strings.TrimSpace(s.Text())
 		t.AppendRow(table.Row{line})
-		result := BingVirtualHostExport{
-			Link: line,
-		}
-		module.Export = append(module.Export, result)
-		target.Save(module, session.TargetResults{
+		result := session.TargetResults{
 			Header: "Link",
 			Value: line,
-		})
+		}
+		target.Save(module, result)
 	})
 	module.Stream.Render(t)
 

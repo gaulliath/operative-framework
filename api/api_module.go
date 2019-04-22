@@ -29,8 +29,12 @@ func (api *ARestFul) Modules(w http.ResponseWriter, r *http.Request){
 func (api *ARestFul) RunModule(w http.ResponseWriter, r *http.Request){
 	w.Header().Set("Content-Type", "application/json")
 	_ = r.ParseForm()
-	param := mux.Vars(r)
-	mod, err := api.sess.SearchModule(param["module"])
+	if _, ok := r.Form["module"]; !ok{
+		message := api.Core.PrintMessage("Argument 'module' as required.", true)
+		_ = json.NewEncoder(w).Encode(message)
+		return
+	}
+	mod, err := api.sess.SearchModule(r.Form.Get("module"))
 	if err != nil{
 		message := api.Core.PrintMessage("A selected module as been note found", true)
 		_ = json.NewEncoder(w).Encode(message)

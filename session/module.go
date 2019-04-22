@@ -22,7 +22,8 @@ type Module interface {
 	Description() string
 	GetType() string
 	ListArguments()
-	GetExport() interface{}
+	GetExport() []TargetResults
+	SetExport(result TargetResults)
 	GetInformation() ModuleInformation
 	CheckRequired() bool
 	SetParameter(name string, value string) (bool, error)
@@ -40,6 +41,7 @@ type Param struct{
 
 type SessionModule struct{
 	Module
+	Export []TargetResults
 	Parameters []Param `json:"parameters"`
 	History []string `json:"history"`
 }
@@ -158,4 +160,13 @@ func (module *SessionModule) ListArguments(){
 		t.AppendRow([]interface{}{"No argument."})
 	}
 	t.Render()
+}
+
+
+func (module *SessionModule) SetExport(result TargetResults){
+	module.Export = append(module.Export, result)
+}
+
+func (module *SessionModule) GetExport() []TargetResults{
+	return module.Export
 }
