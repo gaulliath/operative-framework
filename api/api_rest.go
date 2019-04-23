@@ -25,7 +25,7 @@ func PushARestFul(s *session.Session) *ARestFul{
 	return &mod
 }
 
-func (api *ARestFul) Start(){
+func (api *ARestFul) LoadRouter() *mux.Router{
 	r := mux.NewRouter()
 	r.HandleFunc("/api/modules", api.Modules).Methods("GET")
 	r.HandleFunc("/api/modules/{module}", api.Module).Methods("GET")
@@ -35,8 +35,11 @@ func (api *ARestFul) Start(){
 	r.HandleFunc("/api/targets/{target_id}", api.Target).Methods("GET")
 	r.HandleFunc("/api/targets/{target_id}/results", api.Results).Methods("GET")
 	r.HandleFunc("/api/targets/{target_id}/results/{result_id}", api.Result).Methods("GET")
+	return r
+}
 
-
+func (api *ARestFul) Start(){
+	r := api.LoadRouter()
 	api.Server.Handler = r
 	err := api.Server.ListenAndServe()
 	if err != nil{
