@@ -12,13 +12,6 @@ type HeaderRetrievalModule struct{
 	session.SessionModule
 	sess *session.Session
 	Stream *session.Stream
-	Export []HeaderRetrievalExport
-
-}
-
-type HeaderRetrievalExport struct{
-	Key string
-	Value []string
 }
 
 func PushModuleHeaderRetrieval(s *session.Session) *HeaderRetrievalModule{
@@ -45,10 +38,6 @@ func (module *HeaderRetrievalModule) Description() string{
 
 func (module *HeaderRetrievalModule) GetType() string{
 	return "url"
-}
-
-func (module *HeaderRetrievalModule) GetExport() interface{}{
-	return module.Export
 }
 
 func (module *HeaderRetrievalModule) GetInformation() session.ModuleInformation{
@@ -98,12 +87,16 @@ func (module *HeaderRetrievalModule) Start(){
 	t.AppendHeader(table.Row{"KEY", "VALUE"})
 	for index, header := range r.Response().Header{
 		t.AppendRow([]interface{}{index, header})
-		result := HeaderRetrievalExport{
-			Key: index,
-			Value: header,
+		separator := target.GetSeparator()
+		if len(header) > 0{
+			for _, l := range header{
+				result := session.TargetResults{
+					Header: "Index" + separator + "Header",
+					Value: index + separator + l,
+				}
+				target.Save(module, result)
+			}
 		}
-		module.Export = append(module.Export, result)
-		target.Save(module, result)
 	}
 	module.Stream.Render(t)
 }

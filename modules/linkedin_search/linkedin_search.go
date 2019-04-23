@@ -14,13 +14,6 @@ type LinkedinSearchModule struct{
 	session.SessionModule
 	sess *session.Session
 	Stream *session.Stream
-	Export []LinkedinSearchExport
-}
-
-type LinkedinSearchExport struct{
-	Name string `json:"name"`
-	Work string `json:"work"`
-	Link string `json:"link"`
 }
 
 func PushLinkedinSearchModule(s *session.Session) *LinkedinSearchModule{
@@ -59,10 +52,6 @@ func (module *LinkedinSearchModule) GetInformation() session.ModuleInformation{
 		Parameters: module.Parameters,
 	}
 	return information
-}
-
-func (module *LinkedinSearchModule) GetExport() interface{}{
-	return module.Export
 }
 
 func (module *LinkedinSearchModule) Start(){
@@ -112,13 +101,12 @@ func (module *LinkedinSearchModule) Start(){
 			name := strings.Split(strings.TrimSpace(line), "-")[0]
 			work := strings.Split(strings.TrimSpace(line), "-")[1]
 			link := s.Find("cite").Text()
+			separator := target.GetSeparator()
 			t.AppendRow([]interface{}{name, work, link})
-			result := LinkedinSearchExport{
-				Name: name,
-				Work: work,
-				Link: link,
+			result := session.TargetResults{
+				Header: "Name" + separator + "Work" + separator + "Link",
+				Value: name + separator + work + separator + link,
 			}
-			module.Export = append(module.Export, result)
 			target.Save(module, result)
 			resultFound = resultFound + 1
 

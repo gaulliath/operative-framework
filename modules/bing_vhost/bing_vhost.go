@@ -1,23 +1,18 @@
 package bing_vhost
 
 import (
+	"github.com/PuerkitoBio/goquery"
+	"github.com/graniet/go-pretty/table"
 	"github.com/graniet/operative-framework/session"
 	"net/http"
-	"github.com/PuerkitoBio/goquery"
-	"strings"
-	"github.com/graniet/go-pretty/table"
 	"os"
+	"strings"
 )
 
 type BingVirtualHostModule struct{
 	session.SessionModule
 	sess *session.Session
 	Stream *session.Stream
-	Export []BingVirtualHostExport
-}
-
-type BingVirtualHostExport struct{
-	Link string
 }
 
 func PushBingVirtualHostModule(s *session.Session) *BingVirtualHostModule{
@@ -56,10 +51,6 @@ func (module *BingVirtualHostModule) GetInformation() session.ModuleInformation{
 		Parameters: module.Parameters,
 	}
 	return information
-}
-
-func (module *BingVirtualHostModule) GetExport() interface{}{
-	return module.Export
 }
 
 func (module *BingVirtualHostModule) Start(){
@@ -109,10 +100,10 @@ func (module *BingVirtualHostModule) Start(){
 	doc.Find("cite").Each(func(i int, s *goquery.Selection) {
 		line := strings.TrimSpace(s.Text())
 		t.AppendRow(table.Row{line})
-		result := BingVirtualHostExport{
-			Link: line,
+		result := session.TargetResults{
+			Header: "Link",
+			Value: line,
 		}
-		module.Export = append(module.Export, result)
 		target.Save(module, result)
 	})
 	module.Stream.Render(t)

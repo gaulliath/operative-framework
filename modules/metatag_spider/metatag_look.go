@@ -13,12 +13,6 @@ type MetaTagModule struct{
 	session.SessionModule
 	sess *session.Session
 	Stream *session.Stream
-	Export []MetaTagExport `json:"export"`
-}
-
-type MetaTagExport struct{
-	Key string `json:"key"`
-	Value string `json:"value"`
 }
 
 func PushMetaTagModule(s *session.Session) *MetaTagModule{
@@ -55,10 +49,6 @@ func (module *MetaTagModule) GetInformation() session.ModuleInformation{
 		Parameters: module.Parameters,
 	}
 	return information
-}
-
-func (module *MetaTagModule) GetExport() interface{}{
-	return module.Export
 }
 
 func (module *MetaTagModule) Start(){
@@ -103,15 +93,15 @@ func (module *MetaTagModule) Start(){
 	doc.Find("meta").Each(func(i int, s *goquery.Selection){
 		tagContent,_ := s.Attr("content")
 		tagName,_ := s.Attr("name")
+		separator := target.GetSeparator()
 		if _, ok := tagFound[tagName]; !ok{
 			if tagName != "" {
 				tagFound[tagName] = tagContent
-				tagResult := MetaTagExport{
-					Key: tagName,
-					Value: tagContent,
+				result := session.TargetResults{
+					Header: "KEY" + separator + "VALUE",
+					Value: tagName + separator + tagContent,
 				}
-				module.Export = append(module.Export, tagResult)
-				target.Save(module, tagResult)
+				target.Save(module, result)
 			}
 		}
 	})

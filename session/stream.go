@@ -18,7 +18,8 @@ func (stream *Stream) Standard(text string){
 	if stream.Verbose {
 		t := time.Now()
 		timeText := t.Format("2006-01-02 15:04:05")
-		fmt.Printf("[%s] : %s", timeText, text)
+		fmt.Printf("[%s] : %s\n", timeText, text)
+		stream.Sess.Information.AddEvent()
 	}
 }
 
@@ -26,7 +27,8 @@ func (stream *Stream) Error(text string){
 	if stream.Verbose {
 		t := time.Now()
 		timeText := t.Format("2006-01-02 15:04:05")
-		color.Red("[%s] : %s", timeText, text)
+		color.Red("[%s] : %s\n", timeText, text)
+		stream.Sess.Information.AddEvent()
 	}
 }
 
@@ -34,7 +36,8 @@ func (stream *Stream) Success(text string) {
 	if stream.Verbose {
 		t := time.Now()
 		timeText := t.Format("2006-01-02 15:04:05")
-		color.Green("[%s] : %s", timeText, text)
+		color.Green("[%s] : %s\n", timeText, text)
+		stream.Sess.Information.AddEvent()
 	}
 }
 
@@ -42,7 +45,7 @@ func (stream *Stream) Warning(text string) {
 	if stream.Verbose {
 		t := time.Now()
 		timeText := t.Format("2006-01-02 15:04:05")
-		color.Yellow("[%s] : %s", timeText, text)
+		color.Yellow("[%s] : %s\n", timeText, text)
 	}
 }
 

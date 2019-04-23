@@ -5,14 +5,16 @@ import (
 	"github.com/graniet/go-pretty/table"
 	"github.com/segmentio/ksuid"
 	"os"
+	"strings"
 )
 
 func (s *Session) AddTarget(t string, name string) (string, error){
 	subject := Target{
-		Id: ksuid.New().String(),
+		SessionId: s.GetId(),
+		TargetId: ksuid.New().String(),
 		Name: name,
 		Type: t,
-		Results: make(map[string][]interface{}),
+		Results: make(map[string][]TargetResults),
 		Sess: s,
 	}
 	if !subject.CheckType(){
@@ -21,7 +23,7 @@ func (s *Session) AddTarget(t string, name string) (string, error){
 		t.AppendHeader(table.Row{
 			"TYPE",
 		})
-		for _, sType := range subject.ListType(){
+		for _, sType := range s.ListType(){
 			t.AppendRow(table.Row{
 				sType,
 			})
@@ -37,18 +39,30 @@ func (s *Session) AddTarget(t string, name string) (string, error){
 	}
 	s.Targets = append(s.Targets, &subject)
 	s.Connection.ORM.Create(&subject)
+	s.FindLinkedTargetByResult(&subject)
 	return subject.GetId(), nil
 }
 
 func (s *Session) RemoveTarget(id string) (bool, error){
 	if len(s.Targets) < 1{
-		return false, errors.New("for the moment session don't have target")
+		return false, errors.New("at this moment a session don't have target")
 	}
 	var newSubject []*Target
 	for _, subject := range s.Targets{
 		if subject.GetId() != id{
+			var newLinked []Linking
+			for _, linked := range subject.TargetLinked{
+				if linked.TargetId != id{
+					newLinked = append(newLinked, linked)
+				}
+			}
+			subject.TargetLinked = newLinked
 			newSubject = append(newSubject, subject)
 		}
+	}
+	t, err := s.GetTarget(id)
+	if err == nil{
+		s.Connection.ORM.Delete(t)
 	}
 	s.Targets = newSubject
 	return true, nil
@@ -76,18 +90,19 @@ func (s *Session) ListTargets(){
 
 func (s *Session) UpdateTarget(id string, value string){
 	for k, t := range s.Targets{
-		if t.GetId() != id{
+		if t.GetId() == id{
 			s.Targets[k].Name = value
+			s.Connection.ORM.Save(t)
 		}
 	}
 }
 
-func (s *Session) FindLinked(m string, res interface{}) ([]string, error){
+func (s *Session) FindLinked(m string, res TargetResults) ([]string, error){
 	var targets []string
 	for _,t := range s.Targets{
 		targetId := t.GetId()
 		for _, targetRes := range t.Results[m]{
-			if res == targetRes{
+			if res.Header == targetRes.Header && res.Value == targetRes.Value{
 				targets = append(targets, targetId)
 			}
 		}
@@ -96,5 +111,32 @@ func (s *Session) FindLinked(m string, res interface{}) ([]string, error){
 		return nil, errors.New("can't find linked target")
 	} else{
 		return targets, nil
+	}
+}
+
+func (s *Session) FindLinkedTargetByResult(t *Target){
+	targets := make(map[string]string, 0)
+	for _, target := range s.Targets{
+		for _, module := range target.Results{
+			for _, res := range module{
+				result := strings.Split(res.Value, target.GetSeparator())
+				for _, r := range result{
+					if strings.TrimSpace(strings.ToLower(r)) == strings.TrimSpace(strings.ToLower(t.Name)){
+						targets[target.TargetId] = res.ResultId
+					}
+				}
+			}
+		}
+	}
+	if len(targets) > 0 {
+		for TargetId, resId := range targets {
+			trg, err := s.GetTarget(TargetId)
+			if err == nil {
+				trg.Link(Linking{
+					TargetId:       t.TargetId,
+					TargetResultId: resId,
+				})
+			}
+		}
 	}
 }

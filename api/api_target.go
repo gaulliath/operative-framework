@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"github.com/gorilla/mux"
+	"github.com/graniet/operative-framework/session"
 	"net/http"
 )
 
@@ -10,14 +11,21 @@ type TargetsResponse struct{
 	TargetId string `json:"target_id"`
 	TargetName string `json:"target_name"`
 	TargetType string `json:"target_type"`
-	TargetLinked []TargetsResponse `json:"target_linked"`
+	TargetLinked []TargetLink `json:"target_linked"`
+}
+
+type TargetLink struct{
+	TargetId string `json:"target_id"`
+	TargetName string `json:"target_name"`
+	TargetType string `json:"target_type"`
+	TargetResultId string `json:"target_result_id"`
 }
 
 type TargetInformationResponse struct{
 	TargetId string `json:"target_id"`
 	TargetName string `json:"target_name"`
 	TargetType string `json:"target_type"`
-	TargetResults map[string][]interface{} `json:"target_results"`
+	TargetResults map[string][]session.TargetResults `json:"target_results"`
 
 }
 
@@ -32,10 +40,11 @@ func (api *ARestFul) Targets(w http.ResponseWriter, r *http.Request){
 		}
 		if len(target.GetLinked()) > 0{
 			for _, element := range target.GetLinked(){
-				response.TargetLinked = append(response.TargetLinked, TargetsResponse{
-					TargetId: element.GetId(),
-					TargetName: element.GetName(),
-					TargetType: element.GetType(),
+				response.TargetLinked = append(response.TargetLinked, TargetLink{
+					TargetId: element.TargetId,
+					TargetName: element.TargetName,
+					TargetType: element.TargetType,
+					TargetResultId: element.TargetResultId,
 				})
 			}
 		}
@@ -66,4 +75,41 @@ func (api *ARestFul) Target(w http.ResponseWriter, r *http.Request){
 	message := api.Core.PrintData("request executed", false, targetInformationR)
 	_ = json.NewEncoder(w).Encode(message)
 
+}
+
+func (api *ARestFul) Results(w http.ResponseWriter, r *http.Request){
+	w.Header().Set("Content-Type", "application/json")
+	get := mux.Vars(r)
+	target, err := api.sess.GetTarget(get["target_id"])
+	if err != nil{
+		message := api.Core.PrintMessage("This target as been not found.", true)
+		_ = json.NewEncoder(w).Encode(message)
+		return
+	}
+
+	message := api.Core.PrintData("request executed", false, target.GetResults())
+	_ = json.NewEncoder(w).Encode(message)
+
+}
+
+func (api *ARestFul) Result(w http.ResponseWriter, r *http.Request){
+	w.Header().Set("Content-Type", "application/json")
+	get := mux.Vars(r)
+	target, err := api.sess.GetTarget(get["target_id"])
+	if err != nil{
+		message := api.Core.PrintMessage("This target as been not found.", true)
+		_ = json.NewEncoder(w).Encode(message)
+		return
+	}
+
+	result, err := target.GetResult(get["result_id"])
+	if err != nil{
+		message := api.Core.PrintMessage(err.Error(), true)
+		_ = json.NewEncoder(w).Encode(message)
+		return
+	}
+
+	message := api.Core.PrintData("request executed", false, result)
+	_ = json.NewEncoder(w).Encode(message)
+	return
 }
