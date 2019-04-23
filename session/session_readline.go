@@ -107,7 +107,9 @@ func (s *Session) PushPrompt(){
 			readline.PcItem("run"),
 		),
 		readline.PcItem("help"),
-		readline.PcItem("info"),
+		readline.PcItem("info",
+			readline.PcItem("session"),
+			readline.PcItem("api")),
 		readline.PcItem("api",
 			readline.PcItem("run"),
 			readline.PcItem("stop"),),
@@ -235,9 +237,11 @@ func (s *Session) ParseCommand(line string){
 						for _, h := range header{
 							headerRow = append(headerRow, h)
 						}
+						headerRow = append(headerRow, "RESULT ID")
 						for _, r := range res{
 							resRow = append(resRow, r)
 						}
+						resRow = append(resRow, result.ResultId)
 						t.AppendHeader(headerRow)
 						t.AppendRow(resRow)
 						s.Stream.Render(t)

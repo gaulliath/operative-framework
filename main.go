@@ -81,7 +81,7 @@ func main(){
 		sess.Stream.Verbose = false
 	} else{
 		c := color.New(color.FgYellow)
-		_, _ = c.Println("operative framework - digital investigation framework")
+		_, _ = c.Println("OPERATIVE FRAMEWORK - DIGITAL INVESTIGATION FRAMEWORK")
 	}
 
 

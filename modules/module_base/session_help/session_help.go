@@ -49,22 +49,25 @@ func (module *HelpModule) GetInformation() session.ModuleInformation{
 }
 
 func (module *HelpModule) Start(){
-	fmt.Println("Base:")
+	fmt.Println("ENGINE:")
 	t := module.sess.Stream.GenerateTable()
 	t.SetOutputMirror(os.Stdout)
 	t.AppendHeader(table.Row{"command", "description"})
 	t.AppendRows([]table.Row{
-		{"info", "Print current session information"},
+		{"info session", "Print current session information"},
+		{"info api", "Print api rest endpoints information"},
 		{"help", "Print help information"},
 		{"api <run/stop>", "(Run/Stop) restful API"},
 	})
 	module.sess.Stream.Render(t)
-	fmt.Println("Targets:")
+	fmt.Println("TARGETS:")
 	t = module.sess.Stream.GenerateTable()
 	t.SetOutputMirror(os.Stdout)
 	t.AppendHeader(table.Row{"command", "description"})
 	t.AppendRows([]table.Row{
 		{"target add <type> <value>", "Add new target"},
+		{"target view result <target_id> <result_id>", "View one result from targets"},
+		{"target view results <target_id> <module_name>", "View all targets results from module name"},
 		{"target links <target_id>", "View linked targets"},
 		{"target update <target_id> <value>", "Update a target"},
 		{"target delete <target_id>", "Remove target by ID"},
@@ -72,7 +75,7 @@ func (module *HelpModule) Start(){
 		{"target modules <target_id>", "List modules available with selected target"},
 	})
 	module.sess.Stream.Render(t)
-	fmt.Println("Modules:")
+	fmt.Println("MODULES:")
 	t = module.sess.Stream.GenerateTable()
 	t.SetOutputMirror(os.Stdout)
 	t.AppendHeader(table.Row{"command", "description"})

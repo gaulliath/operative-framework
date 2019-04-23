@@ -5,6 +5,7 @@ import (
 	"github.com/graniet/go-pretty/table"
 	"github.com/segmentio/ksuid"
 	"os"
+	"strings"
 )
 
 func (s *Session) AddTarget(t string, name string) (string, error){
@@ -38,16 +39,24 @@ func (s *Session) AddTarget(t string, name string) (string, error){
 	}
 	s.Targets = append(s.Targets, &subject)
 	s.Connection.ORM.Create(&subject)
+	s.FindLinkedTargetByResult(&subject)
 	return subject.GetId(), nil
 }
 
 func (s *Session) RemoveTarget(id string) (bool, error){
 	if len(s.Targets) < 1{
-		return false, errors.New("for the moment session don't have target")
+		return false, errors.New("at this moment a session don't have target")
 	}
 	var newSubject []*Target
 	for _, subject := range s.Targets{
 		if subject.GetId() != id{
+			var newLinked []Linking
+			for _, linked := range subject.TargetLinked{
+				if linked.TargetId != id{
+					newLinked = append(newLinked, linked)
+				}
+			}
+			subject.TargetLinked = newLinked
 			newSubject = append(newSubject, subject)
 		}
 	}
@@ -102,5 +111,32 @@ func (s *Session) FindLinked(m string, res TargetResults) ([]string, error){
 		return nil, errors.New("can't find linked target")
 	} else{
 		return targets, nil
+	}
+}
+
+func (s *Session) FindLinkedTargetByResult(t *Target){
+	targets := make(map[string]string, 0)
+	for _, target := range s.Targets{
+		for _, module := range target.Results{
+			for _, res := range module{
+				result := strings.Split(res.Value, target.GetSeparator())
+				for _, r := range result{
+					if strings.TrimSpace(strings.ToLower(r)) == strings.TrimSpace(strings.ToLower(t.Name)){
+						targets[target.TargetId] = res.ResultId
+					}
+				}
+			}
+		}
+	}
+	if len(targets) > 0 {
+		for TargetId, resId := range targets {
+			trg, err := s.GetTarget(TargetId)
+			if err == nil {
+				trg.Link(Linking{
+					TargetId:       t.TargetId,
+					TargetResultId: resId,
+				})
+			}
+		}
 	}
 }

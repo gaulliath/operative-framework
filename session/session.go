@@ -2,11 +2,8 @@ package session
 
 import (
 	"github.com/chzyer/readline"
-	"github.com/graniet/go-pretty/table"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
-	"github.com/labstack/gommon/color"
 	"github.com/pkg/errors"
-	"os"
 )
 
 type Session struct{
@@ -25,32 +22,6 @@ type Information struct{
 	ApiStatus bool `json:"api_status"`
 	ModuleLaunched int `json:"module_launched"`
 	Event int `json:"event"`
-}
-
-func (s *Session) ViewInformation(){
-	t := s.Stream.GenerateTable()
-	t.SetOutputMirror(os.Stdout)
-	t.AppendHeader(table.Row{
-		"Name",
-		"Value",
-	})
-	apiStatus := color.Red("false")
-	if s.Information.ApiStatus{
-		apiStatus = color.Green("true")
-	}
-	t.AppendRow(table.Row{
-		"API",
-		apiStatus,
-	})
-	t.AppendRow(table.Row{
-		"EVENT(S)",
-		s.Information.Event,
-	})
-	t.AppendRow(table.Row{
-		"MODULE(S)",
-		s.Information.ModuleLaunched,
-	})
-	s.Stream.Render(t)
 }
 
 func (i *Information) AddEvent(){
