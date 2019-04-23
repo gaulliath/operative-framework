@@ -1,10 +1,10 @@
 package session_help
 
 import (
-	"github.com/graniet/operative-framework/session"
-	"github.com/graniet/go-pretty/table"
-	"os"
 	"fmt"
+	"github.com/graniet/go-pretty/table"
+	"github.com/graniet/operative-framework/session"
+	"os"
 )
 
 type HelpModule struct{
@@ -49,8 +49,18 @@ func (module *HelpModule) GetInformation() session.ModuleInformation{
 }
 
 func (module *HelpModule) Start(){
-	fmt.Println("Targets:")
+	fmt.Println("Base:")
 	t := module.sess.Stream.GenerateTable()
+	t.SetOutputMirror(os.Stdout)
+	t.AppendHeader(table.Row{"command", "description"})
+	t.AppendRows([]table.Row{
+		{"info", "Print current session information"},
+		{"help", "Print help information"},
+		{"api <run/stop>", "(Run/Stop) restful API"},
+	})
+	module.sess.Stream.Render(t)
+	fmt.Println("Targets:")
+	t = module.sess.Stream.GenerateTable()
 	t.SetOutputMirror(os.Stdout)
 	t.AppendHeader(table.Row{"command", "description"})
 	t.AppendRows([]table.Row{
@@ -62,8 +72,6 @@ func (module *HelpModule) Start(){
 		{"target modules <target_id>", "List modules available with selected target"},
 	})
 	module.sess.Stream.Render(t)
-
-	fmt.Println("")
 	fmt.Println("Modules:")
 	t = module.sess.Stream.GenerateTable()
 	t.SetOutputMirror(os.Stdout)

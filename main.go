@@ -80,7 +80,7 @@ func main(){
 	if *verbose{
 		sess.Stream.Verbose = false
 	} else{
-		c := color.New(color.BgYellow).Add(color.FgBlack)
+		c := color.New(color.FgYellow)
 		_, _ = c.Println("operative framework - digital investigation framework")
 	}
 

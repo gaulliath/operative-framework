@@ -93,12 +93,13 @@ func (module *MetaTagModule) Start(){
 	doc.Find("meta").Each(func(i int, s *goquery.Selection){
 		tagContent,_ := s.Attr("content")
 		tagName,_ := s.Attr("name")
+		separator := target.GetSeparator()
 		if _, ok := tagFound[tagName]; !ok{
 			if tagName != "" {
 				tagFound[tagName] = tagContent
 				result := session.TargetResults{
-					Header: "name",
-					Value: tagContent,
+					Header: "KEY" + separator + "VALUE",
+					Value: tagName + separator + tagContent,
 				}
 				target.Save(module, result)
 			}

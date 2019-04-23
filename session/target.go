@@ -3,7 +3,7 @@ package session
 import (
 	"encoding/base64"
 	"github.com/graniet/go-pretty/table"
-	"github.com/pkg/errors"
+	"errors"
 	"github.com/segmentio/ksuid"
 	"os"
 )
@@ -159,4 +159,14 @@ func (target *Target) Save(module Module, result TargetResults) bool{
 	}
 	module.SetExport(result)
 	return true
+}
+
+func (target *Target) GetModuleResults(name string) ([]TargetResults, error){
+
+	for moduleName, results := range target.Results{
+		if moduleName == name{
+			return results, nil
+		}
+	}
+	return []TargetResults{}, errors.New("result not found for this module")
 }
