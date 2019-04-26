@@ -3,6 +3,7 @@ package engine
 import (
 	"github.com/graniet/operative-framework/modules"
 	"github.com/graniet/operative-framework/session"
+	"github.com/graniet/operative-framework/filters"
 	"github.com/jinzhu/gorm"
 	"time"
 )
@@ -35,6 +36,7 @@ func New() *session.Session{
 	s.Stream.Sess = &s
 	s.Connection.Migrate()
 	modules.LoadModules(&s)
+	filters.LoadFilters(&s)
 	db.Create(&s)
 	return &s
 }
@@ -65,6 +67,7 @@ func Load(id int) *session.Session{
 	s.Stream.Sess = &s
 	s.Connection.Migrate()
 	modules.LoadModules(&s)
+	filters.LoadFilters(&s)
 
 	// Load targets now
 	var targets []*session.Target

@@ -89,7 +89,7 @@ func (s *Session) PushPrompt(){
 			readline.PcItem("list"),
 			readline.PcItem("links",
 				readline.PcItemDynamic(s.ReadLineAutoCompleteTargets())),
-			readline.PcItem("modules"),
+			readline.PcItem("modules",readline.PcItemDynamic(s.ReadLineAutoCompleteTargets())),
 			readline.PcItem("view",
 				readline.PcItem("result",
 					readline.PcItemDynamic(s.ReadLineAutoCompleteTargets(),
@@ -330,6 +330,15 @@ func (s *Session) ParseCommand(line string){
 				if module.CheckRequired() {
 					s.Information.ModuleLaunched = s.Information.ModuleLaunched + 1
 					module.Start()
+					filter, err := module.GetParameter("FILTER")
+					if err == nil && filter.Value != ""{
+						flt, err := s.SearchFilter(filter.Value)
+						if err != nil{
+							s.Stream.Error("Filter '"+filter.Value+"' as not found.")
+							return
+						}
+						flt.Start(module)
+					}
 				} else {
 					s.Stream.Error("Please validate required argument. (<module> list)")
 				}
@@ -338,5 +347,14 @@ func (s *Session) ParseCommand(line string){
 	}
 	if moduleName == "help"{
 		module.Start()
+		filter, err := module.GetParameter("FILTER")
+		if err == nil && filter.Value != ""{
+			flt, err := s.SearchFilter(filter.Value)
+			if err != nil{
+				s.Stream.Error("Filter '"+filter.Value+"' as not found.")
+				return
+			}
+			flt.Start(module)
+		}
 	}
 }

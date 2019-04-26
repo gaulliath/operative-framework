@@ -2,8 +2,8 @@ package session
 
 import (
 	"encoding/base64"
-	"github.com/graniet/go-pretty/table"
 	"errors"
+	"github.com/graniet/go-pretty/table"
 	"github.com/segmentio/ksuid"
 	"os"
 )

@@ -8,6 +8,16 @@ import (
 	"strings"
 )
 
+
+func (s *Session) GetTarget(id string) (*Target, error){
+	for _, targ := range s.Targets{
+		if targ.GetId() == id{
+			return targ, nil
+		}
+	}
+	return nil, errors.New("can't find selected target")
+}
+
 func (s *Session) AddTarget(t string, name string) (string, error){
 	subject := Target{
 		SessionId: s.GetId(),

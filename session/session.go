@@ -3,7 +3,6 @@ package session
 import (
 	"github.com/chzyer/readline"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
-	"github.com/pkg/errors"
 )
 
 type Session struct{
@@ -14,6 +13,7 @@ type Session struct{
 	Version string            `json:"version" sql:"-"`
 	Targets []*Target   `json:"subjects" sql:"-"`
 	Modules []Module          `json:"modules" sql:"-"`
+	Filters []ModuleFilter `json:"filters" sql:"-"`
 	Prompt *readline.Config `json:"-" sql:"-"`
 	Stream Stream `json:"-" sql:"-"`
 }
@@ -52,18 +52,10 @@ func (s *Session) ListType() []string{
 	return []string{
 		"enterprise",
 		"ip_address",
+		"email",
 		"website",
 		"url",
 		"person",
 		"social_network",
 	}
-}
-
-func (s *Session) GetTarget(id string) (*Target, error){
-	for _, targ := range s.Targets{
-		if targ.GetId() == id{
-			return targ, nil
-		}
-	}
-	return nil, errors.New("can't find selected target")
 }

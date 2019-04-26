@@ -1,11 +1,11 @@
 package session
 
 import (
-	"github.com/graniet/go-pretty/table"
 	"errors"
+	"github.com/graniet/go-pretty/table"
+	"os"
 	"strconv"
 	"strings"
-	"os"
 )
 
 const (
@@ -28,6 +28,7 @@ type Module interface {
 	CheckRequired() bool
 	SetParameter(name string, value string) (bool, error)
 	GetParameter(name string) (Param, error)
+	GetAllParameters() []Param
 	CreateNewParam(name string, description string, value string, isRequired bool, paramType int)
 }
 
@@ -169,4 +170,8 @@ func (module *SessionModule) SetExport(result TargetResults){
 
 func (module *SessionModule) GetExport() []TargetResults{
 	return module.Export
+}
+
+func (module *SessionModule) GetAllParameters() []Param{
+	return module.Parameters
 }
