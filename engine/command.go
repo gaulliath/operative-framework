@@ -5,6 +5,7 @@ import (
 	"github.com/graniet/go-pretty/table"
 	"github.com/graniet/operative-framework/api"
 	"github.com/graniet/operative-framework/session"
+	"github.com/joho/godotenv"
 	"github.com/labstack/gommon/color"
 	"os"
 )
@@ -16,8 +17,30 @@ func CommandBase(line string, s *session.Session) bool{
 	} else if line== "info api"{
 		ViewApiInformation(s)
 		return true
+	} else if line == "env"{
+		viewEnvironment(s)
+		return true
 	}
 	return false
+}
+
+func viewEnvironment(s *session.Session){
+	t := s.Stream.GenerateTable()
+	t.SetOutputMirror(os.Stdout)
+	t.AppendHeader(table.Row{
+		"Name",
+		"Value",
+	})
+	mp, err := godotenv.Read(".env")
+	if err == nil{
+		for name, value := range mp{
+			t.AppendRow(table.Row{
+				name,
+				value,
+			})
+		}
+	}
+	s.Stream.Render(t)
 }
 
 func ViewInformation(s *session.Session){

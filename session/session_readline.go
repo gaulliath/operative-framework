@@ -119,6 +119,7 @@ func (s *Session) PushPrompt(){
 			readline.PcItem("run"),
 		),
 		readline.PcItem("help"),
+		readline.PcItem("env"),
 		readline.PcItem("info",
 			readline.PcItem("session"),
 			readline.PcItem("api")),

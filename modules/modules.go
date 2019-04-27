@@ -9,6 +9,7 @@ import (
 	"github.com/graniet/operative-framework/modules/module_base/session_help"
 	"github.com/graniet/operative-framework/modules/module_base/session_stream"
 	"github.com/graniet/operative-framework/modules/phone_generator"
+	"github.com/graniet/operative-framework/modules/twitter"
 	"github.com/graniet/operative-framework/modules/viewdns_search"
 	"github.com/graniet/operative-framework/modules/whatsapp"
 	"github.com/graniet/operative-framework/session"
@@ -25,6 +26,7 @@ func LoadModules(s *session.Session){
 	s.Modules = append(s.Modules, phone_generator.PushPhoneGeneratorModule(s))
 	s.Modules = append(s.Modules, whatsapp.PushWhatsappExtractorModule(s))
 	s.Modules = append(s.Modules, instagram.PushInstagramFollowersModule(s))
+	s.Modules = append(s.Modules, twitter.PushTwitterFollowerModule(s))
 
 	for _, mod := range s.Modules{
 		mod.CreateNewParam("FILTER", "Use module filter after execution", "",false, session.STRING)
