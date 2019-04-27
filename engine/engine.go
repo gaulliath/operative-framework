@@ -1,6 +1,8 @@
 package engine
 
 import (
+	"github.com/graniet/operative-framework/config"
+	"github.com/graniet/operative-framework/filters"
 	"github.com/graniet/operative-framework/modules"
 	"github.com/graniet/operative-framework/session"
 	"github.com/jinzhu/gorm"
@@ -8,7 +10,11 @@ import (
 )
 
 func New() *session.Session{
-	db, err := gorm.Open("sqlite3", "./opf.db")
+	conf, err := config.ParseConfig()
+	if err != nil{
+		panic(err.Error())
+	}
+	db, err := gorm.Open(conf.Database.Driver, conf.Database.Name)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -31,16 +37,22 @@ func New() *session.Session{
 			ORM: db,
 			Migrations: make(map[string]interface{}),
 		},
+		Config: conf,
 	}
 	s.Stream.Sess = &s
 	s.Connection.Migrate()
 	modules.LoadModules(&s)
+	filters.LoadFilters(&s)
 	db.Create(&s)
 	return &s
 }
 
 func Load(id int) *session.Session{
-	db, err := gorm.Open("sqlite3", "./opf.db")
+	conf, err := config.ParseConfig()
+	if err != nil{
+		panic(err.Error())
+	}
+	db, err := gorm.Open(conf.Database.Driver, conf.Database.Name)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -58,6 +70,7 @@ func Load(id int) *session.Session{
 			ORM: db,
 			Migrations: make(map[string]interface{}),
 		},
+		Config:conf,
 	}
 	s.Connection.ORM.Where(&session.Session{
 		Id: id,
@@ -65,6 +78,7 @@ func Load(id int) *session.Session{
 	s.Stream.Sess = &s
 	s.Connection.Migrate()
 	modules.LoadModules(&s)
+	filters.LoadFilters(&s)
 
 	// Load targets now
 	var targets []*session.Target

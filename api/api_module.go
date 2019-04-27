@@ -1,9 +1,9 @@
 package api
 
 import (
-	"net/http"
 	"encoding/json"
 	"github.com/gorilla/mux"
+	"net/http"
 )
 
 type Module struct{
@@ -13,6 +13,7 @@ type Module struct{
 }
 
 func (api *ARestFul) Modules(w http.ResponseWriter, r *http.Request){
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
 	var modules []Module
 	for _, module := range api.sess.Modules{
@@ -27,6 +28,7 @@ func (api *ARestFul) Modules(w http.ResponseWriter, r *http.Request){
 }
 
 func (api *ARestFul) RunModule(w http.ResponseWriter, r *http.Request){
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
 	_ = r.ParseForm()
 	if _, ok := r.Form["module"]; !ok{
@@ -69,6 +71,7 @@ func (api *ARestFul) RunModule(w http.ResponseWriter, r *http.Request){
 }
 
 func (api *ARestFul) Module(w http.ResponseWriter, r *http.Request){
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
 	param := mux.Vars(r)
 	mod, err := api.sess.SearchModule(param["module"])
