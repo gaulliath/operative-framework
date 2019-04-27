@@ -22,7 +22,6 @@ func main(){
 		fmt.Println("Please rename/create .env file on root path.")
 		return
 	}
-
 	parser := argparse.NewParser("operative-framework", "digital investigation framework")
 	rApi := parser.Flag("a", "api", &argparse.Options{
 		Required: false,
