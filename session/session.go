@@ -2,6 +2,7 @@ package session
 
 import (
 	"github.com/chzyer/readline"
+	"github.com/graniet/operative-framework/config"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
 
@@ -10,6 +11,7 @@ type Session struct{
 	SessionName string `json:"session_name"`
 	Information Information
 	Connection Connection `json:"-" sql:"-"`
+	Config config.Config
 	Version string            `json:"version" sql:"-"`
 	Targets []*Target   `json:"subjects" sql:"-"`
 	Modules []Module          `json:"modules" sql:"-"`
@@ -56,6 +58,7 @@ func (s *Session) ListType() []string{
 		"website",
 		"url",
 		"person",
-		"social_network",
+		"instagram",
+		"twitter",
 	}
 }

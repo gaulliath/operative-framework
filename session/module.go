@@ -24,6 +24,7 @@ type Module interface {
 	ListArguments()
 	GetExport() []TargetResults
 	SetExport(result TargetResults)
+	GetResults() []string
 	GetInformation() ModuleInformation
 	CheckRequired() bool
 	SetParameter(name string, value string) (bool, error)
@@ -45,6 +46,7 @@ type SessionModule struct{
 	Export []TargetResults
 	Parameters []Param `json:"parameters"`
 	History []string `json:"history"`
+	Results []string
 }
 
 type ModuleInformation struct{
@@ -174,4 +176,8 @@ func (module *SessionModule) GetExport() []TargetResults{
 
 func (module *SessionModule) GetAllParameters() []Param{
 	return module.Parameters
+}
+
+func (module *SessionModule) GetResults() []string{
+	return module.Results
 }

@@ -23,6 +23,16 @@ func (s *Session) ReadLineAutoCompleteListModules() func(string) []string{
 	}
 }
 
+func (s *Session) ReadLineAutoCompleteFilters() func(string) []string{
+	return func(line string) []string{
+		filters := make([]string, 0)
+		for _, filter := range s.Filters{
+			filters = append(filters, filter.Name())
+		}
+		return filters
+	}
+}
+
 func (s *Session) ReadLineAutoCompleteTargets() func(string) []string{
 	return func(line string) []string{
 		targets := make([]string, 0)
@@ -102,6 +112,8 @@ func (s *Session) PushPrompt(){
 			readline.PcItem("list"),
 			readline.PcItem("target",
 				readline.PcItemDynamic(s.ReadLineAutoCompleteTargets())),
+			readline.PcItem("filter",
+				readline.PcItemDynamic(s.ReadLineAutoCompleteFilters())),
 			readline.PcItem("set",
 				readline.PcItem("TARGET")),
 			readline.PcItem("run"),
@@ -116,7 +128,7 @@ func (s *Session) PushPrompt(){
 	)
 	s.Prompt = &readline.Config{
 		Prompt:          "\033[90m[OPF v"+s.Version+"]:\033[0m ",
-		HistoryFile:     os.Getenv("OPERATIVE_HISTORY"),
+		HistoryFile:     s.Config.Common.HistoryFile,
 		InterruptPrompt: "^C",
 		AutoComplete: completer,
 		EOFPrompt:       "exit",
@@ -314,6 +326,26 @@ func (s *Session) ParseCommand(line string){
 					s.Stream.Error(err.Error())
 					return
 				}
+			case "filter":
+				if len(arguments) < 3 {
+					s.Stream.Error("Please use <module> <set> <argument> <value>")
+					return
+				}
+				filter, errFilter := s.SearchFilter(arguments[2])
+				if errFilter != nil{
+					s.Stream.Error(errFilter.Error())
+					return
+				}
+				if filter.WorkWith(arguments[0]) {
+					ret, err := module.SetParameter("FILTER", arguments[2])
+					if ret == false {
+						s.Stream.Error(err.Error())
+						return
+					}
+				} else{
+					s.Stream.Error("This filter do not work with module '" + arguments[0] + "'")
+					return
+				}
 			case "set":
 				if len(arguments) < 4 {
 					s.Stream.Error("Please use <module> <set> <argument> <value>")
@@ -337,6 +369,7 @@ func (s *Session) ParseCommand(line string){
 							s.Stream.Error("Filter '"+filter.Value+"' as not found.")
 							return
 						}
+						s.Stream.Success("Start filter '"+filter.Value+"'...")
 						flt.Start(module)
 					}
 				} else {
@@ -354,6 +387,7 @@ func (s *Session) ParseCommand(line string){
 				s.Stream.Error("Filter '"+filter.Value+"' as not found.")
 				return
 			}
+			s.Stream.Success("Start filter '"+filter.Value+"'...")
 			flt.Start(module)
 		}
 	}

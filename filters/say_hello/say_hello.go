@@ -29,5 +29,5 @@ func (filter *SayHelloFilter) Author() string{
 }
 
 func (filter *SayHelloFilter) Start(mod session.Module){
-	filter.Sess.Stream.Success("Filter as running successfully !")
+	filter.Sess.Stream.Success("Filter as running successfully after module " + mod.Name() + " !")
 }

@@ -3,7 +3,7 @@ package modules
 import (
 	"github.com/graniet/operative-framework/modules/bing_vhost"
 	"github.com/graniet/operative-framework/modules/header_retrieval"
-	"github.com/graniet/operative-framework/modules/instagram_sync"
+	"github.com/graniet/operative-framework/modules/instagram"
 	"github.com/graniet/operative-framework/modules/linkedin_search"
 	"github.com/graniet/operative-framework/modules/metatag_spider"
 	"github.com/graniet/operative-framework/modules/module_base/session_help"
@@ -24,7 +24,7 @@ func LoadModules(s *session.Session){
 	s.Modules = append(s.Modules, viewdns_search.PushWSearchModule(s))
 	s.Modules = append(s.Modules, phone_generator.PushPhoneGeneratorModule(s))
 	s.Modules = append(s.Modules, whatsapp_extractor.PushWhatsappExtractorModule(s))
-	s.Modules = append(s.Modules, instagram_sync.PushInstagramSyncModule(s))
+	s.Modules = append(s.Modules, instagram.PushInstagramFollowersModule(s))
 
 	for _, mod := range s.Modules{
 		mod.CreateNewParam("FILTER", "Use module filter after execution", "",false, session.STRING)

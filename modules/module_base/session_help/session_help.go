@@ -75,12 +75,21 @@ func (module *HelpModule) Start(){
 		{"target modules <target_id>", "List modules available with selected target"},
 	})
 	module.sess.Stream.Render(t)
+	fmt.Println("FILTERS:")
+	t = module.sess.Stream.GenerateTable()
+	t.SetOutputMirror(os.Stdout)
+	t.AppendHeader(table.Row{"Filter Name", "Filter Description"})
+	for _, mod := range module.sess.Filters{
+		t.AppendRow([]interface{}{mod.Name(), mod.Description()})
+	}
+	module.sess.Stream.Render(t)
 	fmt.Println("MODULES:")
 	t = module.sess.Stream.GenerateTable()
 	t.SetOutputMirror(os.Stdout)
 	t.AppendHeader(table.Row{"command", "description"})
 	t.AppendRows([]table.Row{
 		{"<module> target <target_id>", "Set a target argument"},
+		{"<module> filter <filter>", "Set a filter argument"},
 		{"<module> set <argument> <value>", "Set specific argument"},
 		{"<module> list", "List module arguments"},
 		{"<module> run", "Run selected module"},
@@ -94,4 +103,5 @@ func (module *HelpModule) Start(){
 		t.AppendRow([]interface{}{mod.Name(), mod.Description()})
 	}
 	module.sess.Stream.Render(t)
+
 }

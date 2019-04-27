@@ -14,7 +14,6 @@ import (
 type PhoneGenerator struct{
 	session.SessionModule
 	Sess *session.Session
-	Phones []string
 	Current int
 	Bar *pb.ProgressBar
 }
@@ -22,14 +21,14 @@ type PhoneGenerator struct{
 func PushPhoneGeneratorModule(s *session.Session) *PhoneGenerator{
 	mod := PhoneGenerator{
 		Sess: s,
-		Phones: []string{},
 		Current: 1,
 	}
 
 	mod.CreateNewParam("NUMBER_PREFIX", "Country prefix ex: (310)", "310", false, session.STRING)
 	mod.CreateNewParam("NAME_PREFIX", "Prefix of contact random name ex: (BHILLS_)", "", false, session.STRING)
 	mod.CreateNewParam("FILE_PATH", "Location for generated VCards", "", false, session.STRING)
-	mod.CreateNewParam("VCARD", "Generate vcard to file", "true", false, session.STRING)
+	mod.CreateNewParam("VCARD", "Generate vcard to file", "true", false, session.BOOL)
+	mod.CreateNewParam("LIMIT", "Limit of phone numbers", "100", false, session.INT)
 	return &mod
 }
 
@@ -88,8 +87,17 @@ func (module *PhoneGenerator) Start(){
 		}
 	}
 
+	argumentLimit, err5 := module.GetParameter("LIMIT")
+	if err5 != nil{
+		fmt.Println(err5.Error())
+		return
+	}
+	if argumentLimit.Value == ""{
+		argumentLimit.Value = "100"
+	}
 
-	module.Bar = pb.New(5000)
+
+	module.Bar = pb.New(module.Sess.StringToInteger(argumentLimit.Value))
 
 	pool, err := pb.StartPool(module.Bar)
 	if err != nil {
@@ -97,7 +105,7 @@ func (module *PhoneGenerator) Start(){
 	}
 	wg := new(sync.WaitGroup)
 	for{
-		if module.Current < 5000 {
+		if module.Current < module.Sess.StringToInteger(argumentLimit.Value) {
 			wg.Add(1)
 			go func(module *PhoneGenerator, bar *pb.ProgressBar) {
 				phone := faker.PhoneNumber().CellPhone()
@@ -106,10 +114,10 @@ func (module *PhoneGenerator) Start(){
 					if argumentPrefix.Value != "" {
 						newPhone = "+1 ("+strings.TrimSpace(argumentPrefix.Value)+")" + newPhone
 					} else{
-						newPhone = "+1 (310)" + newPhone
+						newPhone = "+1 (213)" + newPhone
 					}
 
-					module.Phones = append(module.Phones, newPhone)
+					module.Results = append(module.Results, newPhone)
 					module.Current = module.Current + 1
 					bar.Increment()
 				}
@@ -135,7 +143,7 @@ func (module *PhoneGenerator) Start(){
 		return
 	}
 	defer file.Close()
-	for _, number := range module.Phones{
+	for _, number := range module.Results{
 		var uuid string
 		if argumentNamePrefix.Value == "" {
 			uuid = "BHills_GO_" + ksuid.New().String()
@@ -148,5 +156,5 @@ func (module *PhoneGenerator) Start(){
 			_, _ = file.WriteString("\"" + number + "\",\n")
 		}
 	}
-	module.Sess.Stream.Success("VCards successfully generated")
+	module.Sess.Stream.Success("VCards successfully generated to '" + argumentFilePath.Value + "'")
 }

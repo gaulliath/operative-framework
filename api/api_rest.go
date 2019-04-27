@@ -15,9 +15,14 @@ type ARestFul struct{
 }
 
 func PushARestFul(s *session.Session) *ARestFul{
+	c := core.Core{
+		Host: s.Config.Api.Host,
+		Port: s.Config.Api.Port,
+		Verbose: s.Config.Api.Verbose,
+	}
 	mod := ARestFul{
 		sess: s,
-		Core: core.PushCore(),
+		Core: &c,
 	}
 	mod.Server = &http.Server{
 		Addr: mod.Core.Host + ":" + mod.Core.Port,
