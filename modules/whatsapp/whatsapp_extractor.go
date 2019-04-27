@@ -1,4 +1,4 @@
-package whatsapp_extractor
+package whatsapp
 
 import (
 	"encoding/gob"

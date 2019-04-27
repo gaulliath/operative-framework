@@ -10,7 +10,7 @@ import (
 	"github.com/graniet/operative-framework/modules/module_base/session_stream"
 	"github.com/graniet/operative-framework/modules/phone_generator"
 	"github.com/graniet/operative-framework/modules/viewdns_search"
-	"github.com/graniet/operative-framework/modules/whatsapp_extractor"
+	"github.com/graniet/operative-framework/modules/whatsapp"
 	"github.com/graniet/operative-framework/session"
 )
 
@@ -23,7 +23,7 @@ func LoadModules(s *session.Session){
 	s.Modules = append(s.Modules, bing_vhost.PushBingVirtualHostModule(s))
 	s.Modules = append(s.Modules, viewdns_search.PushWSearchModule(s))
 	s.Modules = append(s.Modules, phone_generator.PushPhoneGeneratorModule(s))
-	s.Modules = append(s.Modules, whatsapp_extractor.PushWhatsappExtractorModule(s))
+	s.Modules = append(s.Modules, whatsapp.PushWhatsappExtractorModule(s))
 	s.Modules = append(s.Modules, instagram.PushInstagramFollowersModule(s))
 
 	for _, mod := range s.Modules{
