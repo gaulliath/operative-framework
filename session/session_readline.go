@@ -114,6 +114,9 @@ func (s *Session) PushPrompt(){
 			readline.PcItem("update",
 				readline.PcItemDynamic(s.ReadLineAutoCompleteTargets())),
 			readline.PcItem("list"),
+			readline.PcItem("link",
+				readline.PcItemDynamic(s.ReadLineAutoCompleteTargets(),
+					readline.PcItemDynamic(s.ReadLineAutoCompleteTargets()))),
 			readline.PcItem("links",
 				readline.PcItemDynamic(s.ReadLineAutoCompleteTargets())),
 			readline.PcItem("modules",readline.PcItemDynamic(s.ReadLineAutoCompleteTargets())),
@@ -184,10 +187,31 @@ func (s *Session) ParseCommand(line string){
 				s.Stream.Success("target '" + value[3] + "' as successfully added with id '"+id+"'")
 			case "list":
 				s.ListTargets()
+			case "link":
+				value := strings.SplitN(strings.TrimSpace(line), " ", 4)
+				if len(arguments) < 3{
+					s.Stream.Error("Please use subject add <type> <name>")
+					return
+				}
+				trg, err := s.GetTarget(value[2])
+				if err != nil{
+					s.Stream.Error(err.Error())
+					return
+				}
+				trg2, err := s.GetTarget(value[3])
+				if err != nil{
+					s.Stream.Error(err.Error())
+					return
+				}
+				trg.Link(Linking{
+					TargetId: trg2.GetId(),
+				})
+				s.Stream.Success("target '"+trg.GetId()+"' as linked to '"+trg2.GetId()+"'")
+				return
 			case "links":
 				value := strings.SplitN(strings.TrimSpace(line), " ", 3)
 				if len(arguments) < 3{
-					s.Stream.Error("Please use subject add <type> <name>")
+					s.Stream.Error("Please use subject links <target>")
 					return
 				}
 				trg, err := s.GetTarget(value[2])

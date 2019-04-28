@@ -1,6 +1,7 @@
 package twitter
 
 import (
+	"fmt"
 	"github.com/ChimeraCoder/anaconda"
 	"github.com/graniet/go-pretty/table"
 	"github.com/graniet/operative-framework/session"
@@ -19,6 +20,7 @@ func PushTwitterFollowerModule(s *session.Session) *TwitterFollower{
 	}
 
 	mod.CreateNewParam("TARGET", "TWITTER USER SCREEN NAME", "", true, session.STRING)
+	mod.CreateNewParam("COUNT", "FOLLOWER LIMIT", "50", false, session.INT)
 	return &mod
 }
 
@@ -78,14 +80,38 @@ func (module *TwitterFollower) Start(){
 		module.Sess.Stream.Error(err.Error())
 		return
 	}
+
+
+	argumentCount, errCount := module.GetParameter("COUNT")
+	if errCount != nil{
+		module.Sess.Stream.Error("Count parameters as not listed.")
+		return
+	}
+
+	maxCount, errConv := strconv.Atoi(argumentCount.Value)
+	if errConv != nil{
+		module.Sess.Stream.Error("Error as occured with parameter 'COUNT'")
+		return
+	}
+	current := 0
 	if followers.Next_cursor_str == "0"{
+		fmt.Println(current)
 		for _, ids := range followers.Ids{
+			if current >= maxCount{
+				break
+			}
 			followerIds = append(followerIds, ids)
+			current = current + 1
 		}
 	}
 	for followers.Next_cursor_str != "0"{
 		for _, ids := range followers.Ids{
+			fmt.Println(current)
+			if current >= maxCount{
+				break
+			}
 			followerIds = append(followerIds, ids)
+			current = current + 1
 		}
 		v.Set("cursor", followers.Next_cursor_str)
 		followers, err = api.GetFollowersUser(user[0].Id, v)
@@ -102,6 +128,7 @@ func (module *TwitterFollower) Start(){
 	})
 	separator := target.GetSeparator()
 	for _, ids := range followerIds{
+		module.Results = append(module.Results, strconv.Itoa(int(ids)))
 		t.AppendRow(table.Row{
 			ids,
 		})
