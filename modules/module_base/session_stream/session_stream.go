@@ -52,6 +52,6 @@ func (module *SessionStreamModule) Start(){
 		return
 	}
 	module.Stream.Verbose = module.sess.StringToBoolean(paramVerbosity.Value)
-	module.Stream.Success("Session event stream as been updated.")
+	return
 
 }
