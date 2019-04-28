@@ -27,8 +27,10 @@ func LoadModules(s *session.Session){
 	s.Modules = append(s.Modules, whatsapp.PushWhatsappExtractorModule(s))
 	s.Modules = append(s.Modules, instagram.PushInstagramFollowersModule(s))
 	s.Modules = append(s.Modules, twitter.PushTwitterFollowerModule(s))
+	s.Modules = append(s.Modules, twitter.PushTwitterRetweetModule(s))
 
 	for _, mod := range s.Modules{
+		s.PushType(mod.GetType())
 		mod.CreateNewParam("FILTER", "Use module filter after execution", "",false, session.STRING)
 	}
 }

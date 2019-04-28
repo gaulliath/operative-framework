@@ -104,6 +104,7 @@ func main(){
 
 		line = strings.TrimSpace(line)
 		if line == "api run"{
+			sess.Stream.Success("API Rest as been started at http://" + sess.Config.Api.Host + ":" + sess.Config.Api.Port)
 			go apiRest.Start()
 			sess.Information.SetApi(true)
 		} else if line == "api stop"{

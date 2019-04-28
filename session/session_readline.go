@@ -4,8 +4,25 @@ import (
 	"github.com/chzyer/readline"
 	"github.com/graniet/go-pretty/table"
 	"os"
+	"os/exec"
+	"runtime"
 	"strings"
 )
+
+func (s *Session) ClearScreen(){
+	switch runtime.GOOS {
+	case "linux", "darwin", "freebsd", "dragonfly", "netbsd", "openbsd", "solaris":
+		cmd := exec.Command("clear")
+		cmd.Stdout = os.Stdout
+		cmd.Run()
+	case "windows":
+		cmd := exec.Command("cls")
+		cmd.Stdout = os.Stdout
+		cmd.Run()
+	default:
+		// do nothing
+	}
+}
 
 func (s *Session) ReadLineAutoCompleteType() func(string) []string{
 	return func(line string) []string{
@@ -205,7 +222,7 @@ func (s *Session) ParseCommand(line string){
 
 						t := s.Stream.GenerateTable()
 						t.SetOutputMirror(os.Stdout)
-						t.SetAllowedColumnLengths([]int{0, 30, 30, 30})
+						t.SetAllowedColumnLengths([]int{40, 30, 30, 30})
 						headerRow := table.Row{}
 						for _, result := range results{
 							resRow := table.Row{}
@@ -242,6 +259,7 @@ func (s *Session) ParseCommand(line string){
 						}
 						t := s.Stream.GenerateTable()
 						t.SetOutputMirror(os.Stdout)
+						t.SetAllowedColumnLengths([]int{40, 30, 30, 30})
 						separator := trg.GetSeparator()
 						header := strings.Split(result.Header, separator)
 						res := strings.Split(result.Value, separator)

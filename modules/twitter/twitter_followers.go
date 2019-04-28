@@ -27,7 +27,7 @@ func (module *TwitterFollower) Name() string{
 }
 
 func (module *TwitterFollower) Description() string{
-	return "Get followers for target user twitter account"
+	return "Get followers from target user twitter account"
 }
 
 func (module *TwitterFollower) Author() string{

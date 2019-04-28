@@ -20,6 +20,9 @@ func CommandBase(line string, s *session.Session) bool{
 	} else if line == "env"{
 		viewEnvironment(s)
 		return true
+	} else if line == "clear"{
+		s.ClearScreen()
+		return true
 	}
 	return false
 }
