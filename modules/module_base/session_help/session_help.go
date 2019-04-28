@@ -56,7 +56,9 @@ func (module *HelpModule) Start(){
 	t.AppendRows([]table.Row{
 		{"info session", "Print current session information"},
 		{"info api", "Print api rest endpoints information"},
+		{"env", "Print environment variable"},
 		{"help", "Print help information"},
+		{"clear", "Clear current screen"},
 		{"api <run/stop>", "(Run/Stop) restful API"},
 	})
 	module.sess.Stream.Render(t)

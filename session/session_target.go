@@ -113,7 +113,22 @@ func (s *Session) FindLinked(m string, res TargetResults) ([]string, error){
 		targetId := t.GetId()
 		for _, targetRes := range t.Results[m]{
 			if res.Header == targetRes.Header && res.Value == targetRes.Value{
-				targets = append(targets, targetId)
+				if len(targetRes.Value) > 5 {
+					targets = append(targets, targetId)
+				}
+			} else{
+				valueParsed := strings.Replace(res.Value,t.GetSeparator(), "", -1)
+				targetResParsed := strings.Replace(targetRes.Value,t.GetSeparator(), "", -1)
+
+				if res.Header == targetRes.Header && strings.Contains(valueParsed, targetResParsed){
+					if len(targetResParsed) > 5 && len(valueParsed) > 5{
+						targets = append(targets, targetId)
+					}
+				} else if res.Header == targetRes.Header && strings.Contains(targetResParsed, valueParsed){
+					if len(targetResParsed) > 5 && len(valueParsed) > 5{
+						targets = append(targets, targetId)
+					}
+				}
 			}
 		}
 	}

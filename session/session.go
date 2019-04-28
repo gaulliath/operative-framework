@@ -18,6 +18,7 @@ type Session struct{
 	Filters []ModuleFilter `json:"filters" sql:"-"`
 	Prompt *readline.Config `json:"-" sql:"-"`
 	Stream Stream `json:"-" sql:"-"`
+	TypeLists []string `json:"type_lists" sql:"-"`
 }
 
 type Information struct{
@@ -51,14 +52,14 @@ func (s *Session) GetId() int{
 }
 
 func (s *Session) ListType() []string{
-	return []string{
-		"enterprise",
-		"ip_address",
-		"email",
-		"website",
-		"url",
-		"person",
-		"instagram",
-		"twitter",
+	return s.TypeLists
+}
+
+func (s *Session) PushType(t string){
+	for _, tp := range s.TypeLists{
+		if tp == t{
+			return
+		}
 	}
+	s.TypeLists = append(s.TypeLists, t)
 }

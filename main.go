@@ -1,14 +1,15 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"github.com/akamensky/argparse"
 	"github.com/chzyer/readline"
-	"github.com/fatih/color"
 	"github.com/graniet/operative-framework/api"
 	"github.com/graniet/operative-framework/engine"
 	"github.com/graniet/operative-framework/session"
 	"github.com/joho/godotenv"
+	"github.com/fatih/color"
 	"io"
 	"os"
 	"strings"
@@ -45,6 +46,16 @@ func main(){
 		Help: "Print help",
 	})
 
+	scripts := parser.String("f", "opf", &argparse.Options{
+		Required: false,
+		Help: "Run script before prompt starting",
+	})
+
+	quiet := parser.Flag("q", "quiet", &argparse.Options{
+		Required: false,
+		Help: "Don't prompt operative shell",
+	})
+
 	err = parser.Parse(os.Args)
 	if err != nil{
 		fmt.Print(parser.Usage(err))
@@ -76,6 +87,28 @@ func main(){
 		}
 	}
 
+	if *scripts != ""{
+		file, err := os.Open(*scripts)
+		defer file.Close()
+
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
+
+		fscanner := bufio.NewScanner(file)
+		for fscanner.Scan() {
+			line := strings.TrimSpace(fscanner.Text())
+			if !strings.Contains(line, "//"){
+				sess.ParseCommand(line)
+			}
+		}
+	}
+
+	if *quiet{
+		return
+	}
+
 	if *verbose{
 		sess.Stream.Verbose = false
 	} else{
@@ -104,6 +137,7 @@ func main(){
 
 		line = strings.TrimSpace(line)
 		if line == "api run"{
+			sess.Stream.Success("API Rest as been started at http://" + sess.Config.Api.Host + ":" + sess.Config.Api.Port)
 			go apiRest.Start()
 			sess.Information.SetApi(true)
 		} else if line == "api stop"{

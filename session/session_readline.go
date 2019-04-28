@@ -4,8 +4,25 @@ import (
 	"github.com/chzyer/readline"
 	"github.com/graniet/go-pretty/table"
 	"os"
+	"os/exec"
+	"runtime"
 	"strings"
 )
+
+func (s *Session) ClearScreen(){
+	switch runtime.GOOS {
+	case "linux", "darwin", "freebsd", "dragonfly", "netbsd", "openbsd", "solaris":
+		cmd := exec.Command("clear")
+		cmd.Stdout = os.Stdout
+		cmd.Run()
+	case "windows":
+		cmd := exec.Command("cls")
+		cmd.Stdout = os.Stdout
+		cmd.Run()
+	default:
+		// do nothing
+	}
+}
 
 func (s *Session) ReadLineAutoCompleteType() func(string) []string{
 	return func(line string) []string{
@@ -97,6 +114,9 @@ func (s *Session) PushPrompt(){
 			readline.PcItem("update",
 				readline.PcItemDynamic(s.ReadLineAutoCompleteTargets())),
 			readline.PcItem("list"),
+			readline.PcItem("link",
+				readline.PcItemDynamic(s.ReadLineAutoCompleteTargets(),
+					readline.PcItemDynamic(s.ReadLineAutoCompleteTargets()))),
 			readline.PcItem("links",
 				readline.PcItemDynamic(s.ReadLineAutoCompleteTargets())),
 			readline.PcItem("modules",readline.PcItemDynamic(s.ReadLineAutoCompleteTargets())),
@@ -119,6 +139,7 @@ func (s *Session) PushPrompt(){
 			readline.PcItem("run"),
 		),
 		readline.PcItem("help"),
+		readline.PcItem("env"),
 		readline.PcItem("info",
 			readline.PcItem("session"),
 			readline.PcItem("api")),
@@ -166,10 +187,31 @@ func (s *Session) ParseCommand(line string){
 				s.Stream.Success("target '" + value[3] + "' as successfully added with id '"+id+"'")
 			case "list":
 				s.ListTargets()
+			case "link":
+				value := strings.SplitN(strings.TrimSpace(line), " ", 4)
+				if len(arguments) < 3{
+					s.Stream.Error("Please use subject add <type> <name>")
+					return
+				}
+				trg, err := s.GetTarget(value[2])
+				if err != nil{
+					s.Stream.Error(err.Error())
+					return
+				}
+				trg2, err := s.GetTarget(value[3])
+				if err != nil{
+					s.Stream.Error(err.Error())
+					return
+				}
+				trg.Link(Linking{
+					TargetId: trg2.GetId(),
+				})
+				s.Stream.Success("target '"+trg.GetId()+"' as linked to '"+trg2.GetId()+"'")
+				return
 			case "links":
 				value := strings.SplitN(strings.TrimSpace(line), " ", 3)
 				if len(arguments) < 3{
-					s.Stream.Error("Please use subject add <type> <name>")
+					s.Stream.Error("Please use subject links <target>")
 					return
 				}
 				trg, err := s.GetTarget(value[2])
@@ -204,7 +246,7 @@ func (s *Session) ParseCommand(line string){
 
 						t := s.Stream.GenerateTable()
 						t.SetOutputMirror(os.Stdout)
-						t.SetAllowedColumnLengths([]int{0, 30, 30, 30})
+						t.SetAllowedColumnLengths([]int{40, 30, 30, 30})
 						headerRow := table.Row{}
 						for _, result := range results{
 							resRow := table.Row{}
@@ -241,6 +283,7 @@ func (s *Session) ParseCommand(line string){
 						}
 						t := s.Stream.GenerateTable()
 						t.SetOutputMirror(os.Stdout)
+						t.SetAllowedColumnLengths([]int{40, 30, 30, 30})
 						separator := trg.GetSeparator()
 						header := strings.Split(result.Header, separator)
 						res := strings.Split(result.Value, separator)

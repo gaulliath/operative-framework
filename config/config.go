@@ -5,6 +5,7 @@ type Config struct{
 	Database DataBase
 	Common Common
 	Instagram Network
+	Twitter Network
 }
 
 type Network struct{

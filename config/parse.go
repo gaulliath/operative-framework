@@ -17,6 +17,11 @@ func ParseConfig() (Config, error){
 	conf.Instagram.Login = os.Getenv("INSTAGRAM_LOGIN")
 	conf.Instagram.Password = os.Getenv("INSTAGRAM_PASSWORD")
 
+	conf.Twitter.Api.Key = os.Getenv("TWITTER_CONSUMER_SECRET")
+	conf.Twitter.Login = os.Getenv("TWITTER_CONSUMER")
+	conf.Twitter.Password = os.Getenv("TWITTER_ACCESS_TOKEN")
+	conf.Twitter.Api.SKey = os.Getenv("TWITTER_ACCESS_TOKEN_SECRET")
+
 	conf.Api.Host = os.Getenv("API_HOST")
 	conf.Api.Port = os.Getenv("API_PORT")
 	conf.Api.Verbose = os.Getenv("API_VERBOSE")
