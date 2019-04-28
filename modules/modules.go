@@ -9,6 +9,7 @@ import (
 	"github.com/graniet/operative-framework/modules/metatag_spider"
 	"github.com/graniet/operative-framework/modules/module_base/session_help"
 	"github.com/graniet/operative-framework/modules/module_base/session_stream"
+	"github.com/graniet/operative-framework/modules/pastebin_email"
 	"github.com/graniet/operative-framework/modules/phone_generator"
 	"github.com/graniet/operative-framework/modules/societe_com"
 	"github.com/graniet/operative-framework/modules/twitter"
@@ -33,6 +34,7 @@ func LoadModules(s *session.Session){
 	s.Modules = append(s.Modules, twitter.PushTwitterFollowingModule(s))
 	s.Modules = append(s.Modules, image_reverse_search.PushImageReverseModule(s))
 	s.Modules = append(s.Modules, societe_com.PushSocieteComModuleModule(s))
+	s.Modules = append(s.Modules, pastebin_email.PushPasteBinEmailModule(s))
 
 	for _, mod := range s.Modules{
 		s.PushType(mod.GetType())

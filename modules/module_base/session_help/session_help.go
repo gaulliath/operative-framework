@@ -100,9 +100,9 @@ func (module *HelpModule) Start(){
 
 	t = module.sess.Stream.GenerateTable()
 	t.SetOutputMirror(os.Stdout)
-	t.AppendHeader(table.Row{"Module Name", "Module Description"})
+	t.AppendHeader(table.Row{"Module Name", "Module Description", "Target"})
 	for _, mod := range module.sess.Modules{
-		t.AppendRow([]interface{}{mod.Name(), mod.Description()})
+		t.AppendRow([]interface{}{mod.Name(), mod.Description(), mod.GetType()})
 	}
 	module.sess.Stream.Render(t)
 
