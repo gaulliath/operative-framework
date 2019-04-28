@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"github.com/akamensky/argparse"
 	"github.com/chzyer/readline"
-	"github.com/fatih/color"
 	"github.com/graniet/operative-framework/api"
 	"github.com/graniet/operative-framework/engine"
 	"github.com/graniet/operative-framework/session"
 	"github.com/joho/godotenv"
+	"github.com/fatih/color"
 	"io"
 	"os"
 	"strings"
@@ -51,6 +51,11 @@ func main(){
 		Help: "Run script before prompt starting",
 	})
 
+	quiet := parser.Flag("q", "quiet", &argparse.Options{
+		Required: false,
+		Help: "Don't prompt operative shell",
+	})
+
 	err = parser.Parse(os.Args)
 	if err != nil{
 		fmt.Print(parser.Usage(err))
@@ -82,13 +87,6 @@ func main(){
 		}
 	}
 
-	if *verbose{
-		sess.Stream.Verbose = false
-	} else{
-		c := color.New(color.FgYellow)
-		_, _ = c.Println("OPERATIVE FRAMEWORK - DIGITAL INVESTIGATION FRAMEWORK")
-	}
-
 	if *scripts != ""{
 		file, err := os.Open(*scripts)
 		defer file.Close()
@@ -105,6 +103,17 @@ func main(){
 				sess.ParseCommand(line)
 			}
 		}
+	}
+
+	if *quiet{
+		return
+	}
+
+	if *verbose{
+		sess.Stream.Verbose = false
+	} else{
+		c := color.New(color.FgYellow)
+		_, _ = c.Println("OPERATIVE FRAMEWORK - DIGITAL INVESTIGATION FRAMEWORK")
 	}
 
 
