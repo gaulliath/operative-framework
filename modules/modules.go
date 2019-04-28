@@ -28,6 +28,7 @@ func LoadModules(s *session.Session){
 	s.Modules = append(s.Modules, instagram.PushInstagramFollowersModule(s))
 	s.Modules = append(s.Modules, twitter.PushTwitterFollowerModule(s))
 	s.Modules = append(s.Modules, twitter.PushTwitterRetweetModule(s))
+	s.Modules = append(s.Modules, twitter.PushTwitterFollowingModule(s))
 
 	for _, mod := range s.Modules{
 		s.PushType(mod.GetType())
