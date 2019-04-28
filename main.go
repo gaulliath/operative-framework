@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"github.com/akamensky/argparse"
 	"github.com/chzyer/readline"
@@ -45,6 +46,11 @@ func main(){
 		Help: "Print help",
 	})
 
+	scripts := parser.String("f", "opf", &argparse.Options{
+		Required: false,
+		Help: "Run script before prompt starting",
+	})
+
 	err = parser.Parse(os.Args)
 	if err != nil{
 		fmt.Print(parser.Usage(err))
@@ -81,6 +87,24 @@ func main(){
 	} else{
 		c := color.New(color.FgYellow)
 		_, _ = c.Println("OPERATIVE FRAMEWORK - DIGITAL INVESTIGATION FRAMEWORK")
+	}
+
+	if *scripts != ""{
+		file, err := os.Open(*scripts)
+		defer file.Close()
+
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
+
+		fscanner := bufio.NewScanner(file)
+		for fscanner.Scan() {
+			line := strings.TrimSpace(fscanner.Text())
+			if !strings.Contains(line, "//"){
+				sess.ParseCommand(line)
+			}
+		}
 	}
 
 

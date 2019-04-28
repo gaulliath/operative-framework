@@ -1,0 +1,5 @@
+session_stream set VERBOSE false
+session_stream run
+target add twitter graniet75
+session_stream set VERBOSE true
+session_stream run
