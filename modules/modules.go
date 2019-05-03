@@ -2,6 +2,7 @@ package modules
 
 import (
 	"github.com/graniet/operative-framework/modules/bing_vhost"
+	"github.com/graniet/operative-framework/modules/directory_search"
 	"github.com/graniet/operative-framework/modules/header_retrieval"
 	"github.com/graniet/operative-framework/modules/image_reverse_search"
 	"github.com/graniet/operative-framework/modules/instagram"
@@ -10,6 +11,7 @@ import (
 	"github.com/graniet/operative-framework/modules/module_base/session_help"
 	"github.com/graniet/operative-framework/modules/module_base/session_stream"
 	"github.com/graniet/operative-framework/modules/pastebin_email"
+	"github.com/graniet/operative-framework/modules/phone_buster"
 	"github.com/graniet/operative-framework/modules/phone_generator"
 	"github.com/graniet/operative-framework/modules/societe_com"
 	"github.com/graniet/operative-framework/modules/twitter"
@@ -35,6 +37,8 @@ func LoadModules(s *session.Session){
 	s.Modules = append(s.Modules, image_reverse_search.PushImageReverseModule(s))
 	s.Modules = append(s.Modules, societe_com.PushSocieteComModuleModule(s))
 	s.Modules = append(s.Modules, pastebin_email.PushPasteBinEmailModule(s))
+	s.Modules = append(s.Modules, phone_buster.PushPhoneBusterModule(s))
+	s.Modules = append(s.Modules, directory_search.PushModuleDirectorySearch(s))
 
 	for _, mod := range s.Modules{
 		s.PushType(mod.GetType())
