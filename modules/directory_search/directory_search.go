@@ -110,10 +110,28 @@ func (module *DirectorySearchModule) Start(){
 			module.Stream.Error(err.Error())
 		} else{
 			if res.StatusCode == 200{
+				result := session.TargetResults{
+					Header: "URL" + target.GetSeparator() + "STATUS",
+					Value: url + target.GetSeparator() + strconv.Itoa(res.StatusCode),
+				}
+				module.Results = append(module.Results, url)
+				target.Save(module, result)
 				module.sess.Stream.Success(url + " : " + strconv.Itoa(res.StatusCode))
 			} else if res.StatusCode == 404{
+				result := session.TargetResults{
+					Header: "URL" + target.GetSeparator() + "STATUS",
+					Value: url + target.GetSeparator() + strconv.Itoa(res.StatusCode),
+				}
+				module.Results = append(module.Results, url)
+				target.Save(module, result)
 				module.sess.Stream.Standard(url + " : " + strconv.Itoa(res.StatusCode))
 			} else{
+				result := session.TargetResults{
+					Header: "URL" + target.GetSeparator() + "STATUS",
+					Value: url + target.GetSeparator() + strconv.Itoa(res.StatusCode),
+				}
+				module.Results = append(module.Results, url)
+				target.Save(module, result)
 				module.sess.Stream.Warning(url + " : " + strconv.Itoa(res.StatusCode))
 			}
 		}

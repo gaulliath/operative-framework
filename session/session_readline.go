@@ -404,16 +404,35 @@ func (s *Session) ParseCommand(line string){
 			case "run":
 				if module.CheckRequired() {
 					s.Information.ModuleLaunched = s.Information.ModuleLaunched + 1
-					module.Start()
-					filter, err := module.GetParameter("FILTER")
-					if err == nil && filter.Value != ""{
-						flt, err := s.SearchFilter(filter.Value)
-						if err != nil{
-							s.Stream.Error("Filter '"+filter.Value+"' as not found.")
-							return
+					background, errBack := module.GetParameter("BACKGROUND")
+					if errBack == nil && strings.ToLower(background.Value) == "true"{
+						go func(s *Session,m Module){
+							s.Stream.Success("Running '" + module.Name() + "' in background...")
+							module.Start()
+							filter, err := module.GetParameter("FILTER")
+							if err == nil && filter.Value != "" {
+								flt, err := s.SearchFilter(filter.Value)
+								if err != nil {
+									s.Stream.Error("Filter '" + filter.Value + "' as not found.")
+									return
+								}
+								s.Stream.Success("Start filter '" + filter.Value + "'...")
+								flt.Start(module)
+							}
+							s.Stream.Success("Module '" + module.Name() + "' executed")
+						}(s, module)
+					} else {
+						module.Start()
+						filter, err := module.GetParameter("FILTER")
+						if err == nil && filter.Value != "" {
+							flt, err := s.SearchFilter(filter.Value)
+							if err != nil {
+								s.Stream.Error("Filter '" + filter.Value + "' as not found.")
+								return
+							}
+							s.Stream.Success("Start filter '" + filter.Value + "'...")
+							flt.Start(module)
 						}
-						s.Stream.Success("Start filter '"+filter.Value+"'...")
-						flt.Start(module)
 					}
 				} else {
 					s.Stream.Error("Please validate required argument. (<module> list)")

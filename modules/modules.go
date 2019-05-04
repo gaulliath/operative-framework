@@ -14,6 +14,7 @@ import (
 	"github.com/graniet/operative-framework/modules/phone_buster"
 	"github.com/graniet/operative-framework/modules/phone_generator"
 	"github.com/graniet/operative-framework/modules/societe_com"
+	"github.com/graniet/operative-framework/modules/tools_suggester"
 	"github.com/graniet/operative-framework/modules/twitter"
 	"github.com/graniet/operative-framework/modules/viewdns_search"
 	"github.com/graniet/operative-framework/modules/whatsapp"
@@ -39,9 +40,11 @@ func LoadModules(s *session.Session){
 	s.Modules = append(s.Modules, pastebin_email.PushPasteBinEmailModule(s))
 	s.Modules = append(s.Modules, phone_buster.PushPhoneBusterModule(s))
 	s.Modules = append(s.Modules, directory_search.PushModuleDirectorySearch(s))
+	s.Modules = append(s.Modules, tools_suggester.PushModuleToolsSuggester(s))
 
 	for _, mod := range s.Modules{
 		s.PushType(mod.GetType())
 		mod.CreateNewParam("FILTER", "Use module filter after execution", "",false, session.STRING)
+		mod.CreateNewParam("BACKGROUND", "Run this task in background", "false", false, session.BOOL)
 	}
 }
