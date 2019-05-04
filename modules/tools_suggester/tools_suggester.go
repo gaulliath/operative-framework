@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -145,6 +146,12 @@ func (module *ToolsSuggesterModule) Start(){
 							Tools: obj.Tools,
 							Type: obj.Name,
 						})
+						trgRest := session.TargetResults{
+							Header: "URL" + target.GetSeparator() + "RESPONSE" + target.GetSeparator() + "TOOLS" + target.GetSeparator() + "CMS",
+							Value: url + target.GetSeparator() + strconv.Itoa(res.StatusCode) + target.GetSeparator() + obj.Tools + target.GetSeparator() + obj.Name,
+						}
+						target.Save(module, trgRest)
+						module.Results = append(module.Results, obj.Tools)
 					}
 				} else{
 					results = append(results, Results{
@@ -153,6 +160,12 @@ func (module *ToolsSuggesterModule) Start(){
 						Tools: obj.Tools,
 						Type: obj.Name,
 					})
+					trgRest := session.TargetResults{
+						Header: "URL" + target.GetSeparator() + "RESPONSE" + target.GetSeparator() + "TOOLS" + target.GetSeparator() + "CMS",
+						Value: url + target.GetSeparator() + strconv.Itoa(res.StatusCode) + target.GetSeparator() + obj.Tools + target.GetSeparator() + obj.Name,
+					}
+					target.Save(module, trgRest)
+					module.Results = append(module.Results, obj.Tools)
 					continue
 				}
 			}
@@ -180,5 +193,5 @@ func (module *ToolsSuggesterModule) Start(){
 	} else{
 		module.sess.Stream.Warning("Not result found.")
 	}
-
+	return
 }
