@@ -138,7 +138,7 @@ func main(){
 	} else{
 		c := color.New(color.FgYellow)
 		_, _ = c.Println("OPERATIVE FRAMEWORK - DIGITAL INVESTIGATION FRAMEWORK")
-		sess.Stream.Standard("Loaded configuration file: " + configFile)
+		sess.Stream.WithoutDate("Loading a configuration file '" + configFile + "'")
 	}
 
 
