@@ -49,6 +49,13 @@ func (stream *Stream) Warning(text string) {
 	}
 }
 
+func (stream *Stream) WithoutDate(text string){
+	if stream.Verbose {
+		fmt.Printf("%s\n", text)
+		stream.Sess.Information.AddEvent()
+	}
+}
+
 func (stream *Stream) GenerateTable() table.Writer{
 	return table.NewWriter()
 }

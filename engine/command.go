@@ -57,6 +57,11 @@ func ViewInformation(s *session.Session){
 	if s.Information.ApiStatus{
 		apiStatus = color.Green("online")
 	}
+
+	t.AppendRow(table.Row{
+		"CONFIGURATION",
+		s.Config.Common.ConfigurationFile,
+	})
 	t.AppendRow(table.Row{
 		"API",
 		apiStatus,
