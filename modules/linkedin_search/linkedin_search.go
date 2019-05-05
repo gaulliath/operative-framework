@@ -68,7 +68,7 @@ func (module *LinkedinSearchModule) Start(){
 	}
 
 	paramLimit, _ := module.GetParameter("limit")
-	url := "https://encrypted.google.com/search?num=" + paramLimit.Value + "&start=0&hl=en&q=site:linkedin.com/in+" + target.GetName()
+	url := "https://encrypted.google.com/search?num=" + paramLimit.Value + "&start=0&hl=en&q=site:linkedin.com/in+" + strings.Replace(target.GetName(), " ", "%20", -1)
 	res, err := http.Get(url)
 	if err != nil {
 		module.Stream.Error("Argument 'URL' can't be reached.")

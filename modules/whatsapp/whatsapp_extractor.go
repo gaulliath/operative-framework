@@ -2,12 +2,13 @@ package whatsapp
 
 import (
 	"encoding/gob"
+	"io/ioutil"
 	"strconv"
 
 	"encoding/json"
 	"fmt"
 	"github.com/Baozisoftware/qrcode-terminal-go"
-	whatsapp "github.com/Rhymen/go-whatsapp"
+	"github.com/Rhymen/go-whatsapp"
 	"github.com/graniet/go-pretty/table"
 	"github.com/graniet/operative-framework/session"
 	"os"
@@ -21,15 +22,15 @@ type ThumbUrl struct {
 }
 
 type WhatsAppContacts struct{
-	Contact whatsapp.Contact
-	Picture ThumbUrl
+	Contact whatsapp.Contact `json:"contact"`
+	Picture ThumbUrl `json:"picture"`
 
 }
 
 type WhatsappExtractor struct{
 	session.SessionModule
 	Sess *session.Session
-	Contacts []WhatsAppContacts
+	Contacts []WhatsAppContacts `json:"contacts"`
 }
 
 func PushWhatsappExtractorModule(s *session.Session) *WhatsappExtractor{
@@ -124,7 +125,7 @@ func (module *WhatsappExtractor) Start(){
 			"Contact Picture",
 		})
 
-		max := 50
+		max := 7000
 		current := 1
 
 		for _,v := range contacts{
@@ -150,6 +151,8 @@ func (module *WhatsappExtractor) Start(){
 		}
 		module.Sess.Stream.Render(t)
 		module.Sess.Stream.Success("Total contacts : " + strconv.Itoa(len(contacts)))
+		rankingsJson, _ := json.Marshal(module.Contacts)
+		err = ioutil.WriteFile("contacts.json", rankingsJson, 0644)
 	}
 
 }
