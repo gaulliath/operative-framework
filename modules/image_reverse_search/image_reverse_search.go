@@ -160,7 +160,7 @@ func (module *ImageReverseModule) Name() string{
 }
 
 func (module *ImageReverseModule) Description() string{
-	return "Search possible image(s) connection in internet"
+	return "Search possible image(s) connection on the internet"
 }
 
 func (module *ImageReverseModule) Author() string{

@@ -5,23 +5,46 @@ import (
 	"fmt"
 	"github.com/akamensky/argparse"
 	"github.com/chzyer/readline"
+	"github.com/fatih/color"
 	"github.com/graniet/operative-framework/api"
 	"github.com/graniet/operative-framework/engine"
 	"github.com/graniet/operative-framework/session"
 	"github.com/joho/godotenv"
-	"github.com/fatih/color"
 	"io"
+	"log"
 	"os"
+	"os/user"
 	"strings"
 )
 
 
 func main(){
 	var sess *session.Session
+	configFile := ".env"
 	err := godotenv.Load(".env")
 	if err != nil {
-		fmt.Println("Please rename/create .env file on root path.")
-		return
+		u, errU := user.Current()
+		if errU != nil{
+			fmt.Println("Please create a .env file on root path.")
+			return
+		}
+		if _, err := os.Stat(u.HomeDir + "/.opf/.env"); os.IsNotExist(err){
+			if _, err := os.Stat(u.HomeDir + "/.opf/"); os.IsNotExist(err){
+				_ = os.Mkdir(u.HomeDir + "/.opf/", os.ModePerm)
+			}
+			log.Println("Generating default .env on '"+u.HomeDir+"' directory...")
+			path, errGeneration := engine.GenerateEnv(u.HomeDir + "/.opf/.env")
+			if errGeneration != nil{
+				log.Println(errGeneration.Error())
+				return
+			}
+			err := godotenv.Load(path)
+			if err != nil{
+				log.Println(err.Error())
+				return
+			}
+		}
+		configFile = u.HomeDir + "/.opf/.env"
 	}
 	parser := argparse.NewParser("operative-framework", "digital investigation framework")
 	rApi := parser.Flag("a", "api", &argparse.Options{
@@ -68,6 +91,7 @@ func main(){
 	}
 
 	sess.PushPrompt()
+	sess.Config.Common.ConfigurationFile = configFile
 	apiRest := api.PushARestFul(sess)
 	if *help{
 		fmt.Print(parser.Usage(""))
@@ -114,12 +138,13 @@ func main(){
 	} else{
 		c := color.New(color.FgYellow)
 		_, _ = c.Println("OPERATIVE FRAMEWORK - DIGITAL INVESTIGATION FRAMEWORK")
+		sess.Stream.Standard("Loaded configuration file: " + configFile)
 	}
 
 
-	l, err := readline.NewEx(sess.Prompt)
-	if err != nil {
-		panic(err)
+	l, errP := readline.NewEx(sess.Prompt)
+	if errP != nil {
+		panic(errP)
 	}
 	defer l.Close()
 

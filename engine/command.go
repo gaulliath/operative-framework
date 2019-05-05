@@ -34,7 +34,7 @@ func viewEnvironment(s *session.Session){
 		"Name",
 		"Value",
 	})
-	mp, err := godotenv.Read(".env")
+	mp, err := godotenv.Read(s.Config.Common.ConfigurationFile)
 	if err == nil{
 		for name, value := range mp{
 			t.AppendRow(table.Row{
