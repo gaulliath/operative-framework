@@ -37,7 +37,7 @@ func (module *PhoneGenerator) Name() string{
 }
 
 func (module *PhoneGenerator) Description() string{
-	return "Generate VCard (.vcf) with random number for whatsapp OSINT"
+	return "Generate VCard (.vcf) with random numbers"
 }
 
 func (module *PhoneGenerator) Author() string{

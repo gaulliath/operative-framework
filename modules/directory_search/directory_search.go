@@ -23,7 +23,7 @@ func PushModuleDirectorySearch(s *session.Session) *DirectorySearchModule{
 	}
 
 	mod.CreateNewParam("TARGET", "website target", "", true, session.STRING)
-	mod.CreateNewParam("WORDLIST", "WORDLIST default: dirbuster.txt", "./extern/directory_search/lists.txt", true, session.STRING)
+	mod.CreateNewParam("WORDLIST", "WORDLIST e.g: operative-framwork-default/directory_search/lists.txt", "", true, session.STRING)
 	return &mod
 }
 

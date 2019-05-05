@@ -4,13 +4,21 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/pkg/errors"
 	"os"
+	"os/user"
 )
 
 func ParseConfig() (Config, error){
 	conf := Config{}
-	err := godotenv.Load(".env")
-	if err != nil{
-		return Config{}, errors.New("Please rename/create .env file on root path.")
+	errConfig := godotenv.Load(".env")
+	u,_ := user.Current()
+	if errConfig != nil{
+		if _, err := os.Stat(u.HomeDir + "/.opf/.env"); os.IsNotExist(err){
+			return Config{}, errors.New("Please create .env file on root path.")
+		}
+		err := godotenv.Load(u.HomeDir + "/.opf/.env")
+		if err != nil{
+			return Config{}, errors.New("Please create .env file on root path.")
+		}
 	}
 
 
