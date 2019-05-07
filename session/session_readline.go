@@ -157,7 +157,7 @@ func (s *Session) PushPrompt(){
 	}
 }
 
-func (s *Session) ParseCommand(line string){
+func (s *Session) ParseCommand(line string) []string{
 	moduleName := strings.Split(line, " ")[0]
 	module, err := s.SearchModule(moduleName)
 	if err != nil{
@@ -166,82 +166,95 @@ func (s *Session) ParseCommand(line string){
 		} else if !strings.HasPrefix(strings.TrimSpace(line), "target ") {
 			s.Stream.Error("command '"+line+"' do not exist")
 			s.Stream.Error("'help' for more information")
-			return
+			return nil
 		}
 	}
 	if strings.Contains(line, " "){
-		if strings.HasPrefix(line, "target "){
+		if strings.HasPrefix(line, "sh "){
+			arguments := strings.Split(strings.TrimSpace(line), " ")
+			value := strings.SplitN(strings.TrimSpace(line), " ", 2)
+			if len(arguments) < 2{
+				s.Stream.Error("Please use sh <cmd> e.g: sh ls")
+				return nil
+			}
+			module.SetParameter("CMD", value[1])
+			module.Start()
+			return nil
+		} else if strings.HasPrefix(line, "target "){
 			arguments := strings.Split(strings.TrimSpace(line), " ")
 			switch arguments[1] {
 			case "add":
 				value := strings.SplitN(strings.TrimSpace(line), " ", 4)
 				if len(arguments) < 4{
 					s.Stream.Error("Please use subject add <type> <name>")
-					return
+					return nil
 				}
 				id, err := s.AddTarget(value[2], value[3])
 				if err != nil{
 					s.Stream.Error(err.Error())
-					return
+					return nil
 				}
 				s.Stream.Success("target '" + value[3] + "' as successfully added with id '"+id+"'")
+				return []string{
+					id,
+				}
 			case "list":
 				s.ListTargets()
 			case "link":
 				value := strings.SplitN(strings.TrimSpace(line), " ", 4)
 				if len(arguments) < 3{
 					s.Stream.Error("Please use subject add <type> <name>")
-					return
+					return nil
 				}
 				trg, err := s.GetTarget(value[2])
 				if err != nil{
 					s.Stream.Error(err.Error())
-					return
+					return nil
 				}
 				trg2, err := s.GetTarget(value[3])
 				if err != nil{
 					s.Stream.Error(err.Error())
-					return
+					return nil
 				}
 				trg.Link(Linking{
 					TargetId: trg2.GetId(),
 				})
 				s.Stream.Success("target '"+trg.GetId()+"' as linked to '"+trg2.GetId()+"'")
-				return
+				return nil
 			case "links":
 				value := strings.SplitN(strings.TrimSpace(line), " ", 3)
 				if len(arguments) < 3{
 					s.Stream.Error("Please use subject links <target>")
-					return
+					return nil
 				}
 				trg, err := s.GetTarget(value[2])
 				if err != nil{
 					s.Stream.Error(err.Error())
-					return
+					return nil
 				}
 				trg.Linked()
 			case "view":
 				if len(arguments) < 5{
 					s.Stream.Error("Please use target view result <target_id> <result_id>")
-					return
+					return nil
 				}
 				switch arguments[2] {
 					case "results":
 						value := strings.SplitN(strings.TrimSpace(line), " ", 5)
 						if len(arguments) < 4{
 							s.Stream.Error("Please use target view results <target_id>")
-							return
+							return nil
 						}
 						trg, err := s.GetTarget(value[3])
 						if err != nil{
 							s.Stream.Error(err.Error())
-							return
+							return nil
 						}
 						moduleName := value[4]
 						results, err := trg.GetModuleResults(moduleName)
 						if err != nil{
 							s.Stream.Error(err.Error())
-							return
+							return nil
 						}
 
 						t := s.Stream.GenerateTable()
@@ -273,13 +286,13 @@ func (s *Session) ParseCommand(line string){
 						trg, err := s.GetTarget(value[3])
 						if err != nil{
 							s.Stream.Error(err.Error())
-							return
+							return nil
 						}
 						resultId := value[4]
 						result, err := trg.GetResult(resultId)
 						if err != nil{
 							s.Stream.Error(err.Error())
-							return
+							return nil
 						}
 						t := s.Stream.GenerateTable()
 						t.SetOutputMirror(os.Stdout)
@@ -300,14 +313,14 @@ func (s *Session) ParseCommand(line string){
 						t.AppendHeader(headerRow)
 						t.AppendRow(resRow)
 						s.Stream.Render(t)
-						return
+						return nil
 				}
 
 			case "update":
 				value := strings.SplitN(strings.TrimSpace(line), " ", 4)
 				if len(arguments) < 3{
 					s.Stream.Error("Please use target update <target_id> <name>")
-					return
+					return nil
 				}
 				s.UpdateTarget(value[2], value[3])
 				s.Stream.Success("target '" + value[2] + "' as successfully updated.")
@@ -315,12 +328,12 @@ func (s *Session) ParseCommand(line string){
 				value := strings.SplitN(strings.TrimSpace(line), " ", 3)
 				if len(arguments) < 3{
 					s.Stream.Error("Please use target update <target_id> <name>")
-					return
+					return nil
 				}
 				trg, err := s.GetTarget(value[2])
 				if err != nil{
 					s.Stream.Error(err.Error())
-					return
+					return nil
 				}
 
 				t := s.Stream.GenerateTable()
@@ -346,12 +359,12 @@ func (s *Session) ParseCommand(line string){
 				value := strings.SplitN(strings.TrimSpace(line), " ", 3)
 				if len(arguments) < 3{
 					s.Stream.Error("Please use target add <type> <name>")
-					return
+					return nil
 				}
 				_, err := s.RemoveTarget(value[2])
 				if err != nil{
 					s.Stream.Error(err.Error())
-					return
+					return nil
 				}
 				s.Stream.Success("target '" + value[2] + "' as successfully deleted.")
 
@@ -362,42 +375,43 @@ func (s *Session) ParseCommand(line string){
 			case "target":
 				if len(arguments) < 3 {
 					s.Stream.Error("Please use <module> <set> <argument> <value>")
-					return
+					return nil
 				}
 				ret, err := module.SetParameter("TARGET", arguments[2])
 				if ret == false {
 					s.Stream.Error(err.Error())
-					return
+					return nil
 				}
 			case "filter":
 				if len(arguments) < 3 {
 					s.Stream.Error("Please use <module> <set> <argument> <value>")
-					return
+					return nil
 				}
 				filter, errFilter := s.SearchFilter(arguments[2])
 				if errFilter != nil{
 					s.Stream.Error(errFilter.Error())
-					return
+					return nil
 				}
 				if filter.WorkWith(arguments[0]) {
 					ret, err := module.SetParameter("FILTER", arguments[2])
 					if ret == false {
 						s.Stream.Error(err.Error())
-						return
+						return nil
 					}
 				} else{
 					s.Stream.Error("This filter do not work with module '" + arguments[0] + "'")
-					return
+					return nil
 				}
 			case "set":
 				if len(arguments) < 4 {
 					s.Stream.Error("Please use <module> <set> <argument> <value>")
-					return
+					return nil
 				}
-				ret, err := module.SetParameter(arguments[2], arguments[3])
+				expl := strings.SplitN(line, " ", 4)
+				ret, err := module.SetParameter(expl[2], expl[3])
 				if ret == false {
 					s.Stream.Error(err.Error())
-					return
+					return nil
 				}
 			case "list":
 				module.ListArguments()
@@ -423,16 +437,18 @@ func (s *Session) ParseCommand(line string){
 						}(s, module)
 					} else {
 						module.Start()
+						r := module.GetResults()
 						filter, err := module.GetParameter("FILTER")
 						if err == nil && filter.Value != "" {
 							flt, err := s.SearchFilter(filter.Value)
 							if err != nil {
 								s.Stream.Error("Filter '" + filter.Value + "' as not found.")
-								return
+								return nil
 							}
 							s.Stream.Success("Start filter '" + filter.Value + "'...")
 							flt.Start(module)
 						}
+						return r
 					}
 				} else {
 					s.Stream.Error("Please validate required argument. (<module> list)")
@@ -447,10 +463,11 @@ func (s *Session) ParseCommand(line string){
 			flt, err := s.SearchFilter(filter.Value)
 			if err != nil{
 				s.Stream.Error("Filter '"+filter.Value+"' as not found.")
-				return
+				return nil
 			}
 			s.Stream.Success("Start filter '"+filter.Value+"'...")
 			flt.Start(module)
 		}
 	}
+	return nil
 }

@@ -1,6 +1,8 @@
 package session_stream
 
-import "github.com/graniet/operative-framework/session"
+import (
+	"github.com/graniet/operative-framework/session"
+)
 
 type SessionStreamModule struct{
 	session.SessionModule
