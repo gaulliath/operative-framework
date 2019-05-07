@@ -1,12 +1,12 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"github.com/akamensky/argparse"
 	"github.com/chzyer/readline"
 	"github.com/fatih/color"
 	"github.com/graniet/operative-framework/api"
+	"github.com/graniet/operative-framework/compiler"
 	"github.com/graniet/operative-framework/engine"
 	"github.com/graniet/operative-framework/session"
 	"github.com/joho/godotenv"
@@ -112,21 +112,7 @@ func main(){
 	}
 
 	if *scripts != ""{
-		file, err := os.Open(*scripts)
-		defer file.Close()
-
-		if err != nil {
-			fmt.Println(err.Error())
-			return
-		}
-
-		fscanner := bufio.NewScanner(file)
-		for fscanner.Scan() {
-			line := strings.TrimSpace(fscanner.Text())
-			if !strings.Contains(line, "//"){
-				sess.ParseCommand(line)
-			}
-		}
+		compiler.Run(sess, *scripts)
 	}
 
 	if *quiet{

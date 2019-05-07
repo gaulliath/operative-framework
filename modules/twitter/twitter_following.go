@@ -96,7 +96,6 @@ func (module *TwitterFollowing) Start(){
 	}
 	current := 0
 	if followers.Next_cursor_str == "0"{
-		fmt.Println(current)
 		for _, ids := range followers.Ids{
 			if current >= maxCount{
 				break
