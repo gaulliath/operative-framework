@@ -67,21 +67,24 @@ func (s *Scripts) AddVar(name string, foreach bool, value []string){
 	})
 }
 
-func Settings(sess *session.Session, line string, s *Scripts){
+func Settings(sess *session.Session, line string, s *Scripts) bool{
 	if string(line[0]) == "@"{
 		if line == "@debug off"{
 			s.Config.Debug = false
 			sess.ParseCommand("session_stream set VERBOSE false")
 			sess.ParseCommand("session_stream run")
+			return true
 		} else if line == "@history"{
 			s.Config.History = true
+			return true
 		} else if line == "@debug on"{
 			s.Config.Debug = true
 			sess.ParseCommand("session_stream set VERBOSE true")
 			sess.ParseCommand("session_stream run")
-			return
+			return true
 		}
 	}
+	return false
 }
 
 func Run(sess *session.Session, script string){
@@ -98,9 +101,10 @@ func Run(sess *session.Session, script string){
 	for fScanner.Scan() {
 		line := strings.TrimSpace(fScanner.Text())
 		if line != "" {
-			if !strings.Contains(line, "//") {
-				Settings(sess, line, &newScript)
-				if newScript.Foreach.InForeach{
+			if !strings.HasPrefix(line, "//") {
+				if string(line[0]) == "@" {
+					Settings(sess, line, &newScript)
+				} else if newScript.Foreach.InForeach{
 					if strings.Contains(line,"<=)"){
 						for _, element := range newScript.Foreach.Context{
 							for _, stmts := range newScript.Foreach.Statements{
