@@ -15,7 +15,6 @@ func PushSampleModuleModule(s *session.Session) *SampleModule{
 		sess: s,
 		Stream: &s.Stream,
 	}
-
 	mod.CreateNewParam("TARGET", "TWITTER ID e.g: 4378543", "", true, session.STRING)
 	return &mod
 }
