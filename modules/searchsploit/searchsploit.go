@@ -35,6 +35,8 @@ func PushSearchSploitModule(s *session.Session) *SearchSploitModule{
 		sess: s,
 		Stream: &s.Stream,
 	}
+
+	mod.WithProgram("searchsploit")
 	mod.CreateNewParam("TARGET", "Name of software", "", true, session.STRING)
 	return &mod
 }

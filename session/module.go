@@ -30,7 +30,7 @@ type Module interface {
 	SetParameter(name string, value string) (bool, error)
 	GetParameter(name string) (Param, error)
 	GetAllParameters() []Param
-	NeedExternal(name string) bool
+	WithProgram(name string) bool
 	GetExternal() []string
 	CreateNewParam(name string, description string, value string, isRequired bool, paramType int)
 }
@@ -134,7 +134,7 @@ func (module *SessionModule) CreateNewParam(name string, description string, val
 	module.Parameters = append(module.Parameters, newParam)
 }
 
-func (module *SessionModule) NeedExternal(name string) bool{
+func (module *SessionModule) WithProgram(name string) bool{
 	module.External = append(module.External, name)
 	return true
 }
