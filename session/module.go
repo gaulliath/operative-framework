@@ -30,6 +30,8 @@ type Module interface {
 	SetParameter(name string, value string) (bool, error)
 	GetParameter(name string) (Param, error)
 	GetAllParameters() []Param
+	WithProgram(name string) bool
+	GetExternal() []string
 	CreateNewParam(name string, description string, value string, isRequired bool, paramType int)
 }
 
@@ -46,6 +48,7 @@ type SessionModule struct{
 	Export []TargetResults
 	Parameters []Param `json:"parameters"`
 	History []string `json:"history"`
+	External []string `json:"external"`
 	Results []string
 }
 
@@ -131,6 +134,11 @@ func (module *SessionModule) CreateNewParam(name string, description string, val
 	module.Parameters = append(module.Parameters, newParam)
 }
 
+func (module *SessionModule) WithProgram(name string) bool{
+	module.External = append(module.External, name)
+	return true
+}
+
 func (module *SessionModule) ListArguments(){
 	t := table.NewWriter()
 	t.SetOutputMirror(os.Stdout)
@@ -180,4 +188,8 @@ func (module *SessionModule) GetAllParameters() []Param{
 
 func (module *SessionModule) GetResults() []string{
 	return module.Results
+}
+
+func (module *SessionModule) GetExternal() []string{
+	return module.External
 }

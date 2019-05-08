@@ -9,6 +9,7 @@ import (
 	"os"
 	"strings"
 	"regexp"
+	"time"
 )
 
 type Scripts struct{
@@ -69,18 +70,19 @@ func (s *Scripts) AddVar(name string, foreach bool, value []string){
 
 func Settings(sess *session.Session, line string, s *Scripts) bool{
 	if string(line[0]) == "@"{
-		if line == "@debug off"{
-			s.Config.Debug = false
+		if line == "@verbose off"{
 			sess.ParseCommand("session_stream set VERBOSE false")
 			sess.ParseCommand("session_stream run")
 			return true
 		} else if line == "@history"{
 			s.Config.History = true
 			return true
-		} else if line == "@debug on"{
-			s.Config.Debug = true
+		} else if line == "@verbose on"{
 			sess.ParseCommand("session_stream set VERBOSE true")
 			sess.ParseCommand("session_stream run")
+			return true
+		} else if line == "@debug"{
+			s.Config.Debug = true
 			return true
 		}
 	}
@@ -105,6 +107,9 @@ func Run(sess *session.Session, script string){
 				if string(line[0]) == "@" {
 					Settings(sess, line, &newScript)
 				} else if newScript.Foreach.InForeach{
+					if newScript.Config.Debug{
+						log.Println("Foreach execution...")
+					}
 					if strings.Contains(line,"<=)"){
 						for _, element := range newScript.Foreach.Context{
 							for _, stmts := range newScript.Foreach.Statements{
@@ -144,6 +149,9 @@ func Run(sess *session.Session, script string){
 							}
 						}
 						newScript.Foreach.InForeach = false
+						if newScript.Config.Debug{
+							log.Println("Foreach executed.")
+						}
 						continue
 					}
 					newScript.AddStatement(line)
@@ -155,7 +163,10 @@ func Run(sess *session.Session, script string){
 					if ret != nil {
 						newScript.AddVar(variable, false, ret)
 					}
-				} else if strings.Contains(line, "{") && strings.Contains(line, "}") && !strings.Contains(line,"=>"){
+					if newScript.Config.Debug{
+						log.Println("Assignation", variable)
+					}
+				} else if strings.Contains(line, "{") && strings.Contains(line, "}") && !strings.Contains(line,"=>") && !strings.Contains(line, "="){
 					r, _ := regexp.Compile("\\{(.*?)\\}")
 					v := strings.TrimSpace(r.FindString(line))
 					for _, vars := range newScript.Vars{
@@ -164,6 +175,9 @@ func Run(sess *session.Session, script string){
 								newCommand := strings.Replace(line, v, value, -1)
 								sess.ParseCommand(newCommand)
 								newScript.AddHistory(newCommand)
+								if newScript.Config.Debug{
+									log.Println("Command execution", newCommand)
+								}
 							}
 						}
 					}
@@ -206,5 +220,12 @@ func Run(sess *session.Session, script string){
 			})
 		}
 		t.Render()
+
+		if newScript.Config.Debug{
+			t := time.Now()
+			timeText := t.Format("15:04:05")
+			Settings(sess, "@verbose on", &newScript)
+			sess.Stream.Standard("executed at " + timeText)
+		}
 	}
 }

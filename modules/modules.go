@@ -10,10 +10,12 @@ import (
 	"github.com/graniet/operative-framework/modules/metatag_spider"
 	"github.com/graniet/operative-framework/modules/module_base/session_help"
 	"github.com/graniet/operative-framework/modules/module_base/session_stream"
+	"github.com/graniet/operative-framework/modules/pastebin"
 	"github.com/graniet/operative-framework/modules/pastebin_email"
 	"github.com/graniet/operative-framework/modules/phone_buster"
 	"github.com/graniet/operative-framework/modules/phone_generator"
 	"github.com/graniet/operative-framework/modules/sample"
+	"github.com/graniet/operative-framework/modules/searchsploit"
 	"github.com/graniet/operative-framework/modules/societe_com"
 	"github.com/graniet/operative-framework/modules/system"
 	"github.com/graniet/operative-framework/modules/tools_suggester"
@@ -45,6 +47,8 @@ func LoadModules(s *session.Session){
 	s.Modules = append(s.Modules, tools_suggester.PushModuleToolsSuggester(s))
 	s.Modules = append(s.Modules, sample.PushSampleModuleModule(s))
 	s.Modules = append(s.Modules, system.PushSystemModuleModule(s))
+	s.Modules = append(s.Modules, pastebin.PushPasteBinModule(s))
+	s.Modules = append(s.Modules, searchsploit.PushSearchSploitModule(s))
 
 	for _, mod := range s.Modules{
 		s.PushType(mod.GetType())

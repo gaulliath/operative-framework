@@ -417,6 +417,15 @@ func (s *Session) ParseCommand(line string) []string{
 				module.ListArguments()
 			case "run":
 				if module.CheckRequired() {
+					if len(module.GetExternal()) > 0{
+						for _, external := range module.GetExternal(){
+							_, err := exec.LookPath(external)
+							if err != nil {
+								s.Stream.Error("This module need external program : '" + external + "'")
+								return nil
+							}
+						}
+					}
 					s.Information.ModuleLaunched = s.Information.ModuleLaunched + 1
 					background, errBack := module.GetParameter("BACKGROUND")
 					if errBack == nil && strings.ToLower(background.Value) == "true"{
