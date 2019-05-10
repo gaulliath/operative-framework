@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/graniet/operative-framework/session"
 	"github.com/jung-kurt/gofpdf"
-	"os"
+	"github.com/jung-kurt/gofpdf/contrib/httpimg"
 	"strconv"
 	"strings"
 )
@@ -57,15 +57,16 @@ func (module *ReportPDF) Start(){
 		return
 	}
 
-	pwd, _ := os.Getwd()
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.AddPage()
 	pdf.SetFont("Arial", "B", 16)
-	pdf.ImageOptions(pwd + "/logo.png", 10, 5, 90, 20, false, gofpdf.ImageOptions{ImageType: "PNG", ReadDpi: true}, 0, "")
+	url := "http://tristan-granier.com/static/img/operative.png"
+	httpimg.Register(pdf, url, "")
+	pdf.Image(url, 10, 5, 90, 20, false,"", 0, "")
 
-	TextSeparator := func(text string){
+	TextSeparator := func(text string, size float64){
 		// Arial 12
-		pdf.SetFont("Arial", "", 12)
+		pdf.SetFont("Arial", "", size)
 		// Background color
 		pdf.SetFillColor(230, 126, 0)
 		pdf.SetTextColor(255, 255, 255)
@@ -77,7 +78,7 @@ func (module *ReportPDF) Start(){
 		pdf.Ln(4)
 	}
 
-	TextSeparator("Session: " + module.Sess.SessionName)
+	TextSeparator("Session: " + module.Sess.SessionName, 12)
 	Reset := func(){
 		pdf.SetFont("Arial", "", 12)
 		pdf.SetFillColor(255, 255, 255)
@@ -199,7 +200,7 @@ func (module *ReportPDF) Start(){
 	Targets()
 
 	for _, target := range module.Sess.Targets{
-		TextSeparator("TARGET: " + target.GetId() + " - " + target.GetName())
+		TextSeparator("TARGET: " + target.GetId() + " - " + target.GetName(), 14)
 		Reset()
 		Title("LINKED TARGET(S)")
 		SubTitle("You can see if below the targets link automatically by operative.")
