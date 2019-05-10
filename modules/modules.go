@@ -3,6 +3,7 @@ package modules
 import (
 	"github.com/graniet/operative-framework/modules/bing_vhost"
 	"github.com/graniet/operative-framework/modules/directory_search"
+	"github.com/graniet/operative-framework/modules/get_ipaddress"
 	"github.com/graniet/operative-framework/modules/header_retrieval"
 	"github.com/graniet/operative-framework/modules/image_reverse_search"
 	"github.com/graniet/operative-framework/modules/instagram"
@@ -14,6 +15,7 @@ import (
 	"github.com/graniet/operative-framework/modules/pastebin_email"
 	"github.com/graniet/operative-framework/modules/phone_buster"
 	"github.com/graniet/operative-framework/modules/phone_generator"
+	"github.com/graniet/operative-framework/modules/report_pdf"
 	"github.com/graniet/operative-framework/modules/sample"
 	"github.com/graniet/operative-framework/modules/searchsploit"
 	"github.com/graniet/operative-framework/modules/societe_com"
@@ -49,6 +51,8 @@ func LoadModules(s *session.Session){
 	s.Modules = append(s.Modules, system.PushSystemModuleModule(s))
 	s.Modules = append(s.Modules, pastebin.PushPasteBinModule(s))
 	s.Modules = append(s.Modules, searchsploit.PushSearchSploitModule(s))
+	s.Modules = append(s.Modules, get_ipaddress.PushGetIpAddressModule(s))
+	s.Modules = append(s.Modules, report_pdf.PushReportPDFModule(s))
 
 	for _, mod := range s.Modules{
 		s.PushType(mod.GetType())

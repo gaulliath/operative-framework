@@ -18,13 +18,26 @@ func (s *Session) GetTarget(id string) (*Target, error){
 	return nil, errors.New("can't find selected target")
 }
 
+func (s *Session) GetResult(id string) (*TargetResults, error){
+	for _, target := range s.Targets{
+		for _, module := range target.Results{
+			for _, result := range module{
+				if result.ResultId == id{
+					return result, nil
+				}
+			}
+		}
+	}
+	return &TargetResults{}, errors.New("this result as been not found")
+}
+
 func (s *Session) AddTarget(t string, name string) (string, error){
 	subject := Target{
 		SessionId: s.GetId(),
 		TargetId: ksuid.New().String(),
 		Name: name,
 		Type: t,
-		Results: make(map[string][]TargetResults),
+		Results: make(map[string][]*TargetResults),
 		Sess: s,
 	}
 	if !subject.CheckType(){

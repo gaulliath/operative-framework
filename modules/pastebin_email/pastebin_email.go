@@ -95,13 +95,12 @@ func (module *PasteBinEmail) Start(){
 	resultFound := 0
 	doc.Find(".g").Each(func(i int, s *goquery.Selection) {
 		link := strings.TrimSpace(s.Find("cite").Text())
-		separator := target.GetSeparator()
 		t.AppendRow(table.Row{
 			link,
 		})
 		result := session.TargetResults{
-			Header: "link" + separator,
-			Value: link + separator,
+			Header: "link",
+			Value: link,
 		}
 		module.Results = append(module.Results, link)
 		target.Save(module, result)

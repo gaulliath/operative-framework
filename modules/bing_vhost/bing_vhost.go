@@ -105,6 +105,7 @@ func (module *BingVirtualHostModule) Start(){
 			Value: line,
 		}
 		target.Save(module, result)
+		module.Results = append(module.Results, line)
 	})
 	module.Stream.Render(t)
 

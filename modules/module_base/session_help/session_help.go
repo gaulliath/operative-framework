@@ -62,6 +62,15 @@ func (module *HelpModule) Start(){
 		{"api <run/stop>", "(Run/Stop) restful API"},
 	})
 	module.sess.Stream.Render(t)
+	fmt.Println("NOTES:")
+	t = module.sess.Stream.GenerateTable()
+	t.SetOutputMirror(os.Stdout)
+	t.AppendHeader(table.Row{"command", "description"})
+	t.AppendRows([]table.Row{
+		{"note add <id target/result> <text>", "Add new note to target or result"},
+		{"note view <id target/result>", "View note linked to target or result "},
+	})
+	module.sess.Stream.Render(t)
 	fmt.Println("TARGETS:")
 	t = module.sess.Stream.GenerateTable()
 	t.SetOutputMirror(os.Stdout)
