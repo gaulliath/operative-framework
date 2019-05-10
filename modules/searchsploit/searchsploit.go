@@ -118,6 +118,8 @@ func (module *SearchSploitModule) Start(){
 			Value: exploit.Title + target.GetSeparator() + exploit.URL,
 		}
 		target.Save(module, result)
+
+		module.Results = append(module.Results, exploit.Title)
 	}
 	module.sess.Stream.Render(t)
 }

@@ -68,6 +68,14 @@ type TargetResults struct{
 	TargetId string `json:"target_id" gorm:"target_id"`
 	Header string `json:"key" gorm:"result_header"`
 	Value string `json:"value" gorm:"result_value"`
+	Notes []Note
+}
+
+func (result *TargetResults) AddNote(text string){
+	result.Notes = append(result.Notes, Note{
+		Text: text,
+	})
+	return
 }
 
 func (s *Session) SearchModule(name string)(Module, error){

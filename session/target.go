@@ -15,8 +15,9 @@ type Target struct{
 	Sess *Session `json:"-" gorm:"-"`
 	Name string `json:"name" gorm:"column:target_name"`
 	Type string `json:"type" gorm:"column:target_type"`
-	Results map[string][]TargetResults `sql:"-"`
+	Results map[string][]*TargetResults `sql:"-"`
 	TargetLinked []Linking `json:"target_linked" sql:"-"`
+	Notes []Note
 }
 
 type Linking struct{
@@ -45,7 +46,7 @@ func (sub *Target) GetType() string{
 	return sub.Type
 }
 
-func (sub *Target) GetResults() map[string][]TargetResults{
+func (sub *Target) GetResults() map[string][]*TargetResults{
 	return sub.Results
 }
 
@@ -105,7 +106,7 @@ func (target *Target) Link(target2 Linking){
 	})
 }
 
-func (target *Target) GetResult(id string) (TargetResults, error){
+func (target *Target) GetResult(id string) (*TargetResults, error){
 	for _, module := range target.Results{
 		for _, result := range module{
 			if result.ResultId == id{
@@ -113,7 +114,7 @@ func (target *Target) GetResult(id string) (TargetResults, error){
 			}
 		}
 	}
-	return TargetResults{}, errors.New("Result as been not found.")
+	return &TargetResults{}, errors.New("Result as been not found.")
 }
 
 func (target *Target) Linked(){
@@ -146,7 +147,7 @@ func (target *Target) Save(module Module, result TargetResults) bool{
 	result.TargetId = target.GetId()
 	result.SessionId = target.Sess.GetId()
 	result.ModuleName = module.Name()
-	target.Results[module.Name()] = append(target.Results[module.Name()], result)
+	target.Results[module.Name()] = append(target.Results[module.Name()], &result)
 	target.Sess.Connection.ORM.Create(&result).Table("target_results")
 	targets, err := target.Sess.FindLinked(module.Name(), result)
 	if err == nil {
@@ -161,12 +162,19 @@ func (target *Target) Save(module Module, result TargetResults) bool{
 	return true
 }
 
-func (target *Target) GetModuleResults(name string) ([]TargetResults, error){
+func (target *Target) GetModuleResults(name string) ([]*TargetResults, error){
 
 	for moduleName, results := range target.Results{
 		if moduleName == name{
 			return results, nil
 		}
 	}
-	return []TargetResults{}, errors.New("result not found for this module")
+	return []*TargetResults{}, errors.New("result not found for this module")
+}
+
+func (target *Target) AddNote(text string){
+	target.Notes = append(target.Notes, Note{
+		Text: text,
+	})
+	return
 }

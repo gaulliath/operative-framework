@@ -6,6 +6,7 @@ import (
 	"github.com/graniet/go-pretty/table"
 	"net/url"
 	"os"
+	"strings"
 )
 
 type HeaderRetrievalModule struct{
@@ -74,6 +75,10 @@ func (module *HeaderRetrievalModule) Start(){
 	header := req.Header{
 		"Accept":        "application/json",
 		"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.103 Safari/537.36",
+	}
+
+	if !strings.Contains(target.GetName(), "://"){
+		target.Name = "http://" + target.Name
 	}
 
 	r, err := req.Get(target.GetName(), header)

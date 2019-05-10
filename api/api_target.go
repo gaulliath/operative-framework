@@ -25,7 +25,7 @@ type TargetInformationResponse struct{
 	TargetId string `json:"target_id"`
 	TargetName string `json:"target_name"`
 	TargetType string `json:"target_type"`
-	TargetResults map[string][]session.TargetResults `json:"target_results"`
+	TargetResults map[string][]*session.TargetResults `json:"target_results"`
 
 }
 

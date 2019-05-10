@@ -1,6 +1,7 @@
 package session
 
 import (
+	"fmt"
 	"github.com/chzyer/readline"
 	"github.com/graniet/go-pretty/table"
 	"os"
@@ -85,6 +86,18 @@ func (s *Session) ReadLineAutoCompleteResults() func(string) []string{
 		value := strings.Split(line, " ")
 		var returnResult []string
 		if len(value) < 4{
+			if value[1] == "add"{
+				for _, target := range s.Targets{
+					for _, module := range target.Results{
+						for _, result := range module{
+							if result.Value != "" {
+								returnResult = append(returnResult, result.ResultId)
+							}
+						}
+					}
+				}
+				return returnResult
+			}
 			return []string{
 			}
 		}
@@ -106,6 +119,11 @@ func (s *Session) ReadLineAutoCompleteResults() func(string) []string{
 
 func (s *Session) PushPrompt(){
 	var completer = readline.NewPrefixCompleter(
+		readline.PcItem("note",
+			readline.PcItem("add",
+				readline.PcItemDynamic(s.ReadLineAutoCompleteResults())),
+				readline.PcItem("view",
+					readline.PcItemDynamic(s.ReadLineAutoCompleteTargets()))),
 		readline.PcItem("target",
 			readline.PcItem("add",
 				readline.PcItemDynamic(s.ReadLineAutoCompleteType())),
@@ -126,7 +144,8 @@ func (s *Session) PushPrompt(){
 						readline.PcItemDynamic(s.ReadLineAutoCompleteResults()))),
 				readline.PcItem("results",
 					readline.PcItemDynamic(s.ReadLineAutoCompleteTargets(),
-						readline.PcItemDynamic(s.ReadLineAutoCompleteModuleResults())))),
+						readline.PcItemDynamic(s.ReadLineAutoCompleteModuleResults()))),
+				readline.PcItem("notes")),
 		),
 		readline.PcItemDynamic(s.ReadLineAutoCompleteListModules(),
 			readline.PcItem("list"),
@@ -163,7 +182,7 @@ func (s *Session) ParseCommand(line string) []string{
 	if err != nil{
 		if moduleName == "help"{
 			module, err = s.SearchModule("session_help")
-		} else if !strings.HasPrefix(strings.TrimSpace(line), "target ") {
+		} else if !strings.HasPrefix(strings.TrimSpace(line), "target ") && !strings.HasPrefix(strings.TrimSpace(line), "note ") {
 			s.Stream.Error("command '"+line+"' do not exist")
 			s.Stream.Error("'help' for more information")
 			return nil
@@ -180,7 +199,64 @@ func (s *Session) ParseCommand(line string) []string{
 			module.SetParameter("CMD", value[1])
 			module.Start()
 			return nil
-		} else if strings.HasPrefix(line, "target "){
+		} else if strings.HasPrefix(line, "note "){
+			arguments := strings.Split(strings.TrimSpace(line), " ")
+			switch arguments[1] {
+			case "add":
+				value := strings.SplitN(strings.TrimSpace(line), " ", 4)
+				findTarget, err := s.GetTarget(value[2])
+				if err != nil{
+					findResult, err := s.GetResult(value[2])
+					if err != nil{
+						s.Stream.Error("can't be find target/result with id '"+value[2]+"'")
+						return nil
+					}
+					findResult.AddNote(value[3])
+					s.Stream.Success("Note as been added to '"+value[2]+"'")
+					return nil
+				}
+				findTarget.AddNote(value[3])
+				s.Stream.Success("Note as been added to '"+value[2]+"'")
+				return nil
+			case "view":
+				value := strings.SplitN(strings.TrimSpace(line), " ", 3)
+				findTarget, err := s.GetTarget(value[2])
+				t := s.Stream.GenerateTable()
+				t.SetOutputMirror(os.Stdin)
+				if err != nil{
+					findResult, err := s.GetResult(value[2])
+					fmt.Println(findResult)
+					if err != nil{
+						s.Stream.Error("can't be find target/result with id '"+value[2]+"'")
+						return nil
+					}
+					t.AppendHeader(table.Row{
+						"ID",
+						"NOTE",
+					})
+					for _, note := range findResult.Notes{
+						t.AppendRow(table.Row{
+							note.Id,
+							note.Text,
+						})
+					}
+					s.Stream.Render(t)
+					return nil
+				}
+				t.AppendHeader(table.Row{
+					"ID",
+					"NOTE",
+				})
+				for _, note := range findTarget.Notes{
+					t.AppendRow(table.Row{
+						note.Id,
+						note.Text,
+					})
+				}
+				s.Stream.Render(t)
+				return nil
+			}
+		}else if strings.HasPrefix(line, "target "){
 			arguments := strings.Split(strings.TrimSpace(line), " ")
 			switch arguments[1] {
 			case "add":
