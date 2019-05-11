@@ -104,7 +104,7 @@ func (module *TwitterRetweet) Start(){
 		"Date",
 	})
 	t.SetAllowedColumnLengths([]int{40, 0,})
-	separator := target.GetSeparator()
+
 	for _, tweet := range retweets{
 		var text string
 		if strings.Contains(tweet.Text, "RT @"){
@@ -120,8 +120,8 @@ func (module *TwitterRetweet) Start(){
 		})
 
 		result := session.TargetResults{
-			Header: "Text" + separator,
-			Value: text + separator,
+			Header: "Text",
+			Value: text,
 		}
 		target.Save(module, result)
 	}

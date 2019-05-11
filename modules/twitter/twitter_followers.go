@@ -125,15 +125,14 @@ func (module *TwitterFollower) Start(){
 	t.AppendHeader(table.Row{
 		"Twitter ID",
 	})
-	separator := target.GetSeparator()
 	for _, ids := range followerIds{
 		module.Results = append(module.Results, strconv.Itoa(int(ids)))
 		t.AppendRow(table.Row{
 			ids,
 		})
 		result := session.TargetResults{
-			Header: "Twitter ID" + separator,
-			Value: strconv.Itoa(int(ids)) + separator,
+			Header: "Twitter ID",
+			Value: strconv.Itoa(int(ids)),
 		}
 		target.Save(module, result)
 	}

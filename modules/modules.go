@@ -1,6 +1,7 @@
 package modules
 
 import (
+	"github.com/graniet/operative-framework/modules/account_checker"
 	"github.com/graniet/operative-framework/modules/bing_vhost"
 	"github.com/graniet/operative-framework/modules/directory_search"
 	"github.com/graniet/operative-framework/modules/get_ipaddress"
@@ -53,6 +54,7 @@ func LoadModules(s *session.Session){
 	s.Modules = append(s.Modules, searchsploit.PushSearchSploitModule(s))
 	s.Modules = append(s.Modules, get_ipaddress.PushGetIpAddressModule(s))
 	s.Modules = append(s.Modules, report_pdf.PushReportPDFModule(s))
+	s.Modules = append(s.Modules, account_checker.PushAccountCheckerModule(s))
 
 	for _, mod := range s.Modules{
 		s.PushType(mod.GetType())
