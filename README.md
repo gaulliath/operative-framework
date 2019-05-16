@@ -2,6 +2,13 @@
 
 **operative framework** is a digital investigation framework, you can interact with multiple targets, execute multiple modules, create links with target, export rapport to PDF file, add note to target or results, interact with RESTFul API, write your own modules.
 
+#### INSTALLATION
+
+```
+go get github.com/graniet/operative-framework
+```
+
+
 #### ENGINE COMMANDS
 
 | COMMAND        | DESCRIPTION                          |
