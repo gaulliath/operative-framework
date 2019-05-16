@@ -8,6 +8,12 @@
 go get github.com/graniet/operative-framework
 ```
 
+#### UPDATE
+
+```
+go get -u github.com/graniet/operative-framework
+```
+
 
 #### ENGINE COMMANDS
 
