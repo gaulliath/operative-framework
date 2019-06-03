@@ -1,30 +1,32 @@
-package phone_generator
+package phone_generator_fr
 
 import (
 	"fmt"
 	"github.com/graniet/operative-framework/session"
 	"os"
+	"strconv"
 	"strings"
 	"sync"
 	"syreclabs.com/go/faker"
 	"gopkg.in/cheggaaa/pb.v1"
 	"github.com/segmentio/ksuid"
+	"math/rand"
 )
 
-type PhoneGenerator struct{
+type PhoneGeneratorFr struct{
 	session.SessionModule
 	Sess *session.Session
 	Current int
 	Bar *pb.ProgressBar
 }
 
-func PushPhoneGeneratorModule(s *session.Session) *PhoneGenerator{
-	mod := PhoneGenerator{
+func PushPhoneGeneratorFrModule(s *session.Session) *PhoneGeneratorFr{
+	mod := PhoneGeneratorFr{
 		Sess: s,
 		Current: 1,
 	}
 
-	mod.CreateNewParam("NUMBER_PREFIX", "Country prefix ex: (310)", "310", false, session.STRING)
+	mod.CreateNewParam("NUMBER_PREFIX", "Country prefix ex: (33)", "33", false, session.STRING)
 	mod.CreateNewParam("NAME_PREFIX", "Prefix of contact random name ex: (BHILLS_)", "", false, session.STRING)
 	mod.CreateNewParam("FILE_PATH", "Location for generated VCards", "", false, session.STRING)
 	mod.CreateNewParam("VCARD", "Generate vcard to file", "true", false, session.BOOL)
@@ -32,23 +34,23 @@ func PushPhoneGeneratorModule(s *session.Session) *PhoneGenerator{
 	return &mod
 }
 
-func (module *PhoneGenerator) Name() string{
-	return "phone_generator"
+func (module *PhoneGeneratorFr) Name() string{
+	return "phone_generator_fr"
 }
 
-func (module *PhoneGenerator) Description() string{
-	return "Generate VCard (.vcf) with random numbers"
+func (module *PhoneGeneratorFr) Description() string{
+	return "Generate VCard (.vcf) with random french numbers"
 }
 
-func (module *PhoneGenerator) Author() string{
+func (module *PhoneGeneratorFr) Author() string{
 	return "Tristan Granier"
 }
 
-func (module *PhoneGenerator) GetType() string{
+func (module *PhoneGeneratorFr) GetType() string{
 	return "country"
 }
 
-func (module *PhoneGenerator) GetInformation() session.ModuleInformation{
+func (module *PhoneGeneratorFr) GetInformation() session.ModuleInformation{
 	information := session.ModuleInformation{
 		Name: module.Name(),
 		Description: module.Description(),
@@ -59,7 +61,7 @@ func (module *PhoneGenerator) GetInformation() session.ModuleInformation{
 	return information
 }
 
-func (module *PhoneGenerator) Start(){
+func (module *PhoneGeneratorFr) Start(){
 
 	argumentPrefix, err := module.GetParameter("NUMBER_PREFIX")
 	if err != nil{
@@ -107,16 +109,16 @@ func (module *PhoneGenerator) Start(){
 	for{
 		if module.Current < module.Sess.StringToInteger(argumentLimit.Value) {
 			wg.Add(1)
-			go func(module *PhoneGenerator, bar *pb.ProgressBar) {
+			go func(module *PhoneGeneratorFr, bar *pb.ProgressBar) {
 				phone := faker.PhoneNumber().CellPhone()
 				if strings.Contains(phone, "(") && strings.Contains(phone, ")") {
 					newPhone := strings.Split(phone, ")")[1]
 					if argumentPrefix.Value != "" {
-						newPhone = "+1 ("+strings.TrimSpace(argumentPrefix.Value)+")" + newPhone
+						randomNumber := rand.Intn(9)
+						newPhone = "+"+strings.TrimSpace(argumentPrefix.Value) + " 6" + strings.TrimSpace(strings.Replace(newPhone, "-", "", -1)) + strconv.Itoa(randomNumber)
 					} else{
 						newPhone = "+1 (213)" + newPhone
 					}
-
 					module.Results = append(module.Results, newPhone)
 					module.Current = module.Current + 1
 					bar.Increment()

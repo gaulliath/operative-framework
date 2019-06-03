@@ -37,6 +37,7 @@ func PushWhatsappExtractorModule(s *session.Session) *WhatsappExtractor{
 	mod := WhatsappExtractor{
 		Sess: s,
 	}
+	mod.CreateNewParam("FILE_PATH", "File to extract contacts", "contacts.json", true, session.STRING)
 	return &mod
 }
 
@@ -83,6 +84,13 @@ func readSession() (whatsapp.Session, error) {
 }
 
 func (module *WhatsappExtractor) Start(){
+
+	file_ouput, err := module.GetParameter("FILE_PATH")
+	if err != nil{
+		module.Sess.Stream.Error(err.Error())
+		return
+
+	}
 	//create new WhatsApp connection
 	wac, err := whatsapp.NewConn(5 * time.Second)
 	if err != nil {
@@ -152,7 +160,7 @@ func (module *WhatsappExtractor) Start(){
 		module.Sess.Stream.Render(t)
 		module.Sess.Stream.Success("Total contacts : " + strconv.Itoa(len(contacts)))
 		rankingsJson, _ := json.Marshal(module.Contacts)
-		err = ioutil.WriteFile("contacts.json", rankingsJson, 0644)
+		err = ioutil.WriteFile(file_ouput.Value, rankingsJson, 0644)
 	}
 
 }
