@@ -3,6 +3,7 @@ package modules
 import (
 	"github.com/graniet/operative-framework/modules/account_checker"
 	"github.com/graniet/operative-framework/modules/bing_vhost"
+	"github.com/graniet/operative-framework/modules/darksearch"
 	"github.com/graniet/operative-framework/modules/directory_search"
 	"github.com/graniet/operative-framework/modules/get_ipaddress"
 	"github.com/graniet/operative-framework/modules/google_search"
@@ -61,6 +62,7 @@ func LoadModules(s *session.Session){
 	s.Modules = append(s.Modules, google_search.PushGoogleSearchModule(s))
 	s.Modules = append(s.Modules, phone_generator_fr.PushPhoneGeneratorFrModule(s))
 	s.Modules = append(s.Modules, mac_vendor.PushMacVendorModule(s))
+	s.Modules = append(s.Modules, darksearch.PushMacVendorModule(s))
 
 	for _, mod := range s.Modules{
 		s.PushType(mod.GetType())
