@@ -111,7 +111,11 @@ func (module *HelpModule) Start(){
 	t.SetOutputMirror(os.Stdout)
 	t.AppendHeader(table.Row{"Module Name", "Module Description", "Target"})
 	for _, mod := range module.sess.Modules{
-		t.AppendRow([]interface{}{mod.Name(), mod.Description(), mod.GetType()})
+		if mod.GetType() == ""{
+			t.AppendRow([]interface{}{mod.Name(), mod.Description(), "<blank>"})
+		} else{
+			t.AppendRow([]interface{}{mod.Name(), mod.Description(), mod.GetType()})
+		}
 	}
 	module.sess.Stream.Render(t)
 
