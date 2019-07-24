@@ -5,3 +5,6 @@
 #### DOWNLOAD LATEST RELEASE
 
 https://github.com/graniet/operative-framework/releases
+
+#### USE CASE
+[how i found french government representatives phone numbers with operative framework](https://www.numerama.com/tech/535622-whatsapp-comment-un-hack-permet-de-trouver-les-contacts-de-personnalites-publiques.html)
