@@ -7,4 +7,8 @@
 https://github.com/graniet/operative-framework/releases
 
 #### USE CASE
-[how i found french government representatives phone numbers with operative framework](https://www.numerama.com/tech/535622-whatsapp-comment-un-hack-permet-de-trouver-les-contacts-de-personnalites-publiques.html)
+[OSINT : des numéros de politiques françaises interceptés via Whatsapp](https://www.zataz.com/osint-des-numeros-de-politiques-francaises-interceptes-via-whatsapp/)
+
+[WhatsApp : comment un hack permet de trouver les contacts de personnalités publiques](https://www.numerama.com/tech/535622-whatsapp-comment-un-hack-permet-de-trouver-les-contacts-de-personnalites-publiques.html)
+
+[Les numéros de personnalités politiques « aspirés » sur WhatsApp](https://www.lepoint.fr/high-tech-internet/les-numeros-de-personnalites-politiques-aspires-sur-whatsapp-24-07-2019-2326637_47.php)
