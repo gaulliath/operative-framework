@@ -196,7 +196,7 @@ func (s *Session) ParseCommand(line string) []string{
 				s.Stream.Error("Please use sh <cmd> e.g: sh ls")
 				return nil
 			}
-			module.SetParameter("CMD", value[1])
+			_,_ = module.SetParameter("CMD", value[1])
 			module.Start()
 			return nil
 		} else if strings.HasPrefix(line, "note "){

@@ -10,7 +10,10 @@ import (
 	"os"
 )
 
+// Checking If Input As Default Command
 func CommandBase(line string, s *session.Session) bool{
+
+	// Default Command
 	if line == "info session"{
 		ViewInformation(s)
 		return true
@@ -27,6 +30,7 @@ func CommandBase(line string, s *session.Session) bool{
 	return false
 }
 
+// View Environment File Argument
 func viewEnvironment(s *session.Session){
 	t := s.Stream.GenerateTable()
 	t.SetOutputMirror(os.Stdout)
@@ -46,6 +50,7 @@ func viewEnvironment(s *session.Session){
 	s.Stream.Render(t)
 }
 
+// View Session Information
 func ViewInformation(s *session.Session){
 	t := s.Stream.GenerateTable()
 	t.SetOutputMirror(os.Stdout)
@@ -81,6 +86,7 @@ func ViewInformation(s *session.Session){
 	s.Stream.Render(t)
 }
 
+// View Api EndPoints Information
 func ViewApiInformation(s *session.Session){
 	a := api.PushARestFul(s)
 	r := a.LoadRouter()

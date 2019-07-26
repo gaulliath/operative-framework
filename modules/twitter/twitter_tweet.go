@@ -107,21 +107,33 @@ func (module *TwitterRetweet) Start(){
 
 	for _, tweet := range retweets{
 		var text string
+		var user string
+		var tweetType string
 		if strings.Contains(tweet.Text, "RT @"){
 			text = strings.TrimSpace(strings.Split(tweet.FullText, ":")[1])
 			t := text[:len(text) - 3]
 			text = t
+			if len(tweet.Entities.User_mentions) > 0 {
+				user = tweet.Entities.User_mentions[0].Screen_name
+			} else {
+				user = tweet.User.ScreenName
+			}
+			tweetType = "RT"
 		} else{
+			user = tweet.User.ScreenName
 			text = strings.TrimSpace(tweet.FullText)
+			tweetType = "T"
 		}
 		t.AppendRow(table.Row{
 			text,
+			user,
+			tweetType,
 			tweet.CreatedAt,
 		})
 
 		result := session.TargetResults{
-			Header: "Text",
-			Value: text,
+			Header: "tweet" + target.GetSeparator() + "user" + target.GetSeparator() + "date" + target.GetSeparator() + "type",
+			Value: text + target.GetSeparator() + user + target.GetSeparator() + tweet.CreatedAt + target.GetSeparator() + tweetType,
 		}
 		target.Save(module, result)
 	}

@@ -9,6 +9,7 @@ import (
 	"time"
 )
 
+// Generate New Session
 func New() *session.Session{
 	conf, err := config.ParseConfig()
 	if err != nil{
@@ -47,6 +48,7 @@ func New() *session.Session{
 	return &s
 }
 
+// Load Session With ID
 func Load(id int) *session.Session{
 	conf, err := config.ParseConfig()
 	if err != nil{
@@ -80,13 +82,13 @@ func Load(id int) *session.Session{
 	modules.LoadModules(&s)
 	filters.LoadFilters(&s)
 
-	// Load targets now
+	// Load targets
 	var targets []*session.Target
 	s.Connection.ORM.Where("session_id = ?", id).Find(&targets)
 	s.Targets = targets
 
 
-	// Load target result now
+	// Load target results
 	if len(s.Targets) > 0{
 		for k, target := range s.Targets{
 			var linked []session.Linking

@@ -8,7 +8,9 @@ import (
 	"github.com/graniet/operative-framework/api"
 	"github.com/graniet/operative-framework/compiler"
 	"github.com/graniet/operative-framework/engine"
+	"github.com/graniet/operative-framework/services"
 	"github.com/graniet/operative-framework/session"
+	"github.com/graniet/operative-framework/supervisor"
 	"github.com/joho/godotenv"
 	"io"
 	"log"
@@ -20,9 +22,15 @@ import (
 
 func main(){
 	var sess *session.Session
+	var sp *supervisor.Supervisor
+
+	// Load Configuration File
 	configFile := ".env"
 	err := godotenv.Load(".env")
+
 	if err != nil {
+
+		// Generate Default .env File
 		u, errU := user.Current()
 		if errU != nil{
 			fmt.Println("Please create a .env file on root path.")
@@ -46,10 +54,16 @@ func main(){
 		}
 		configFile = u.HomeDir + "/.opf/.env"
 	}
+
+	// Argument parser
 	parser := argparse.NewParser("operative-framework", "digital investigation framework")
 	rApi := parser.Flag("a", "api", &argparse.Options{
 		Required: false,
 		Help: "Load instantly operative framework restful API",
+	})
+	rSupervisor := parser.Flag("", "services", &argparse.Options{
+		Required: false,
+		Help: "Running supervised services.",
 	})
 	verbose := parser.Flag("v","verbose", &argparse.Options{
 		Required: false,
@@ -84,6 +98,8 @@ func main(){
 		fmt.Print(parser.Usage(err))
 		return
 	}
+
+	// Checking if session as been specified
 	if *loadSession > 0{
 		sess = engine.Load(*loadSession)
 	} else{
@@ -93,6 +109,16 @@ func main(){
 	sess.PushPrompt()
 	sess.Config.Common.ConfigurationFile = configFile
 	apiRest := api.PushARestFul(sess)
+
+	if *rSupervisor{
+		// Load supervised services.
+		sp = supervisor.GetNewSupervisor(sess)
+		services.Load(sp)
+		// Reading loaded services
+		sp.Read()
+		return
+	}
+
 	if *help{
 		fmt.Print(parser.Usage(""))
 		return
@@ -134,6 +160,7 @@ func main(){
 	}
 	defer l.Close()
 
+	// Run Operative Framework Menu
 	for{
 		line, err := l.Readline()
 		if err == readline.ErrInterrupt {
@@ -146,7 +173,10 @@ func main(){
 			break
 		}
 
+		// Get Line With Trim Space
 		line = strings.TrimSpace(line)
+
+		// Checking Command
 		if line == "api run"{
 			sess.Stream.Success("API Rest as been started at http://" + sess.Config.Api.Host + ":" + sess.Config.Api.Port)
 			go apiRest.Start()

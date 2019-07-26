@@ -18,6 +18,15 @@ func (s *Session) GetTarget(id string) (*Target, error){
 	return nil, errors.New("can't find selected target")
 }
 
+func (s *Session) GetTargetByName(name string)(*Target, error) {
+	for _, targ := range s.Targets{
+		if targ.GetName() == name{
+			return targ, nil
+		}
+	}
+	return nil, errors.New("can't find selected target")
+}
+
 func (s *Session) GetResult(id string) (*TargetResults, error){
 	for _, target := range s.Targets{
 		for _, module := range target.Results{
@@ -57,7 +66,7 @@ func (s *Session) AddTarget(t string, name string) (string, error){
 	}
 	for _, subject := range s.Targets{
 		if subject.GetName() == name && subject.GetType() == t{
-			return "", errors.New("this target already exist on current session")
+			return subject.GetId(), errors.New("this target already exist on current session")
 		}
 	}
 	s.Targets = append(s.Targets, &subject)

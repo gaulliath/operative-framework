@@ -6,6 +6,7 @@ import (
 	"github.com/graniet/go-pretty/table"
 	"github.com/segmentio/ksuid"
 	"os"
+	"strings"
 )
 
 type Target struct{
@@ -170,6 +171,31 @@ func (target *Target) GetModuleResults(name string) ([]*TargetResults, error){
 		}
 	}
 	return []*TargetResults{}, errors.New("result not found for this module")
+}
+
+func (target *Target) GetFormatedResults(module string) (map[int]map[string]string, error) {
+	formated := make(map[int]map[string]string)
+
+	results, err := target.GetModuleResults(module)
+	if err != nil {
+		return formated, err
+	}
+
+	for modulekey, result := range results{
+		resultMap := make(map[string]string)
+		separator := target.GetSeparator()
+		header := strings.Split(result.Header, separator)
+		res := strings.Split(result.Value, separator)
+		for k, r := range res{
+			if len(header) < len(res) && k > len(header){
+				resultMap[ksuid.New().String()] = r
+			} else {
+				resultMap[header[k]] = r
+			}
+		}
+		formated[modulekey] = resultMap
+	}
+	return formated, nil
 }
 
 func (target *Target) AddNote(text string){
