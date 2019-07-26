@@ -34,6 +34,7 @@ func (service *Service) Name() string{
 	return "tweets.service"
 }
 
+// Define if service need configuration file
 func (service *Service) HasConfiguration() bool{
 	return true
 }
