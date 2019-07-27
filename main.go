@@ -8,7 +8,7 @@ import (
 	"github.com/graniet/operative-framework/api"
 	"github.com/graniet/operative-framework/compiler"
 	"github.com/graniet/operative-framework/engine"
-	"github.com/graniet/operative-framework-services"
+	"github.com/graniet/operative-framework/services"
 	"github.com/graniet/operative-framework/session"
 	"github.com/graniet/operative-framework/supervisor"
 	"github.com/joho/godotenv"
@@ -23,6 +23,7 @@ import (
 func main(){
 	var sess *session.Session
 	var sp *supervisor.Supervisor
+	var configService string
 
 	// Load Configuration File
 	configFile := ".env"
@@ -53,6 +54,7 @@ func main(){
 			}
 		}
 		configFile = u.HomeDir + "/.opf/.env"
+		configService = u.HomeDir + "/.opf/services/"
 	}
 
 	// Argument parser
@@ -108,12 +110,14 @@ func main(){
 
 	sess.PushPrompt()
 	sess.Config.Common.ConfigurationFile = configFile
+	sess.Config.Common.ConfigurationService = configService
 	apiRest := api.PushARestFul(sess)
 
+	// Load supervised services.
+	sp = supervisor.GetNewSupervisor(sess)
+	services.Load(sp)
+
 	if *rSupervisor{
-		// Load supervised services.
-		sp = supervisor.GetNewSupervisor(sess)
-		services.Load(sp)
 		// Reading loaded services
 		sp.Read()
 		return

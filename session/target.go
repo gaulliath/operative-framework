@@ -173,15 +173,14 @@ func (target *Target) GetModuleResults(name string) ([]*TargetResults, error){
 	return []*TargetResults{}, errors.New("result not found for this module")
 }
 
-func (target *Target) GetFormatedResults(module string) (map[int]map[string]string, error) {
-	formated := make(map[int]map[string]string)
-
+func (target *Target) GetFormatedResults(module string) ([]map[string]string, error) {
+	var formated []map[string]string
 	results, err := target.GetModuleResults(module)
 	if err != nil {
 		return formated, err
 	}
 
-	for modulekey, result := range results{
+	for _, result := range results{
 		resultMap := make(map[string]string)
 		separator := target.GetSeparator()
 		header := strings.Split(result.Header, separator)
@@ -193,7 +192,7 @@ func (target *Target) GetFormatedResults(module string) (map[int]map[string]stri
 				resultMap[header[k]] = r
 			}
 		}
-		formated[modulekey] = resultMap
+		formated = append(formated, resultMap)
 	}
 	return formated, nil
 }

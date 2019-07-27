@@ -4,6 +4,7 @@ import (
 	"github.com/chzyer/readline"
 	"github.com/graniet/operative-framework/config"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
+	"time"
 )
 
 type Session struct{
@@ -19,12 +20,29 @@ type Session struct{
 	Prompt *readline.Config `json:"-" sql:"-"`
 	Stream Stream `json:"-" sql:"-"`
 	TypeLists []string `json:"type_lists" sql:"-"`
+	ServiceFolder	string `json:"home_folder"`
+	Services	[]Listener
 }
 
 type Information struct{
 	ApiStatus bool `json:"api_status"`
 	ModuleLaunched int `json:"module_launched"`
 	Event int `json:"event"`
+}
+
+type Listener struct{
+	ExecutedAt time.Time `json:"executed_at"`
+	NextExecution time.Time `json:"next_execution"`
+	Service Service `json:"service"`
+}
+
+type Service interface {
+	Name()	string
+	Run()	(bool, error)
+	GetHibernate() time.Duration
+	HasConfiguration() bool
+	GetConfiguration() string
+	GetRequired() []string
 }
 
 func (i *Information) AddEvent(){
@@ -62,4 +80,8 @@ func (s *Session) PushType(t string){
 		}
 	}
 	s.TypeLists = append(s.TypeLists, t)
+}
+
+func (s *Session) AddService(service Listener){
+	s.Services = append(s.Services, service)
 }

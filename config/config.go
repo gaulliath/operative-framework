@@ -26,6 +26,7 @@ type DataBase struct{
 type Common struct{
 	HistoryFile string
 	ConfigurationFile string
+	ConfigurationService string
 }
 
 type ApiConfig struct{

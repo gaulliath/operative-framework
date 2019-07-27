@@ -1,0 +1,5 @@
+TWITTER="username1,username2"
+LAST_TWEETS=50
+TO_SERVER=true
+SERVER_URI="http://example.com/api/v1.0/insert"
+VERBOSE=true
