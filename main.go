@@ -8,7 +8,7 @@ import (
 	"github.com/graniet/operative-framework/api"
 	"github.com/graniet/operative-framework/compiler"
 	"github.com/graniet/operative-framework/engine"
-	"github.com/graniet/operative-framework/services"
+	"github.com/graniet/operative-framework-services"
 	"github.com/graniet/operative-framework/session"
 	"github.com/graniet/operative-framework/supervisor"
 	"github.com/joho/godotenv"
