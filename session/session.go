@@ -41,7 +41,7 @@ type Service interface {
 	Run()	(bool, error)
 	GetHibernate() time.Duration
 	HasConfiguration() bool
-	GetConfiguration() string
+	GetConfiguration() map[string]string
 	GetRequired() []string
 }
 

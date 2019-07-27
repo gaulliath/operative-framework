@@ -41,9 +41,15 @@ func (service *Service) HasConfiguration() bool{
 	return true
 }
 
-// Get configuration file
-func (service *Service) GetConfiguration() string{
-	return service.session.Config.Common.ConfigurationService + "tweets.service/service.conf"
+// Get configuration
+func (service *Service) GetConfiguration() map[string]string{
+	configuration := make(map[string]string)
+	configuration["TWITTER"] = "username1,username2"
+	configuration["LAST_TWEETS"] = "50"
+	configuration["TO_SERVER"] = "false"
+	configuration["SERVER_URI"] = "http://example.com/api/v1.0/insert"
+	configuration["VERBOSE"] = "true"
+	return configuration
 }
 
 // Get required fields in configuration file
@@ -120,7 +126,7 @@ func (service *Service) Fetch(configuration map[string]string, username string) 
 // Service Execution with opf routine
 func (service *Service) Run() (bool, error){
 
-	configuration, _ := godotenv.Read(service.GetConfiguration())
+	configuration, _ := godotenv.Read(service.session.Config.Common.ConfigurationService + service.Name() + "/service.conf")
 	service.session.Stream.Verbose = false
 
 	if strings.Contains(configuration["TWITTER"], ",") {

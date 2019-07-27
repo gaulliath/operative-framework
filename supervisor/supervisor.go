@@ -4,7 +4,6 @@ import (
 	"github.com/graniet/operative-framework/engine"
 	"github.com/graniet/operative-framework/session"
 	"github.com/joho/godotenv"
-	"io"
 	"log"
 	"os"
 	"time"
@@ -37,10 +36,11 @@ func (sup *Supervisor) AddHistory(s string) {
 
 func (sup *Supervisor) Launch(service session.Listener, routine chan int) session.Listener{
 
+	path := sup.Session.Config.Common.ConfigurationService + service.Service.Name() + "/service.conf"
 	if service.Service.HasConfiguration() {
-		configuration, err := godotenv.Read(service.Service.GetConfiguration())
+		configuration, err := godotenv.Read(path)
 		if err != nil {
-			log.Fatalln("'" + service.Service.GetConfiguration() + "' Config as been not found")
+			log.Fatalln("'" + path + "' Config as been not found")
 		}
 
 		for _, validator := range service.Service.GetRequired() {
@@ -75,32 +75,32 @@ func (sup *Supervisor) Configure() error {
 		if _, err := os.Stat(sup.Session.Config.Common.ConfigurationService + service.Service.Name()); os.IsNotExist(err){
 			_ = os.Mkdir(sup.Session.Config.Common.ConfigurationService + service.Service.Name(), os.ModePerm)
 		}
-		path := sup.Session.Config.Common.ConfigurationService + service.Service.Name() + "/service.conf"
-		if _, err := os.Stat(path); os.IsNotExist(err) {
-			var file *os.File
-			var errPath error
 
-			if _, err := os.Stat("./services/" + service.Service.Name() + "/service.conf.example"); os.IsNotExist(err){
-				return  err
-			}
+		if !service.Service.HasConfiguration(){
+			continue
+		}
 
-			in, err := os.Open("./services/" + service.Service.Name() + "/service.conf.example")
-			if err != nil {
-				return err
-			}
-			defer in.Close()
+		if _, err := os.Stat(sup.Session.Config.Common.ConfigurationService + service.Service.Name() + "/service.conf"); !os.IsNotExist(err){
+			continue
+		}
 
-			file, errPath = os.OpenFile(path, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0755)
-			if errPath != nil{
-				return errPath
-			}
-			defer file.Close()
+		// Generate a .env
+		var file *os.File
+		var errPath error
 
-			_, err = io.Copy(file, in)
-			if err != nil {
-				return err
+		file, errPath = os.OpenFile(sup.Session.Config.Common.ConfigurationService + service.Service.Name() + "/service.conf", os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0755)
+		if errPath != nil{
+			return errPath
+		}
+		defer file.Close()
+
+		// Writing parameters
+		for key, param := range service.Service.GetConfiguration(){
+			if param == "" {
+				_, _ = file.WriteString(key + "=\n")
+			} else{
+				_, _ = file.WriteString(key + "=" + "\""+param+"\"\n")
 			}
-			log.Println("service '"+service.Service.Name()+"' configured.")
 		}
 		sup.Session.AddService(service)
 	}
