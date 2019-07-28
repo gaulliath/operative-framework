@@ -128,5 +128,7 @@ func (module *InstagramFeed) Start(){
 		}
 	}
 	module.Sess.Stream.Render(t)
-	module.Sess.Stream.Standard("Feed as exported at '"+exportPath + target.Name+"'")
+	if hasDownload {
+		module.Sess.Stream.Standard("Feed as exported at '" + exportPath + target.Name + "'")
+	}
 }

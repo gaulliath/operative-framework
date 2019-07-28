@@ -127,7 +127,7 @@ func (module *InstagramFriends) Start(){
 	}
 
 	module.Sess.Stream.Render(t)
-	module.Sess.Stream.Standard("Possible friend '"+strconv.Itoa(len(friends))+"'")
+	module.Sess.Stream.Standard("Possible friend(s) '"+strconv.Itoa(len(friends))+"'")
 
 
 }
