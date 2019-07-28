@@ -20,7 +20,6 @@ func PushInstagramInfoModule(s *session.Session) *InstagramInfo{
 	}
 
 	mod.CreateNewParam("TARGET", "INSTAGRAM USER ACCOUNT", "",true,session.STRING)
-	mod.CreateNewParam("DOWNLOAD", "DOWNLOAD INSTAGRAM USER FEED", "false", false, session.BOOL)
 	return &mod
 }
 
