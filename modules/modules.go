@@ -44,6 +44,10 @@ func LoadModules(s *session.Session){
 	s.Modules = append(s.Modules, phone_generator.PushPhoneGeneratorModule(s))
 	s.Modules = append(s.Modules, whatsapp.PushWhatsappExtractorModule(s))
 	s.Modules = append(s.Modules, instagram.PushInstagramFollowersModule(s))
+	s.Modules = append(s.Modules, instagram.PushInstagramFeedModule(s))
+	s.Modules = append(s.Modules, instagram.PushInstagramFollowingModule(s))
+	s.Modules = append(s.Modules, instagram.PushInstagramFriendsModule(s))
+	s.Modules = append(s.Modules, instagram.PushInstagramInfoModule(s))
 	s.Modules = append(s.Modules, twitter.PushTwitterFollowerModule(s))
 	s.Modules = append(s.Modules, twitter.PushTwitterRetweetModule(s))
 	s.Modules = append(s.Modules, twitter.PushTwitterFollowingModule(s))
@@ -65,9 +69,6 @@ func LoadModules(s *session.Session){
 	s.Modules = append(s.Modules, mac_vendor.PushMacVendorModule(s))
 	s.Modules = append(s.Modules, darksearch.PushMacVendorModule(s))
 	s.Modules = append(s.Modules, google_dork.PushGoogleDorkModule(s))
-	s.Modules = append(s.Modules, instagram.PushInstagramFeedModule(s))
-	s.Modules = append(s.Modules, instagram.PushInstagramFollowingModule(s))
-	s.Modules = append(s.Modules, instagram.PushInstagramFriendsModule(s))
 
 	for _, mod := range s.Modules{
 		s.PushType(mod.GetType())
