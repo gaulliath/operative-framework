@@ -186,10 +186,11 @@ func (target *Target) GetFormatedResults(module string) ([]map[string]string, er
 		header := strings.Split(result.Header, separator)
 		res := strings.Split(result.Value, separator)
 		for k, r := range res{
+			resultKey := strings.Replace(strings.ToLower(header[k]), " ", "_", -1)
 			if len(header) < len(res) && k > len(header){
 				resultMap[ksuid.New().String()] = r
 			} else {
-				resultMap[header[k]] = r
+				resultMap[resultKey] = r
 			}
 		}
 		formated = append(formated, resultMap)
