@@ -138,6 +138,11 @@ func (s *Session) PushPrompt(){
 			readline.PcItem("links",
 				readline.PcItemDynamic(s.ReadLineAutoCompleteTargets())),
 			readline.PcItem("modules",readline.PcItemDynamic(s.ReadLineAutoCompleteTargets())),
+			readline.PcItem("tag",
+				readline.PcItem("add",
+					readline.PcItemDynamic(s.ReadLineAutoCompleteTargets())),
+				readline.PcItem("list",
+					readline.PcItemDynamic(s.ReadLineAutoCompleteTargets()))),
 			readline.PcItem("view",
 				readline.PcItem("result",
 					readline.PcItemDynamic(s.ReadLineAutoCompleteTargets(),
@@ -309,6 +314,54 @@ func (s *Session) ParseCommand(line string) []string{
 					return nil
 				}
 				trg.Linked()
+			case "tag":
+				switch arguments[2] {
+					case "add":
+						if len(arguments) < 5{
+							s.Stream.Error("Please use target tag add <target_id> <tag>")
+							return nil
+						}
+						value := strings.SplitN(strings.TrimSpace(line), " ", 5)
+						trg, err := s.GetTarget(value[3])
+						if err != nil{
+							s.Stream.Error(err.Error())
+							return nil
+						}
+
+						_, err = trg.AddTag(value[4])
+						if err != nil {
+							s.Stream.Error(err.Error())
+							return nil
+						}
+
+						s.Stream.Success("Tag '"+value[4]+"' as been add to target '"+trg.GetName()+"'")
+						return nil
+					case "list":
+						if len(arguments) < 4{
+							s.Stream.Error("Please use target tag add <target_id> <tag>")
+							return nil
+						}
+						value := strings.SplitN(strings.TrimSpace(line), " ", 4)
+						trg, err := s.GetTarget(value[3])
+						if err != nil{
+							s.Stream.Error(err.Error())
+							return nil
+						}
+						t := s.Stream.GenerateTable()
+						t.SetOutputMirror(os.Stdout)
+						t.SetAllowedColumnLengths([]int{40, 30, 30, 30})
+						headerRow := table.Row{}
+						resRow := table.Row{}
+						headerRow = append(headerRow, "TAG")
+						for _, tag := range trg.GetTags(){
+							resRow = append(resRow, tag)
+						}
+						t.AppendHeader(headerRow)
+						t.AppendRow(resRow)
+						s.Stream.Render(t)
+						return nil
+
+				}
 			case "view":
 				if len(arguments) < 5{
 					s.Stream.Error("Please use target view result <target_id> <result_id>")

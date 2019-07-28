@@ -2,3 +2,4 @@ operative-framework
 .env
 opf.db
 .DS_Store 
+report.pdf

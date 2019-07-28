@@ -64,8 +64,20 @@ func ViewInformation(s *session.Session){
 	}
 
 	t.AppendRow(table.Row{
+		"OPF",
+		s.Config.Common.BaseDirectory,
+	})
+	t.AppendRow(table.Row{
 		"CONFIGURATION",
 		s.Config.Common.ConfigurationFile,
+	})
+	t.AppendRow(table.Row{
+		"SERVICES",
+		s.Config.Common.ConfigurationService,
+	})
+	t.AppendRow(table.Row{
+		"EXPORT",
+		s.Config.Common.ExportDirectory,
 	})
 	t.AppendRow(table.Row{
 		"API",

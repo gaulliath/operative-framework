@@ -101,8 +101,8 @@ func (module *SocieteComModule) Start(){
 		line = strings.TrimSpace(line)
 
 		result := session.TargetResults{
-			Header: "enterprise" + target.GetSeparator(),
-			Value: line + target.GetSeparator(),
+			Header: "enterprise",
+			Value: line,
 		}
 		module.Results = append(module.Results, line)
 		target.Save(module, result)

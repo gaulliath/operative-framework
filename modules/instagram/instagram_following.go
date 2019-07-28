@@ -8,13 +8,13 @@ import (
 	"os"
 )
 
-type InstagramFollowers struct{
+type InstagramFollowing struct{
 	session.SessionModule
 	Sess *session.Session
 }
 
-func PushInstagramFollowersModule(s *session.Session) *InstagramFollowers{
-	mod := InstagramFollowers{
+func PushInstagramFollowingModule(s *session.Session) *InstagramFollowing{
+	mod := InstagramFollowing{
 		Sess: s,
 	}
 
@@ -22,23 +22,23 @@ func PushInstagramFollowersModule(s *session.Session) *InstagramFollowers{
 	return &mod
 }
 
-func (module *InstagramFollowers) Name() string{
-	return "instagram_followers"
+func (module *InstagramFollowing) Name() string{
+	return "instagram_following"
 }
 
-func (module *InstagramFollowers) Description() string{
-	return "Get followers for target user instagram account"
+func (module *InstagramFollowing) Description() string{
+	return "Get following for target user instagram account"
 }
 
-func (module *InstagramFollowers) Author() string{
+func (module *InstagramFollowing) Author() string{
 	return "Tristan Granier"
 }
 
-func (module *InstagramFollowers) GetType() string{
+func (module *InstagramFollowing) GetType() string{
 	return "instagram"
 }
 
-func (module *InstagramFollowers) GetInformation() session.ModuleInformation{
+func (module *InstagramFollowing) GetInformation() session.ModuleInformation{
 	information := session.ModuleInformation{
 		Name: module.Name(),
 		Description: module.Description(),
@@ -49,7 +49,7 @@ func (module *InstagramFollowers) GetInformation() session.ModuleInformation{
 	return information
 }
 
-func (module *InstagramFollowers) Start(){
+func (module *InstagramFollowing) Start(){
 
 	trg, err := module.GetParameter("TARGET")
 	if err != nil{
@@ -82,17 +82,17 @@ func (module *InstagramFollowers) Start(){
 		"Username",
 		"Full Name",
 	})
-	followers := profil.Followers()
+	followings := profil.Following()
 	separator := target.GetSeparator()
-	for followers.Next(){
-		for _, follower := range followers.Users{
+	for followings.Next(){
+		for _, following := range followings.Users{
 			t.AppendRow(table.Row{
-				follower.Username,
-				follower.FullName,
+				following.Username,
+				following.FullName,
 			})
 			result := session.TargetResults{
 				Header: "username" + separator + "full_name",
-				Value: follower.Username + separator + follower.FullName,
+				Value: following.Username + separator + following.FullName,
 			}
 			target.Save(module, result)
 		}

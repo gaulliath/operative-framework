@@ -65,6 +65,9 @@ func LoadModules(s *session.Session){
 	s.Modules = append(s.Modules, mac_vendor.PushMacVendorModule(s))
 	s.Modules = append(s.Modules, darksearch.PushMacVendorModule(s))
 	s.Modules = append(s.Modules, google_dork.PushGoogleDorkModule(s))
+	s.Modules = append(s.Modules, instagram.PushInstagramFeedModule(s))
+	s.Modules = append(s.Modules, instagram.PushInstagramFollowingModule(s))
+	s.Modules = append(s.Modules, instagram.PushInstagramFriendsModule(s))
 
 	for _, mod := range s.Modules{
 		s.PushType(mod.GetType())

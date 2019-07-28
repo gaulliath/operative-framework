@@ -25,6 +25,8 @@ type DataBase struct{
 
 type Common struct{
 	HistoryFile string
+	BaseDirectory string
+	ExportDirectory string
 	ConfigurationFile string
 	ConfigurationService string
 }

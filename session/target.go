@@ -19,6 +19,7 @@ type Target struct{
 	Results map[string][]*TargetResults `sql:"-"`
 	TargetLinked []Linking `json:"target_linked" sql:"-"`
 	Notes []Note
+	Tags  []string `json:"tags"  sql:"-"`
 }
 
 type Linking struct{
@@ -203,4 +204,26 @@ func (target *Target) AddNote(text string){
 		Text: text,
 	})
 	return
+}
+
+func (target *Target) GetTags() []string{
+	return target.Tags
+}
+
+func (target *Target) HasTag(tag string) bool{
+	tag = strings.TrimSpace(tag)
+	for _, element := range target.Tags{
+		if strings.ToLower(element) == strings.ToLower(tag){
+			return true
+		}
+	}
+	return  false
+}
+
+func (target *Target) AddTag(tag string) (bool, error) {
+	if target.HasTag(tag) {
+		return false, errors.New("Tag already exist for target '"+target.GetName()+"'")
+	}
+	target.Tags = append(target.Tags, strings.ToLower(tag))
+	return true, nil
 }

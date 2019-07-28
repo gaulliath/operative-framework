@@ -24,6 +24,8 @@ func main(){
 	var sess *session.Session
 	var sp *supervisor.Supervisor
 	var configService string
+	var opfBaseDirectory string
+	var opfExport string
 
 	// Load Configuration File
 	configFile := ".env"
@@ -55,6 +57,8 @@ func main(){
 		}
 		configFile = u.HomeDir + "/.opf/.env"
 		configService = u.HomeDir + "/.opf/services/"
+		opfBaseDirectory = u.HomeDir + "/.opf/"
+		opfExport = opfBaseDirectory + "export/"
 	}
 
 	// Argument parser
@@ -111,6 +115,8 @@ func main(){
 	sess.PushPrompt()
 	sess.Config.Common.ConfigurationFile = configFile
 	sess.Config.Common.ConfigurationService = configService
+	sess.Config.Common.BaseDirectory = opfBaseDirectory
+	sess.Config.Common.ExportDirectory = opfExport
 	apiRest := api.PushARestFul(sess)
 
 	// Load supervised services.
