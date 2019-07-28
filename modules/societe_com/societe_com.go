@@ -69,8 +69,11 @@ func (module *SocieteComModule) Start(){
 	person := strings.Replace(target.Name," ", "%20", -1)
 
 	paramLimit, _ := module.GetParameter("limit")
-	url := "https://encrypted.google.com/search?num=" + paramLimit.Value + "&start=0&hl=en&q=intext%3A\"" + person +"\"+site%3Asociete.com+intext%3A\"siret\"+"
-	res, err := http.Get(url)
+	url := "https://www.google.com/search?num=" + paramLimit.Value + "&start=0&hl=en&q=intext%3A\"" + person +"\"+site%3Asociete.com+intext%3A\"siret\"+"
+	client := http.Client{}
+	req, _ := http.NewRequest("GET", url, nil)
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36")
+	res, err := client.Do(req)
 	if err != nil {
 		module.Stream.Error("Argument 'URL' can't be reached.")
 		return
