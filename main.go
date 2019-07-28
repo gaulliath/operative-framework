@@ -155,6 +155,7 @@ func main(){
 		c := color.New(color.FgYellow)
 		_, _ = c.Println("OPERATIVE FRAMEWORK - DIGITAL INVESTIGATION FRAMEWORK")
 		sess.Stream.WithoutDate("Loading a configuration file '" + configFile + "'")
+		sess.Stream.WithoutDate("Loading a services configuration '"+sess.Config.Common.ConfigurationService+"'")
 	}
 
 
