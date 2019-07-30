@@ -11,8 +11,8 @@ import (
 
 type AccountCheckerModule struct{
 	session.SessionModule
-	sess *session.Session
-	Stream *session.Stream
+	sess *session.Session `json:"-"`
+	Stream *session.Stream `json:"-"`
 }
 
 type GeneratedSites struct {
@@ -47,7 +47,7 @@ func PushAccountCheckerModule(s *session.Session) *AccountCheckerModule{
 
 
 func (module *AccountCheckerModule) Name() string{
-	return "account_checker"
+	return "account.checker"
 }
 
 func (module *AccountCheckerModule) Author() string{

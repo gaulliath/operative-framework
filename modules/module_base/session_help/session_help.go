@@ -9,7 +9,7 @@ import (
 
 type HelpModule struct{
 	session.SessionModule
-	sess *session.Session
+	sess *session.Session `json:"-"`
 }
 
 func PushModuleHelp(s *session.Session) *HelpModule{

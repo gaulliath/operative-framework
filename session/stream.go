@@ -8,10 +8,10 @@ import (
 )
 
 type Stream struct{
-	Sess *Session
-	Verbose bool
-	JSON bool
-	History map[string]string
+	Sess *Session `json:"-"`
+	Verbose bool `json:"verbose"`
+	JSON bool `json:"json"`
+	History map[string]string `json:"history"`
 }
 
 func (stream *Stream) Standard(text string){

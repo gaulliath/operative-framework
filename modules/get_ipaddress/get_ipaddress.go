@@ -10,8 +10,8 @@ import (
 
 type GetIpAddressModule struct{
 	session.SessionModule
-	sess *session.Session
-	Stream *session.Stream
+	sess *session.Session `json:"-"`
+	Stream *session.Stream `json:"-"`
 }
 
 func PushGetIpAddressModule(s *session.Session) *GetIpAddressModule{
@@ -26,7 +26,7 @@ func PushGetIpAddressModule(s *session.Session) *GetIpAddressModule{
 
 
 func (module *GetIpAddressModule) Name() string{
-	return "get_ip_address"
+	return "get.ip_address"
 }
 
 func (module *GetIpAddressModule) Author() string{

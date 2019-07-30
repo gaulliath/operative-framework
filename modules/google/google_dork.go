@@ -1,4 +1,4 @@
-package google_dork
+package google
 
 import (
 	"github.com/graniet/go-pretty/table"
@@ -8,8 +8,8 @@ import (
 
 type GoogleDorkModule struct{
 	session.SessionModule
-	sess *session.Session
-	Stream *session.Stream
+	sess *session.Session `json:"-"`
+	Stream *session.Stream `json:"-"`
 }
 
 func PushGoogleDorkModule(s *session.Session) *GoogleDorkModule{

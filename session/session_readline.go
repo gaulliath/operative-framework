@@ -15,11 +15,11 @@ func (s *Session) ClearScreen(){
 	case "linux", "darwin", "freebsd", "dragonfly", "netbsd", "openbsd", "solaris":
 		cmd := exec.Command("clear")
 		cmd.Stdout = os.Stdout
-		cmd.Run()
+		_ = cmd.Run()
 	case "windows":
 		cmd := exec.Command("cls")
 		cmd.Stdout = os.Stdout
-		cmd.Run()
+		_ = cmd.Run()
 	default:
 		// do nothing
 	}
@@ -283,8 +283,8 @@ func (s *Session) ParseCommand(line string) []string{
 				s.ListTargets()
 			case "link":
 				value := strings.SplitN(strings.TrimSpace(line), " ", 4)
-				if len(arguments) < 3{
-					s.Stream.Error("Please use subject add <type> <name>")
+				if len(arguments) < 4{
+					s.Stream.Error("Please use 'target link <target1> <target2>'")
 					return nil
 				}
 				trg, err := s.GetTarget(value[2])
@@ -295,6 +295,10 @@ func (s *Session) ParseCommand(line string) []string{
 				trg2, err := s.GetTarget(value[3])
 				if err != nil{
 					s.Stream.Error(err.Error())
+					return nil
+				}
+				if trg2.GetId() == trg.GetId() {
+					s.Stream.Error("Can't link same target '" + trg.GetId() + "' : '" + trg2.GetId() + "'")
 					return nil
 				}
 				trg.Link(Linking{

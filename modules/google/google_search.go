@@ -1,4 +1,4 @@
-package google_search
+package google
 
 import (
 	"github.com/PuerkitoBio/goquery"
@@ -13,8 +13,8 @@ import (
 
 type GoogleSearchModule struct{
 	session.SessionModule
-	sess *session.Session
-	Stream *session.Stream
+	sess *session.Session `json:"-"`
+	Stream *session.Stream `json:"-"`
 }
 
 func PushGoogleSearchModule(s *session.Session) *GoogleSearchModule{
@@ -30,7 +30,7 @@ func PushGoogleSearchModule(s *session.Session) *GoogleSearchModule{
 
 
 func (module *GoogleSearchModule) Name() string{
-	return "google_search"
+	return "google.search"
 }
 
 func (module *GoogleSearchModule) Author() string{
@@ -71,8 +71,11 @@ func (module *GoogleSearchModule) Start(){
 	}
 
 	paramLimit, _ := module.GetParameter("LIMIT")
-	url := "https://encrypted.google.com/search?num=" + paramLimit.Value + "&start=0&hl=en&q=" + u.QueryEscape(target.GetName())
-	res, err := http.Get(url)
+	url := "https://www.google.com/search?num=" + paramLimit.Value + "&start=0&hl=en&q=" + u.QueryEscape(target.GetName())
+	client := http.Client{}
+	req, _ := http.NewRequest("GET", url, nil)
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36")
+	res, err := client.Do(req)
 	if err != nil {
 		module.Stream.Error("Argument 'URL' can't be reached.")
 		return

@@ -12,8 +12,8 @@ import (
 
 type LinkedinSearchModule struct{
 	session.SessionModule
-	sess *session.Session
-	Stream *session.Stream
+	sess *session.Session `json:"-"`
+	Stream *session.Stream `json:"-"`
 }
 
 func PushLinkedinSearchModule(s *session.Session) *LinkedinSearchModule{
@@ -28,7 +28,7 @@ func PushLinkedinSearchModule(s *session.Session) *LinkedinSearchModule{
 }
 
 func (module *LinkedinSearchModule) Name() string{
-	return "linkedin_search"
+	return "linkedin.search"
 }
 
 func (module *LinkedinSearchModule) Description() string{

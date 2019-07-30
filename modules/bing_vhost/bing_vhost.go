@@ -11,8 +11,8 @@ import (
 
 type BingVirtualHostModule struct{
 	session.SessionModule
-	sess *session.Session
-	Stream *session.Stream
+	sess *session.Session `json:"-"`
+	Stream *session.Stream `json:"-"`
 }
 
 func PushBingVirtualHostModule(s *session.Session) *BingVirtualHostModule{
@@ -27,7 +27,7 @@ func PushBingVirtualHostModule(s *session.Session) *BingVirtualHostModule{
 
 
 func (module *BingVirtualHostModule) Name() string{
-	return "bing_vhost"
+	return "bing.vhost"
 }
 
 func (module *BingVirtualHostModule) Author() string{

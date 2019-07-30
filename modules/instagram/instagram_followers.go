@@ -10,7 +10,7 @@ import (
 
 type InstagramFollowers struct{
 	session.SessionModule
-	Sess *session.Session
+	Sess *session.Session `json:"-"`
 }
 
 func PushInstagramFollowersModule(s *session.Session) *InstagramFollowers{
@@ -23,7 +23,7 @@ func PushInstagramFollowersModule(s *session.Session) *InstagramFollowers{
 }
 
 func (module *InstagramFollowers) Name() string{
-	return "instagram_followers"
+	return "instagram.followers"
 }
 
 func (module *InstagramFollowers) Description() string{

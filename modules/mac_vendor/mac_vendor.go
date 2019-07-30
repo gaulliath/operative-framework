@@ -10,8 +10,8 @@ import (
 
 type MacVendorModule struct{
 	session.SessionModule
-	Session *session.Session
-	Stream  *session.Stream
+	Session *session.Session `json:"-"`
+	Stream  *session.Stream `json:"-"`
 }
 
 func PushMacVendorModule(s *session.Session) *MacVendorModule{
@@ -25,7 +25,7 @@ func PushMacVendorModule(s *session.Session) *MacVendorModule{
 }
 
 func (module *MacVendorModule) Name() string{
-	return "mac_vendor"
+	return "mac.get_vendor"
 }
 
 func (module *MacVendorModule) Description() string{

@@ -13,8 +13,8 @@ import (
 
 type DarkSearchModule struct{
 	session.SessionModule
-	Session *session.Session
-	Stream  *session.Stream
+	Session *session.Session `json:"-"`
+	Stream  *session.Stream `json:"-"`
 }
 
 type DarkSearchResults struct {

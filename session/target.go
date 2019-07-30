@@ -16,9 +16,9 @@ type Target struct{
 	Sess *Session `json:"-" gorm:"-"`
 	Name string `json:"name" gorm:"column:target_name"`
 	Type string `json:"type" gorm:"column:target_type"`
-	Results map[string][]*TargetResults `sql:"-"`
+	Results map[string][]*TargetResults `sql:"-" json:"results"`
 	TargetLinked []Linking `json:"target_linked" sql:"-"`
-	Notes []Note
+	Notes []Note `json:"notes" sql:"-"`
 	Tags  []string `json:"tags"  sql:"-"`
 }
 

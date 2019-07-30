@@ -62,7 +62,7 @@ func (service *Service) GetRequired() []string{
 
 // Fetching matching to pastebin
 func (service *Service) Fetch(configuration map[string]string, match string) (bool, error){
-	module, err := service.session.SearchModule("pastebin")
+	module, err := service.session.SearchModule("pastebin.search")
 	if err != nil {
 		return false, err
 	}
@@ -90,7 +90,7 @@ func (service *Service) Fetch(configuration map[string]string, match string) (bo
 		return false, err
 	}
 
-	results, err := target.GetFormatedResults("pastebin")
+	results, err := target.GetFormatedResults("pastebin.search")
 
 	js, err := json.Marshal(&results)
 	if err != nil{

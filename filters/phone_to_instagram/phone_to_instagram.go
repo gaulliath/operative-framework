@@ -10,7 +10,7 @@ import (
 
 type PhoneToInstagram struct{
 	session.SessionFilter
-	Sess *session.Session
+	Sess *session.Session `json:"-"`
 }
 
 func PushPhoneToInstagramFilter(s *session.Session) *PhoneToInstagram{

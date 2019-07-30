@@ -29,7 +29,7 @@ type WhatsAppContacts struct{
 
 type WhatsappExtractor struct{
 	session.SessionModule
-	Sess *session.Session
+	Sess *session.Session `json:"-"`
 	Contacts []WhatsAppContacts `json:"contacts"`
 }
 
@@ -42,7 +42,7 @@ func PushWhatsappExtractorModule(s *session.Session) *WhatsappExtractor{
 }
 
 func (module *WhatsappExtractor) Name() string{
-	return "whatsapp_extractor"
+	return "whatsapp.extractor"
 }
 
 func (module *WhatsappExtractor) Description() string{

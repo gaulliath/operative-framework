@@ -12,7 +12,7 @@ import (
 
 type InstagramFeed struct{
 	session.SessionModule
-	Sess *session.Session
+	Sess *session.Session `json:"-"`
 }
 
 func PushInstagramFeedModule(s *session.Session) *InstagramFeed{
@@ -26,7 +26,7 @@ func PushInstagramFeedModule(s *session.Session) *InstagramFeed{
 }
 
 func (module *InstagramFeed) Name() string{
-	return "instagram_feed"
+	return "instagram.feed"
 }
 
 func (module *InstagramFeed) Description() string{

@@ -11,8 +11,8 @@ import (
 
 type PasteBinEmail struct{
 	session.SessionModule
-	sess *session.Session
-	Stream *session.Stream
+	sess *session.Session `json:"-"`
+	Stream *session.Stream `json:"-"`
 }
 
 func PushPasteBinEmailModule(s *session.Session) *PasteBinEmail{
@@ -27,7 +27,7 @@ func PushPasteBinEmailModule(s *session.Session) *PasteBinEmail{
 }
 
 func (module *PasteBinEmail) Name() string{
-	return "pastebin_email"
+	return "pastebin.search.email"
 }
 
 func (module *PasteBinEmail) Description() string{

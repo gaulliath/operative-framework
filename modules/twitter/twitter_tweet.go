@@ -1,6 +1,7 @@
 package twitter
 
 import (
+	"fmt"
 	"github.com/ChimeraCoder/anaconda"
 	"github.com/graniet/go-pretty/table"
 	"github.com/graniet/operative-framework/session"
@@ -11,7 +12,7 @@ import (
 
 type TwitterRetweet struct{
 	session.SessionModule
-	Sess *session.Session
+	Sess *session.Session `json:"-"`
 }
 
 func PushTwitterRetweetModule(s *session.Session) *TwitterRetweet{
@@ -26,7 +27,7 @@ func PushTwitterRetweetModule(s *session.Session) *TwitterRetweet{
 }
 
 func (module *TwitterRetweet) Name() string{
-	return "twitter_tweets"
+	return "twitter.tweets"
 }
 
 func (module *TwitterRetweet) Description() string{
@@ -101,6 +102,10 @@ func (module *TwitterRetweet) Start(){
 	t.SetOutputMirror(os.Stdout)
 	t.AppendHeader(table.Row{
 		"text",
+		"user",
+		"type",
+		"latitude",
+		"longitude",
 		"Date",
 	})
 	t.SetAllowedColumnLengths([]int{40, 0,})
@@ -124,16 +129,33 @@ func (module *TwitterRetweet) Start(){
 			text = strings.TrimSpace(tweet.FullText)
 			tweetType = "T"
 		}
+		latitudeFloat, err := tweet.Latitude()
+		latitude := ""
+		if err != nil {
+			latitude = "-"
+		} else {
+			latitude = fmt.Sprintf("%f", latitudeFloat)
+		}
+
+		longitudeFloat, err := tweet.Longitude()
+		longitude := ""
+		if err != nil {
+			longitude = "-"
+		} else {
+			longitude = fmt.Sprintf("%f", longitudeFloat)
+		}
 		t.AppendRow(table.Row{
 			text,
 			user,
 			tweetType,
+			latitude,
+			longitude,
 			tweet.CreatedAt,
 		})
 
 		result := session.TargetResults{
-			Header: "tweet" + target.GetSeparator() + "user" + target.GetSeparator() + "date" + target.GetSeparator() + "type",
-			Value: text + target.GetSeparator() + user + target.GetSeparator() + tweet.CreatedAt + target.GetSeparator() + tweetType,
+			Header: "tweet" + target.GetSeparator() + "user" + target.GetSeparator() + "date" + target.GetSeparator() + "type" + target.GetSeparator() + "latitude" + target.GetSeparator() + "longitude",
+			Value: text + target.GetSeparator() + user + target.GetSeparator() + tweet.CreatedAt + target.GetSeparator() + tweetType + target.GetSeparator() + latitude + target.GetSeparator() + longitude,
 		}
 		target.Save(module, result)
 	}

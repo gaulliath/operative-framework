@@ -10,8 +10,8 @@ import (
 
 type SearchSploitModule struct{
 	session.SessionModule
-	sess *session.Session
-	Stream *session.Stream
+	sess *session.Session `json:"-"`
+	Stream *session.Stream `json:"-"`
 }
 
 type Exploit struct {

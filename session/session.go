@@ -10,9 +10,9 @@ import (
 type Session struct{
 	Id int `json:"-" gorm:"primary_key:yes;column:id;AUTO_INCREMENT"`
 	SessionName string `json:"session_name"`
-	Information Information
+	Information Information `json:"information"`
 	Connection Connection `json:"-" sql:"-"`
-	Config config.Config
+	Config config.Config `json:"config" sql:"-"`
 	Version string            `json:"version" sql:"-"`
 	Targets []*Target   `json:"subjects" sql:"-"`
 	Modules []Module          `json:"modules" sql:"-"`
@@ -21,7 +21,22 @@ type Session struct{
 	Stream Stream `json:"-" sql:"-"`
 	TypeLists []string `json:"type_lists" sql:"-"`
 	ServiceFolder	string `json:"home_folder"`
-	Services	[]Listener
+	Services	[]Listener `json:"services"`
+}
+
+type SessionExport struct {
+	Id int `json:"-"`
+	SessionName string `json:"session_name"`
+	Information Information `json:"information"`
+	Config config.Config `json:"config" sql:"-"`
+	Version string            `json:"version" sql:"-"`
+	Targets []*Target   `json:"subjects" sql:"-"`
+	Modules []Module          `json:"modules" sql:"-"`
+	Filters []ModuleFilter `json:"filters" sql:"-"`
+	Stream Stream `json:"-" sql:"-"`
+	TypeLists []string `json:"type_lists" sql:"-"`
+	ServiceFolder	string `json:"home_folder"`
+	Services	[]Listener `json:"services"`
 }
 
 type Information struct{
@@ -84,4 +99,22 @@ func (s *Session) PushType(t string){
 
 func (s *Session) AddService(service Listener){
 	s.Services = append(s.Services, service)
+}
+
+func (s *Session) ExportNow() SessionExport {
+	export := SessionExport{
+		Id: s.Id,
+		SessionName: s.SessionName,
+		Information: s.Information,
+		Config: s.Config,
+		Version: s.Version,
+		Targets: s.Targets,
+		Modules: s.Modules,
+		Filters: s.Filters,
+		Stream: s.Stream,
+		TypeLists: s.TypeLists,
+		ServiceFolder: s.ServiceFolder,
+		Services: s.Services,
+	}
+	return export
 }

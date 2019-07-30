@@ -4,13 +4,13 @@ import "github.com/graniet/operative-framework/session"
 
 type WebArchiveModule struct{
 	session.SessionModule
-	sess *session.Session
-	Stream session.Stream
+	sess *session.Session `json:"-"`
+	Stream session.Stream `json:"-"`
 
 }
 
 func (module *WebArchiveModule) Name() string{
-	return "web_archive"
+	return "web.archive"
 }
 
 func (module *WebArchiveModule) Author() string{

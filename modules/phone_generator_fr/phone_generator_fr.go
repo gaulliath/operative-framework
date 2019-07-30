@@ -15,9 +15,9 @@ import (
 
 type PhoneGeneratorFr struct{
 	session.SessionModule
-	Sess *session.Session
-	Current int
-	Bar *pb.ProgressBar
+	Sess *session.Session `json:"-"`
+	Current int `json:"-"`
+	Bar *pb.ProgressBar `json:"-"`
 }
 
 func PushPhoneGeneratorFrModule(s *session.Session) *PhoneGeneratorFr{
@@ -35,7 +35,7 @@ func PushPhoneGeneratorFrModule(s *session.Session) *PhoneGeneratorFr{
 }
 
 func (module *PhoneGeneratorFr) Name() string{
-	return "phone_generator_fr"
+	return "phone.generator.fr"
 }
 
 func (module *PhoneGeneratorFr) Description() string{

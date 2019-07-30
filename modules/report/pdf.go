@@ -1,4 +1,4 @@
-package report_pdf
+package report
 
 import (
 	"fmt"
@@ -11,7 +11,7 @@ import (
 
 type ReportPDF struct{
 	session.SessionModule
-	Sess *session.Session
+	Sess *session.Session `json:"-"`
 }
 
 func PushReportPDFModule(s *session.Session) *ReportPDF{
@@ -24,7 +24,7 @@ func PushReportPDFModule(s *session.Session) *ReportPDF{
 }
 
 func (module *ReportPDF) Name() string{
-	return "report_pdf"
+	return "report.pdf"
 }
 
 func (module *ReportPDF) Description() string{

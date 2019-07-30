@@ -11,8 +11,8 @@ import (
 
 type DirectorySearchModule struct{
 	session.SessionModule
-	sess *session.Session
-	Stream *session.Stream
+	sess *session.Session `json:"-"`
+	Stream *session.Stream `json:"-"`
 }
 
 func PushModuleDirectorySearch(s *session.Session) *DirectorySearchModule{

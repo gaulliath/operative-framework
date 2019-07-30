@@ -65,7 +65,7 @@ func (service *Service) GetRequired() []string{
 
 // Fetching username tweets
 func (service *Service) Fetch(configuration map[string]string, username string) (bool, error){
-	module, err := service.session.SearchModule("twitter_tweets")
+	module, err := service.session.SearchModule("twitter.tweets")
 	if err != nil {
 		return false, err
 	}
@@ -93,7 +93,7 @@ func (service *Service) Fetch(configuration map[string]string, username string) 
 		return false, err
 	}
 
-	results, err := target.GetFormatedResults("twitter_tweets")
+	results, err := target.GetFormatedResults("twitter.tweets")
 
 	js, err := json.Marshal(&results)
 	if err != nil{

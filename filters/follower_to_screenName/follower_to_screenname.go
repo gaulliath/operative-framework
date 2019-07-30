@@ -11,7 +11,7 @@ import (
 
 type FollowerScreenName struct{
 	session.SessionFilter
-	Sess *session.Session
+	Sess *session.Session `json:"-"`
 }
 
 func PushFollowerScreenNameFilter(s *session.Session) *FollowerScreenName{

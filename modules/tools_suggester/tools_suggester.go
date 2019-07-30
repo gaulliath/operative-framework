@@ -12,9 +12,9 @@ import (
 
 type ToolsSuggesterModule struct{
 	session.SessionModule
-	sess *session.Session
-	Stream *session.Stream
-	Lists []WorldList
+	sess *session.Session `json:"-"`
+	Stream *session.Stream `json:"-"`
+	Lists []WorldList `json:"-"`
 }
 
 type WorldList struct{
@@ -62,7 +62,7 @@ func (module *ToolsSuggesterModule) PushToLists(name string, path string, tools 
 }
 
 func (module *ToolsSuggesterModule) Name() string{
-	return "tools_suggester"
+	return "tools.suggester"
 }
 
 func (module *ToolsSuggesterModule) Author() string{

@@ -6,7 +6,7 @@ import (
 
 type SayHelloFilter struct{
 	session.SessionFilter
-	Sess *session.Session
+	Sess *session.Session `json:"-"`
 }
 
 func PushSayHelloFilter(s *session.Session) *SayHelloFilter{

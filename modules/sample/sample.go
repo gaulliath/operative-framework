@@ -6,8 +6,8 @@ import (
 
 type SampleModule struct{
 	session.SessionModule
-	sess *session.Session
-	Stream *session.Stream
+	sess *session.Session `json:"-"`
+	Stream *session.Stream `json:"-"`
 }
 
 func PushSampleModuleModule(s *session.Session) *SampleModule{

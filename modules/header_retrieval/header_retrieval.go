@@ -11,8 +11,8 @@ import (
 
 type HeaderRetrievalModule struct{
 	session.SessionModule
-	sess *session.Session
-	Stream *session.Stream
+	sess *session.Session `json:"-"`
+	Stream *session.Stream `json:"-"`
 }
 
 func PushModuleHeaderRetrieval(s *session.Session) *HeaderRetrievalModule{
@@ -26,7 +26,7 @@ func PushModuleHeaderRetrieval(s *session.Session) *HeaderRetrievalModule{
 }
 
 func (module *HeaderRetrievalModule) Name() string{
-	return "header_retrieval"
+	return "get.header"
 }
 
 func (module *HeaderRetrievalModule) Author() string{

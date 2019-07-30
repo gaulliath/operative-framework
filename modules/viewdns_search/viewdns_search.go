@@ -11,8 +11,8 @@ import (
 
 type VDNSearch struct{
 	session.SessionModule
-	sess *session.Session
-	Stream *session.Stream
+	sess *session.Session `json:"-"`
+	Stream *session.Stream `json:"-"`
 }
 
 func PushWSearchModule(sess *session.Session) *VDNSearch{

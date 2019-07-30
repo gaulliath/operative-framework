@@ -8,8 +8,8 @@ import (
 
 type SystemModule struct{
 	session.SessionModule
-	sess *session.Session
-	Stream *session.Stream
+	sess *session.Session `json:"-"`
+	Stream *session.Stream `json:"-"`
 }
 
 func PushSystemModuleModule(s *session.Session) *SystemModule{

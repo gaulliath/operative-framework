@@ -7,8 +7,8 @@ import (
 
 type Connection struct {
 	ConnectionInstance
-	ORM *gorm.DB
-	Migrations map[string]interface{}
+	ORM *gorm.DB `json:"-"`
+	Migrations map[string]interface{} `json:"-"`
 }
 
 type ConnectionInstance interface {

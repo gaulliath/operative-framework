@@ -11,8 +11,8 @@ import (
 
 type PhoneBuster struct{
 	session.SessionModule
-	Sess *session.Session
-	Current int
+	Sess *session.Session `json:"-"`
+	Current int `json:"-"`
 }
 
 func PushPhoneBusterModule(s *session.Session) *PhoneBuster{
@@ -28,7 +28,7 @@ func PushPhoneBusterModule(s *session.Session) *PhoneBuster{
 }
 
 func (module *PhoneBuster) Name() string{
-	return "phone_buster"
+	return "phone.buster"
 }
 
 func (module *PhoneBuster) Description() string{

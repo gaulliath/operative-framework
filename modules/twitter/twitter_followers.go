@@ -11,7 +11,7 @@ import (
 )
 type TwitterFollower struct{
 	session.SessionModule
-	Sess *session.Session
+	Sess *session.Session `json:"-"`
 }
 
 func PushTwitterFollowerModule(s *session.Session) *TwitterFollower{
@@ -25,7 +25,7 @@ func PushTwitterFollowerModule(s *session.Session) *TwitterFollower{
 }
 
 func (module *TwitterFollower) Name() string{
-	return "twitter_followers"
+	return "twitter.followers"
 }
 
 func (module *TwitterFollower) Description() string{

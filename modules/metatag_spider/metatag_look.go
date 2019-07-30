@@ -11,8 +11,8 @@ import (
 
 type MetaTagModule struct{
 	session.SessionModule
-	sess *session.Session
-	Stream *session.Stream
+	sess *session.Session `json:"-"`
+	Stream *session.Stream `json:"-"`
 }
 
 func PushMetaTagModule(s *session.Session) *MetaTagModule{
@@ -25,7 +25,7 @@ func PushMetaTagModule(s *session.Session) *MetaTagModule{
 }
 
 func (module *MetaTagModule) Name() string{
-	return "metatag_spider"
+	return "get.meta_tags"
 }
 
 func (module *MetaTagModule) Description() string{

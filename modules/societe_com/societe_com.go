@@ -11,8 +11,8 @@ import (
 
 type SocieteComModule struct{
 	session.SessionModule
-	sess *session.Session
-	Stream *session.Stream
+	sess *session.Session `json:"-"`
+	Stream *session.Stream `json:"-"`
 }
 
 func PushSocieteComModuleModule(s *session.Session) *SocieteComModule{
