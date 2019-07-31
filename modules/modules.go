@@ -21,6 +21,7 @@ import (
 	"github.com/graniet/operative-framework/modules/phone_buster"
 	"github.com/graniet/operative-framework/modules/phone_generator"
 	"github.com/graniet/operative-framework/modules/phone_generator_fr"
+	"github.com/graniet/operative-framework/modules/pictures"
 	"github.com/graniet/operative-framework/modules/report"
 	"github.com/graniet/operative-framework/modules/sample"
 	"github.com/graniet/operative-framework/modules/searchsploit"
@@ -58,6 +59,7 @@ func LoadModules(s *session.Session){
 	s.Modules = append(s.Modules, phone_buster.PushPhoneBusterModule(s))
 	s.Modules = append(s.Modules, phone_generator.PushPhoneGeneratorModule(s))
 	s.Modules = append(s.Modules, phone_generator_fr.PushPhoneGeneratorFrModule(s))
+	s.Modules = append(s.Modules, pictures.PushPictureExifModule(s))
 	s.Modules = append(s.Modules, report.PushReportPDFModule(s))
 	s.Modules = append(s.Modules, report.PushReportJSONModule(s))
 	s.Modules = append(s.Modules, sample.PushSampleModuleModule(s))
