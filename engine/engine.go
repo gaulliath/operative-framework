@@ -39,6 +39,7 @@ func New() *session.Session{
 			Migrations: make(map[string]interface{}),
 		},
 		Config: conf,
+		Alias: make(map[string]string),
 	}
 	s.Stream.Sess = &s
 	s.Connection.Migrate()

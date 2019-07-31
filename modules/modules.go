@@ -9,6 +9,7 @@ import (
 	"github.com/graniet/operative-framework/modules/google"
 	"github.com/graniet/operative-framework/modules/header_retrieval"
 	"github.com/graniet/operative-framework/modules/image_reverse_search"
+	"github.com/graniet/operative-framework/modules/info_greffe"
 	"github.com/graniet/operative-framework/modules/instagram"
 	"github.com/graniet/operative-framework/modules/linkedin_search"
 	"github.com/graniet/operative-framework/modules/mac_vendor"
@@ -48,6 +49,7 @@ func LoadModules(s *session.Session){
 	s.Modules = append(s.Modules, instagram.PushInstagramFriendsModule(s))
 	s.Modules = append(s.Modules, instagram.PushInstagramInfoModule(s))
 	s.Modules = append(s.Modules, image_reverse_search.PushImageReverseModule(s))
+	s.Modules = append(s.Modules, info_greffe.PushInfoGreffeRegistrationModule(s))
 	s.Modules = append(s.Modules, linkedin_search.PushLinkedinSearchModule(s))
 	s.Modules = append(s.Modules, mac_vendor.PushMacVendorModule(s))
 	s.Modules = append(s.Modules, metatag_spider.PushMetaTagModule(s))

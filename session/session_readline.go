@@ -119,6 +119,10 @@ func (s *Session) ReadLineAutoCompleteResults() func(string) []string{
 
 func (s *Session) PushPrompt(){
 	var completer = readline.NewPrefixCompleter(
+		readline.PcItem("alias",
+			readline.PcItem("list"),
+			readline.PcItem("add",
+				readline.PcItemDynamic(s.ReadLineAutoCompleteListModules()))),
 		readline.PcItem("note",
 			readline.PcItem("add",
 				readline.PcItemDynamic(s.ReadLineAutoCompleteResults())),
@@ -185,12 +189,17 @@ func (s *Session) ParseCommand(line string) []string{
 	moduleName := strings.Split(line, " ")[0]
 	module, err := s.SearchModule(moduleName)
 	if err != nil{
-		if moduleName == "help"{
-			module, err = s.SearchModule("session_help")
-		} else if !strings.HasPrefix(strings.TrimSpace(line), "target ") && !strings.HasPrefix(strings.TrimSpace(line), "note ") {
-			s.Stream.Error("command '"+line+"' do not exist")
-			s.Stream.Error("'help' for more information")
-			return nil
+		alias, err := s.GetAlias(moduleName)
+		module, err = s.SearchModule(alias)
+		if err != nil {
+			if moduleName == "help" {
+				module, err = s.SearchModule("session_help")
+			} else if !strings.HasPrefix(strings.TrimSpace(line), "target ") &&
+				!strings.HasPrefix(strings.TrimSpace(line), "note ") && !strings.HasPrefix(strings.TrimSpace(line), "alias ") {
+				s.Stream.Error("command '" + line + "' do not exist")
+				s.Stream.Error("'help' for more information")
+				return nil
+			}
 		}
 	}
 	if strings.Contains(line, " "){
@@ -204,6 +213,22 @@ func (s *Session) ParseCommand(line string) []string{
 			_,_ = module.SetParameter("CMD", value[1])
 			module.Start()
 			return nil
+		} else if strings.HasPrefix(line, "alias ") {
+			arguments := strings.Split(strings.TrimSpace(line), " ")
+			switch arguments[1] {
+			case "add":
+				value := strings.SplitN(strings.TrimSpace(line), " ", 4)
+				if len(value) < 4 {
+					s.Stream.Error("Please use alias add <module> <alias> e.g: alias add google.twitter gt")
+					return nil
+				}
+				module := value[2]
+				s.AddAlias(value[3], module)
+				return nil
+			case "list":
+				s.ListAlias()
+				return nil
+			}
 		} else if strings.HasPrefix(line, "note "){
 			arguments := strings.Split(strings.TrimSpace(line), " ")
 			switch arguments[1] {
@@ -593,7 +618,7 @@ func (s *Session) ParseCommand(line string) []string{
 						return r
 					}
 				} else {
-					s.Stream.Error("Please validate required argument. (<module> list)")
+					s.Stream.Error("Please validate required argument. ("+module.Name()+" list)")
 				}
 			}
 		}
