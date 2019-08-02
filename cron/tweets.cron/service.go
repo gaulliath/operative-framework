@@ -1,7 +1,7 @@
 //	AUTHOR	:	TRISTAN GRANIER
 //	RESUME	:	This service get last tweets for configured username
 //	TIME	:	Every 3 hours
-package tweets_service
+package tweets_cron
 
 import (
 	"bytes"
@@ -33,7 +33,7 @@ func (service *Service) GetHibernate() time.Duration{
 
 // Service name as been set here
 func (service *Service) Name() string{
-	return "tweets.service"
+	return "tweets.cron"
 }
 
 // Define if service need configuration file
@@ -126,7 +126,7 @@ func (service *Service) Fetch(configuration map[string]string, username string) 
 // Service Execution with opf routine
 func (service *Service) Run() (bool, error){
 
-	configuration, _ := godotenv.Read(service.session.Config.Common.ConfigurationService + service.Name() + "/service.conf")
+	configuration, _ := godotenv.Read(service.session.Config.Common.ConfigurationJobs + service.Name() + "/cron.conf")
 	service.session.Stream.Verbose = false
 
 	if strings.Contains(configuration["TWITTER"], ",") {

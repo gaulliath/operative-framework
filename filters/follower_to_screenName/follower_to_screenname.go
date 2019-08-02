@@ -18,8 +18,8 @@ func PushFollowerScreenNameFilter(s *session.Session) *FollowerScreenName{
 	mod := FollowerScreenName{
 		Sess: s,
 	}
-	mod.AddModule("twitter_followers")
-	mod.AddModule("twitter_following")
+	mod.AddModule("twitter.followers")
+	mod.AddModule("twitter.following")
 	return &mod
 }
 

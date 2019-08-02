@@ -8,7 +8,7 @@ import (
 	"github.com/graniet/operative-framework/api"
 	"github.com/graniet/operative-framework/compiler"
 	"github.com/graniet/operative-framework/engine"
-	"github.com/graniet/operative-framework/services"
+	"github.com/graniet/operative-framework/cron"
 	"github.com/graniet/operative-framework/session"
 	"github.com/graniet/operative-framework/supervisor"
 	"github.com/joho/godotenv"
@@ -23,7 +23,7 @@ import (
 func main(){
 	var sess *session.Session
 	var sp *supervisor.Supervisor
-	var configService string
+	var configJob string
 	var opfBaseDirectory string
 	var opfExport string
 
@@ -56,7 +56,7 @@ func main(){
 			}
 		}
 		configFile = u.HomeDir + "/.opf/.env"
-		configService = u.HomeDir + "/.opf/services/"
+		configJob = u.HomeDir + "/.opf/cron/"
 		opfBaseDirectory = u.HomeDir + "/.opf/"
 		opfExport = opfBaseDirectory + "export/"
 	}
@@ -67,9 +67,9 @@ func main(){
 		Required: false,
 		Help: "Load instantly operative framework restful API",
 	})
-	rSupervisor := parser.Flag("", "services", &argparse.Options{
+	rSupervisor := parser.Flag("", "cron", &argparse.Options{
 		Required: false,
-		Help: "Running supervised services.",
+		Help: "Running supervised cron job(s).",
 	})
 	verbose := parser.Flag("v","verbose", &argparse.Options{
 		Required: false,
@@ -114,17 +114,17 @@ func main(){
 
 	sess.PushPrompt()
 	sess.Config.Common.ConfigurationFile = configFile
-	sess.Config.Common.ConfigurationService = configService
+	sess.Config.Common.ConfigurationJobs = configJob
 	sess.Config.Common.BaseDirectory = opfBaseDirectory
 	sess.Config.Common.ExportDirectory = opfExport
 	apiRest := api.PushARestFul(sess)
 
-	// Load supervised services.
+	// Load supervised cron job.
 	sp = supervisor.GetNewSupervisor(sess)
-	services.Load(sp)
+	cron.Load(sp)
 
 	if *rSupervisor{
-		// Reading loaded services
+		// Reading loaded cron job
 		sp.Read()
 		return
 	}
@@ -161,7 +161,7 @@ func main(){
 		c := color.New(color.FgYellow)
 		_, _ = c.Println("OPERATIVE FRAMEWORK - DIGITAL INVESTIGATION FRAMEWORK")
 		sess.Stream.WithoutDate("Loading a configuration file '" + configFile + "'")
-		sess.Stream.WithoutDate("Loading a services configuration '"+sess.Config.Common.ConfigurationService+"'")
+		sess.Stream.WithoutDate("Loading a cron job configuration '"+sess.Config.Common.ConfigurationJobs+"'")
 	}
 
 

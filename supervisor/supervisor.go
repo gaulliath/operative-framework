@@ -25,7 +25,7 @@ func (sup *Supervisor) GetStandaloneSession() *session.Session{
 	newSession := engine.New()
 	newSession.PushPrompt()
 	newSession.Config.Common.ConfigurationFile = sup.Session.Config.Common.ConfigurationFile
-	newSession.Config.Common.ConfigurationService = sup.Session.Config.Common.ConfigurationService
+	newSession.Config.Common.ConfigurationJobs = sup.Session.Config.Common.ConfigurationJobs
 	return newSession
 }
 
@@ -36,7 +36,7 @@ func (sup *Supervisor) AddHistory(s string) {
 
 func (sup *Supervisor) Launch(service session.Listener, routine chan int) session.Listener{
 
-	path := sup.Session.Config.Common.ConfigurationService + service.Service.Name() + "/service.conf"
+	path := sup.Session.Config.Common.ConfigurationJobs + service.Service.Name() + "/cron.conf"
 	if service.Service.HasConfiguration() {
 		configuration, err := godotenv.Read(path)
 		if err != nil {
@@ -68,19 +68,19 @@ func (sup *Supervisor) Launch(service session.Listener, routine chan int) sessio
 
 func (sup *Supervisor) Configure() error {
 	log.Println("Running service configuration...")
-	if _, err := os.Stat(sup.Session.Config.Common.ConfigurationService); os.IsNotExist(err){
-		_ = os.Mkdir(sup.Session.Config.Common.ConfigurationService, os.ModePerm)
+	if _, err := os.Stat(sup.Session.Config.Common.ConfigurationJobs); os.IsNotExist(err){
+		_ = os.Mkdir(sup.Session.Config.Common.ConfigurationJobs, os.ModePerm)
 	}
 	for _, service := range sup.Services{
-		if _, err := os.Stat(sup.Session.Config.Common.ConfigurationService + service.Service.Name()); os.IsNotExist(err){
-			_ = os.Mkdir(sup.Session.Config.Common.ConfigurationService + service.Service.Name(), os.ModePerm)
+		if _, err := os.Stat(sup.Session.Config.Common.ConfigurationJobs + service.Service.Name()); os.IsNotExist(err){
+			_ = os.Mkdir(sup.Session.Config.Common.ConfigurationJobs + service.Service.Name(), os.ModePerm)
 		}
 
 		if !service.Service.HasConfiguration(){
 			continue
 		}
 
-		if _, err := os.Stat(sup.Session.Config.Common.ConfigurationService + service.Service.Name() + "/service.conf"); !os.IsNotExist(err){
+		if _, err := os.Stat(sup.Session.Config.Common.ConfigurationJobs + service.Service.Name() + "/cron.conf"); !os.IsNotExist(err){
 			continue
 		}
 
@@ -88,7 +88,7 @@ func (sup *Supervisor) Configure() error {
 		var file *os.File
 		var errPath error
 
-		file, errPath = os.OpenFile(sup.Session.Config.Common.ConfigurationService + service.Service.Name() + "/service.conf", os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0755)
+		file, errPath = os.OpenFile(sup.Session.Config.Common.ConfigurationJobs + service.Service.Name() + "/cron.conf", os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0755)
 		if errPath != nil{
 			return errPath
 		}

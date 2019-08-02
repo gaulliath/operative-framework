@@ -28,7 +28,7 @@ type Common struct{
 	BaseDirectory string
 	ExportDirectory string
 	ConfigurationFile string
-	ConfigurationService string
+	ConfigurationJobs string
 }
 
 type ApiConfig struct{

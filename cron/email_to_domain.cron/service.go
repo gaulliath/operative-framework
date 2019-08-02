@@ -1,7 +1,7 @@
 //	AUTHOR	: 	TRISTAN GRANIER
 //	RESUME	: 	This service get domain name registered with email address
 //	TIME	:	Every 48 hours
-package email_to_domain_service
+package email_to_domain_cron
 
 import (
 	"bytes"
@@ -33,7 +33,7 @@ func (service *Service) GetHibernate() time.Duration{
 
 // Service name as been set here
 func (service *Service) Name() string{
-	return "email_to_domain.service"
+	return "email_to_domain.cron"
 }
 
 // Define if service need configuration file
@@ -119,7 +119,7 @@ func (service *Service) Fetch(configuration map[string]string, email string) (bo
 // Service Execution with opf routine
 func (service *Service) Run() (bool, error){
 
-	configuration, _ := godotenv.Read(service.session.Config.Common.ConfigurationService + service.Name() + "/service.conf")
+	configuration, _ := godotenv.Read(service.session.Config.Common.ConfigurationJobs + service.Name() + "/cron.conf")
 	service.session.Stream.Verbose = false
 
 	if strings.Contains(configuration["EMAIL"], ",") {

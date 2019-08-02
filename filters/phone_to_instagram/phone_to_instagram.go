@@ -17,7 +17,7 @@ func PushPhoneToInstagramFilter(s *session.Session) *PhoneToInstagram{
 	mod := PhoneToInstagram{
 		Sess: s,
 	}
-	mod.AddModule("phone_generator")
+	mod.AddModule("phone.generator")
 	return &mod
 }
 

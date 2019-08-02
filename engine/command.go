@@ -72,8 +72,8 @@ func ViewInformation(s *session.Session){
 		s.Config.Common.ConfigurationFile,
 	})
 	t.AppendRow(table.Row{
-		"SERVICES",
-		s.Config.Common.ConfigurationService,
+		"CRON JOB(S)",
+		s.Config.Common.ConfigurationJobs,
 	})
 	t.AppendRow(table.Row{
 		"EXPORT",

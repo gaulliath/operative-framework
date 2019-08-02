@@ -1,11 +1,12 @@
-//	AUTHOR	: 	TRISTAN GRANIER
-//	RESUME	:	Search matching element to pastebin
-//	TIME	:	Every 24 hours
-package pastebin_service
+//	AUTHOR	:	TRISTAN GRANIER
+//	RESUME	:	This service get entreprise registered with selected name
+//	TIME	:	Every 72 hours
+package societe_com_cron
 
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"github.com/graniet/operative-framework/session"
 	"github.com/joho/godotenv"
 	"github.com/pkg/errors"
@@ -26,14 +27,14 @@ func GetNewService(sess *session.Session) *Service{
 	}
 }
 
-// Service as been started every 24 hours
+// Service as been started every 3 hours
 func (service *Service) GetHibernate() time.Duration{
-	return 24 * time.Hour
+	return 72 * time.Hour
 }
 
 // Service name as been set here
 func (service *Service) Name() string{
-	return "pastebin.service"
+	return "societe_com.cron"
 }
 
 // Define if service need configuration file
@@ -44,7 +45,7 @@ func (service *Service) HasConfiguration() bool{
 // Get configuration
 func (service *Service) GetConfiguration() map[string]string{
 	configuration := make(map[string]string)
-	configuration["MATCH"] = "example@gmail.com,example2@gmail.com"
+	configuration["PERSON"] = "jhon doe"
 	configuration["TO_SERVER"] = "false"
 	configuration["SERVER_URI"] = "http://example.com/api/v1.0/insert"
 	configuration["VERBOSE"] = "true"
@@ -54,19 +55,20 @@ func (service *Service) GetConfiguration() map[string]string{
 // Get required fields in configuration file
 func (service *Service) GetRequired() []string{
 	return []string{
-		"MATCH",
+		"PERSON",
 		"TO_SERVER",
+		"SERVER_URI",
 		"VERBOSE",
 	}
 }
 
-// Fetching matching to pastebin
-func (service *Service) Fetch(configuration map[string]string, match string) (bool, error){
-	module, err := service.session.SearchModule("pastebin.search")
+// Fetching username tweets
+func (service *Service) Fetch(configuration map[string]string, username string) (bool, error){
+	module, err := service.session.SearchModule("societe_com")
 	if err != nil {
 		return false, err
 	}
-	targetId, err := service.session.AddTarget("text", match)
+	targetId, err := service.session.AddTarget("person", username)
 	if err != nil {
 		if !strings.Contains(err.Error(), "already exist") || targetId == ""{
 			return false, err
@@ -78,11 +80,6 @@ func (service *Service) Fetch(configuration map[string]string, match string) (bo
 		return false, err
 	}
 
-	_, err = module.SetParameter("LIMIT", "10")
-	if err != nil {
-		return false, err
-	}
-
 	module.Start()
 
 	target, err := service.session.GetTarget(targetId)
@@ -90,16 +87,18 @@ func (service *Service) Fetch(configuration map[string]string, match string) (bo
 		return false, err
 	}
 
-	results, err := target.GetFormatedResults("pastebin.search")
+	results, err := target.GetFormatedResults("societe_com")
 
 	js, err := json.Marshal(&results)
 	if err != nil{
 		return false, err
 	}
 
+	fmt.Println(string(js))
+
 	if strings.ToLower(configuration["TO_SERVER"]) == "true" {
 		if strings.ToLower(configuration["VERBOSE"]) == "true" {
-			log.Println("Prepare request '"+match+"' at '"+configuration["SERVER_URI"]+"'")
+			log.Println("Prepare request '"+username+"' at '"+configuration["SERVER_URI"]+"'")
 		}
 		req, err := http.NewRequest("POST", configuration["SERVER_URI"], bytes.NewBuffer(js))
 		if err != nil {
@@ -114,7 +113,7 @@ func (service *Service) Fetch(configuration map[string]string, match string) (bo
 		}
 		defer resp.Body.Close()
 		if strings.ToLower(configuration["VERBOSE"]) == "true" {
-			log.Println("Request '"+match+"' as been sent at '"+configuration["SERVER_URI"]+"'")
+			log.Println("Request '"+username+"' as been sent at '"+configuration["SERVER_URI"]+"'")
 		}
 	}
 	return true, nil
@@ -123,19 +122,19 @@ func (service *Service) Fetch(configuration map[string]string, match string) (bo
 // Service Execution with opf routine
 func (service *Service) Run() (bool, error){
 
-	configuration, _ := godotenv.Read(service.session.Config.Common.ConfigurationService + service.Name() + "/service.conf")
+	configuration, _ := godotenv.Read(service.session.Config.Common.ConfigurationJobs + service.Name() + "/cron.conf")
 	service.session.Stream.Verbose = false
 
-	if strings.Contains(configuration["MATCH"], ",") {
-		matches := strings.Split(configuration["MATCH"], ",")
-		for _, match := range matches{
-			ret, err := service.Fetch(configuration, match)
+	if strings.Contains(configuration["PERSON"], ",") {
+		usernames := strings.Split(configuration["PERSON"], ",")
+		for _, username := range usernames{
+			ret, err := service.Fetch(configuration, username)
 			if err != nil {
 				return ret, err
 			}
 		}
 	} else {
-		ret, err := service.Fetch(configuration, configuration["MATCH"])
+		ret, err := service.Fetch(configuration, configuration["PERSON"])
 		if err != nil {
 			return ret, err
 		}

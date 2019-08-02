@@ -13,6 +13,7 @@ func PushSayHelloFilter(s *session.Session) *SayHelloFilter{
 	mod := SayHelloFilter{
 		Sess: s,
 	}
+	mod.AddModule("instagram.feed")
 	return &mod
 }
 
