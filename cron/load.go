@@ -13,25 +13,25 @@ import (
 func Load(sup *supervisor.Supervisor) {
 	// Loading tweets.service
 	sup.Services = append(sup.Services, session.Listener{
-		Service:       tweets_cron.GetNewService(sup.GetStandaloneSession()),
+		CronJob:       tweets_cron.GetNewService(sup.GetStandaloneSession()),
 		NextExecution: time.Now(),
 	})
 
 	// Loading pastebin.service
 	sup.Services = append(sup.Services, session.Listener{
-		Service:       pastebin_cron.GetNewService(sup.GetStandaloneSession()),
+		CronJob:       pastebin_cron.GetNewService(sup.GetStandaloneSession()),
 		NextExecution: time.Now(),
 	})
 
 	// Loading email_to_domain.service
 	sup.Services = append(sup.Services, session.Listener{
-		Service:       email_to_domain_cron.GetNewService(sup.GetStandaloneSession()),
+		CronJob:       email_to_domain_cron.GetNewService(sup.GetStandaloneSession()),
 		NextExecution: time.Now(),
 	})
 
 	// Loading societe_com.service
 	sup.Services = append(sup.Services, session.Listener{
-		Service:       societe_com_cron.GetNewService(sup.GetStandaloneSession()),
+		CronJob:       societe_com_cron.GetNewService(sup.GetStandaloneSession()),
 		NextExecution: time.Now(),
 	})
 }
