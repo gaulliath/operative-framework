@@ -2,25 +2,26 @@ package phone_generator
 
 import (
 	"fmt"
-	"github.com/graniet/operative-framework/session"
 	"os"
 	"strings"
 	"sync"
-	"syreclabs.com/go/faker"
-	"gopkg.in/cheggaaa/pb.v1"
+
+	"github.com/graniet/operative-framework/session"
 	"github.com/segmentio/ksuid"
+	"gopkg.in/cheggaaa/pb.v1"
+	"syreclabs.com/go/faker"
 )
 
-type PhoneGenerator struct{
+type PhoneGenerator struct {
 	session.SessionModule
-	Sess *session.Session `json:"-"`
-	Current int `json:"-"`
-	Bar *pb.ProgressBar `json:"-"`
+	Sess    *session.Session `json:"-"`
+	Current int              `json:"-"`
+	Bar     *pb.ProgressBar  `json:"-"`
 }
 
-func PushPhoneGeneratorModule(s *session.Session) *PhoneGenerator{
+func PushPhoneGeneratorModule(s *session.Session) *PhoneGenerator {
 	mod := PhoneGenerator{
-		Sess: s,
+		Sess:    s,
 		Current: 1,
 	}
 
@@ -32,70 +33,69 @@ func PushPhoneGeneratorModule(s *session.Session) *PhoneGenerator{
 	return &mod
 }
 
-func (module *PhoneGenerator) Name() string{
+func (module *PhoneGenerator) Name() string {
 	return "phone.generator"
 }
 
-func (module *PhoneGenerator) Description() string{
+func (module *PhoneGenerator) Description() string {
 	return "Generate VCard (.vcf) with random numbers"
 }
 
-func (module *PhoneGenerator) Author() string{
+func (module *PhoneGenerator) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *PhoneGenerator) GetType() string{
+func (module *PhoneGenerator) GetType() string {
 	return "country"
 }
 
-func (module *PhoneGenerator) GetInformation() session.ModuleInformation{
+func (module *PhoneGenerator) GetInformation() session.ModuleInformation {
 	information := session.ModuleInformation{
-		Name: module.Name(),
+		Name:        module.Name(),
 		Description: module.Description(),
-		Author: module.Author(),
-		Type: module.GetType(),
-		Parameters: module.Parameters,
+		Author:      module.Author(),
+		Type:        module.GetType(),
+		Parameters:  module.Parameters,
 	}
 	return information
 }
 
-func (module *PhoneGenerator) Start(){
+func (module *PhoneGenerator) Start() {
 
 	argumentPrefix, err := module.GetParameter("NUMBER_PREFIX")
-	if err != nil{
+	if err != nil {
 		argumentPrefix = session.Param{
 			Value: "",
 		}
 	}
-	argumentFilePath, err2 :=  module.GetParameter("FILE_PATH")
-	if err2 != nil{
+	argumentFilePath, err2 := module.GetParameter("FILE_PATH")
+	if err2 != nil {
 		argumentFilePath = session.Param{
 			Value: "",
 		}
 	}
 	argumentNamePrefix, err3 := module.GetParameter("NAME_PREFIX")
-	if err3 != nil{
+	if err3 != nil {
 		argumentNamePrefix = session.Param{
 			Value: "",
 		}
 	}
 
 	argumentVCard, err4 := module.GetParameter("VCARD")
-	if err4 != nil{
+	if err4 != nil {
 		argumentVCard = session.Param{
 			Value: "",
 		}
 	}
 
 	argumentLimit, err5 := module.GetParameter("LIMIT")
-	if err5 != nil{
+	if err5 != nil {
 		fmt.Println(err5.Error())
 		return
 	}
-	if argumentLimit.Value == ""{
+	if argumentLimit.Value == "" {
 		argumentLimit.Value = "100"
 	}
-
 
 	module.Bar = pb.New(module.Sess.StringToInteger(argumentLimit.Value))
 
@@ -104,7 +104,7 @@ func (module *PhoneGenerator) Start(){
 		panic(err)
 	}
 	wg := new(sync.WaitGroup)
-	for{
+	for {
 		if module.Current < module.Sess.StringToInteger(argumentLimit.Value) {
 			wg.Add(1)
 			go func(module *PhoneGenerator, bar *pb.ProgressBar) {
@@ -112,8 +112,8 @@ func (module *PhoneGenerator) Start(){
 				if strings.Contains(phone, "(") && strings.Contains(phone, ")") {
 					newPhone := strings.Split(phone, ")")[1]
 					if argumentPrefix.Value != "" {
-						newPhone = "+1 ("+strings.TrimSpace(argumentPrefix.Value)+")" + newPhone
-					} else{
+						newPhone = "+1 (" + strings.TrimSpace(argumentPrefix.Value) + ")" + newPhone
+					} else {
 						newPhone = "+1 (213)" + newPhone
 					}
 
@@ -123,7 +123,7 @@ func (module *PhoneGenerator) Start(){
 				}
 			}(module, module.Bar)
 			wg.Done()
-		} else{
+		} else {
 			break
 		}
 	}
@@ -133,7 +133,7 @@ func (module *PhoneGenerator) Start(){
 	var file *os.File
 	var errPath error
 
-	if argumentFilePath.Value != ""{
+	if argumentFilePath.Value != "" {
 		file, errPath = os.OpenFile(strings.TrimSpace(argumentFilePath.Value), os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
 	} else {
 		file, errPath = os.OpenFile("/beverlyHills-5000_1.vcf", os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
@@ -143,16 +143,16 @@ func (module *PhoneGenerator) Start(){
 		return
 	}
 	defer file.Close()
-	for _, number := range module.Results{
+	for _, number := range module.Results {
 		var uuid string
 		if argumentNamePrefix.Value == "" {
 			uuid = "BHills_GO_" + ksuid.New().String()
-		} else{
+		} else {
 			uuid = strings.TrimSpace(argumentNamePrefix.Value) + "_" + ksuid.New().String()
 		}
 		if argumentVCard.Value == "true" {
 			_, _ = file.WriteString("BEGIN:VCARD\nVERSION:3.0\nN:" + uuid + ";;;\nFN:" + uuid + "\nTEL;type=HOME:" + number + "\nEND:VCARD\n")
-		} else{
+		} else {
 			_, _ = file.WriteString("\"" + number + "\",\n")
 		}
 	}

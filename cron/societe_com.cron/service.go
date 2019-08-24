@@ -7,13 +7,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/graniet/operative-framework/session"
-	"github.com/joho/godotenv"
-	"github.com/pkg/errors"
 	"log"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/graniet/operative-framework/session"
+	"github.com/joho/godotenv"
+	"github.com/pkg/errors"
 )
 
 type Service struct {

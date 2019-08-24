@@ -1,0 +1,9 @@
+dist/
+dist/*
+dist/**
+*.db
+vendor
+vendor/
+vendor/*
+vendor/**
+

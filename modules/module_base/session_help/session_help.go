@@ -2,17 +2,18 @@ package session_help
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/graniet/go-pretty/table"
 	"github.com/graniet/operative-framework/session"
-	"os"
 )
 
-type HelpModule struct{
+type HelpModule struct {
 	session.SessionModule
 	sess *session.Session `json:"-"`
 }
 
-func PushModuleHelp(s *session.Session) *HelpModule{
+func PushModuleHelp(s *session.Session) *HelpModule {
 	moduleHelp := HelpModule{
 		sess: s,
 	}
@@ -20,35 +21,34 @@ func PushModuleHelp(s *session.Session) *HelpModule{
 	return &moduleHelp
 }
 
-func (module *HelpModule) Name() string{
+func (module *HelpModule) Name() string {
 	return "session_help"
 }
 
-func (module *HelpModule) Description() string{
+func (module *HelpModule) Description() string {
 	return "Listing available modules"
 }
 
-func (module *HelpModule) Author() string{
+func (module *HelpModule) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *HelpModule) GetType() string{
+func (module *HelpModule) GetType() string {
 	return "session"
 }
 
-
-func (module *HelpModule) GetInformation() session.ModuleInformation{
+func (module *HelpModule) GetInformation() session.ModuleInformation {
 	information := session.ModuleInformation{
-		Name: module.Name(),
+		Name:        module.Name(),
 		Description: module.Description(),
-		Author: module.Author(),
-		Type: module.GetType(),
-		Parameters: module.Parameters,
+		Author:      module.Author(),
+		Type:        module.GetType(),
+		Parameters:  module.Parameters,
 	}
 	return information
 }
 
-func (module *HelpModule) Start(){
+func (module *HelpModule) Start() {
 	fmt.Println("ENGINE:")
 	t := module.sess.Stream.GenerateTable()
 	t.SetOutputMirror(os.Stdout)
@@ -90,7 +90,7 @@ func (module *HelpModule) Start(){
 	t = module.sess.Stream.GenerateTable()
 	t.SetOutputMirror(os.Stdout)
 	t.AppendHeader(table.Row{"Filter Name", "Filter Description"})
-	for _, mod := range module.sess.Filters{
+	for _, mod := range module.sess.Filters {
 		t.AppendRow([]interface{}{mod.Name(), mod.Description()})
 	}
 	module.sess.Stream.Render(t)
@@ -110,10 +110,10 @@ func (module *HelpModule) Start(){
 	t = module.sess.Stream.GenerateTable()
 	t.SetOutputMirror(os.Stdout)
 	t.AppendHeader(table.Row{"Module Name", "Module Description", "Target"})
-	for _, mod := range module.sess.Modules{
-		if mod.GetType() == ""{
+	for _, mod := range module.sess.Modules {
+		if mod.GetType() == "" {
 			t.AppendRow([]interface{}{mod.Name(), mod.Description(), "<blank>"})
-		} else{
+		} else {
 			t.AppendRow([]interface{}{mod.Name(), mod.Description(), mod.GetType()})
 		}
 	}

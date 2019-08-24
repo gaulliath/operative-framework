@@ -1,13 +1,14 @@
 package session
 
 import (
+	"os"
+	"time"
+
 	"github.com/chzyer/readline"
 	"github.com/graniet/go-pretty/table"
 	"github.com/graniet/operative-framework/config"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/pkg/errors"
-	"os"
-	"time"
 )
 
 type Session struct {

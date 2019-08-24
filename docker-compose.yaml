@@ -1,0 +1,23 @@
+---
+version: '3.5'
+services:
+
+  tor-privoxy:
+    restart: always
+    container_name: torp
+    image: dockage/tor-privoxy:latest
+    ports:
+    - "9050:9050" # Tor proxy
+    - "9051:9051" # Tor control port
+    - "8118:8118" # Privoxy
+
+  operative-framework:
+    image: graniet/operative-framework:latest
+    container_name: opf
+    build:
+      dockerfile: Dockerfile
+      context: .
+    depends_on:
+    - tor-privoxy
+    ports:
+    - "8888:8888" # Opf API

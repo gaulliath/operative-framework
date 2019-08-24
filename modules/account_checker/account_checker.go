@@ -2,17 +2,18 @@ package account_checker
 
 import (
 	"encoding/json"
-	"github.com/graniet/operative-framework/session"
 	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/graniet/operative-framework/session"
 )
 
-type AccountCheckerModule struct{
+type AccountCheckerModule struct {
 	session.SessionModule
-	sess *session.Session `json:"-"`
-	Stream *session.Stream `json:"-"`
+	sess   *session.Session `json:"-"`
+	Stream *session.Stream  `json:"-"`
 }
 
 type GeneratedSites struct {
@@ -35,9 +36,9 @@ type GeneratedSites struct {
 	} `json:"sites"`
 }
 
-func PushAccountCheckerModule(s *session.Session) *AccountCheckerModule{
+func PushAccountCheckerModule(s *session.Session) *AccountCheckerModule {
 	mod := AccountCheckerModule{
-		sess: s,
+		sess:   s,
 		Stream: &s.Stream,
 	}
 
@@ -45,43 +46,42 @@ func PushAccountCheckerModule(s *session.Session) *AccountCheckerModule{
 	return &mod
 }
 
-
-func (module *AccountCheckerModule) Name() string{
+func (module *AccountCheckerModule) Name() string {
 	return "account.checker"
 }
 
-func (module *AccountCheckerModule) Author() string{
+func (module *AccountCheckerModule) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *AccountCheckerModule) Description() string{
+func (module *AccountCheckerModule) Description() string {
 	return "Identify the existence of a given acount on various sites"
 }
 
-func (module *AccountCheckerModule) GetType() string{
+func (module *AccountCheckerModule) GetType() string {
 	return "username"
 }
 
-func (module *AccountCheckerModule) GetInformation() session.ModuleInformation{
+func (module *AccountCheckerModule) GetInformation() session.ModuleInformation {
 	information := session.ModuleInformation{
-		Name: module.Name(),
+		Name:        module.Name(),
 		Description: module.Description(),
-		Author: module.Author(),
-		Type: module.GetType(),
-		Parameters: module.Parameters,
+		Author:      module.Author(),
+		Type:        module.GetType(),
+		Parameters:  module.Parameters,
 	}
 	return information
 }
 
-func (module *AccountCheckerModule) LoadingSites(sites *GeneratedSites) bool{
+func (module *AccountCheckerModule) LoadingSites(sites *GeneratedSites) bool {
 	req, err := http.NewRequest("GET", "https://raw.githubusercontent.com/WebBreacher/WhatsMyName/master/web_accounts_list.json", nil)
-	if err != nil{
+	if err != nil {
 		return false
 	}
 	client := http.Client{}
-	req.Header.Set("User-Agent",	"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.103 Safari/537.36")
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.103 Safari/537.36")
 	res, err := client.Do(req)
-	if err != nil{
+	if err != nil {
 		module.Stream.Error(err.Error())
 	} else {
 		if res.StatusCode == 200 {
@@ -96,56 +96,56 @@ func (module *AccountCheckerModule) LoadingSites(sites *GeneratedSites) bool{
 	return false
 }
 
-func (module *AccountCheckerModule) Start(){
+func (module *AccountCheckerModule) Start() {
 
 	trg, err := module.GetParameter("TARGET")
-	if err != nil{
+	if err != nil {
 		module.sess.Stream.Error(err.Error())
 		return
 	}
 
 	target, err := module.sess.GetTarget(trg.Value)
-	if err != nil{
+	if err != nil {
 		module.sess.Stream.Error(err.Error())
 		return
 	}
 
 	var sites GeneratedSites
 	load := module.LoadingSites(&sites)
-	if load == false{
+	if load == false {
 		module.sess.Stream.Error("can't load website listing.")
 		return
 	}
 
-	if len(sites.Sites) > 0{
+	if len(sites.Sites) > 0 {
 		client := http.Client{}
 
-		for _, site := range sites.Sites{
+		for _, site := range sites.Sites {
 			url := strings.Replace(site.CheckURI, "{account}", target.GetName(), -1)
 			req, err := http.NewRequest("GET", url, nil)
-			if err != nil{
+			if err != nil {
 				continue
 			}
 			module.sess.Stream.Standard("checking: " + url)
-			req.Header.Set("User-Agent",	"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.103 Safari/537.36")
+			req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.103 Safari/537.36")
 			res, err := client.Do(req)
-			if err != nil{
+			if err != nil {
 				module.Stream.Error(err.Error())
-			} else{
+			} else {
 				code, err := strconv.Atoi(site.AccountExistenceCode)
-				if err != nil{
+				if err != nil {
 					continue
 				}
-				if res.StatusCode == code{
+				if res.StatusCode == code {
 					bodyBytes, err := ioutil.ReadAll(res.Body)
 					if err != nil {
 						continue
 					}
-					if strings.Contains(string(bodyBytes), site.AccountExistenceString){
+					if strings.Contains(string(bodyBytes), site.AccountExistenceString) {
 						module.sess.Stream.Success("Account found : " + url)
 						result := session.TargetResults{
-							Header:"URL" + target.GetSeparator() + "WEBSITE",
-							Value: url + target.GetSeparator() + site.Name,
+							Header: "URL" + target.GetSeparator() + "WEBSITE",
+							Value:  url + target.GetSeparator() + site.Name,
 						}
 						target.Save(module, result)
 						module.Results = append(module.Results, url)

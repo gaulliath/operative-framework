@@ -1,26 +1,27 @@
 package engine
 
 import (
+	"os"
+
 	"github.com/gorilla/mux"
 	"github.com/graniet/go-pretty/table"
 	"github.com/graniet/operative-framework/api"
 	"github.com/graniet/operative-framework/session"
 	"github.com/joho/godotenv"
 	"github.com/labstack/gommon/color"
-	"os"
 )
 
 // Checking If Input As Default Command
-func CommandBase(line string, s *session.Session) bool{
+func CommandBase(line string, s *session.Session) bool {
 
 	// Default Command
-	if line == "info session"{
+	if line == "info session" {
 		ViewInformation(s)
 		return true
-	} else if line== "info api"{
+	} else if line == "info api" {
 		ViewApiInformation(s)
 		return true
-	} else if line == "env"{
+	} else if line == "env" {
 		viewEnvironment(s)
 		return true
 	} else if line == "clear" {
@@ -31,7 +32,7 @@ func CommandBase(line string, s *session.Session) bool{
 }
 
 // View Environment File Argument
-func viewEnvironment(s *session.Session){
+func viewEnvironment(s *session.Session) {
 	t := s.Stream.GenerateTable()
 	t.SetOutputMirror(os.Stdout)
 	t.AppendHeader(table.Row{
@@ -39,8 +40,8 @@ func viewEnvironment(s *session.Session){
 		"Value",
 	})
 	mp, err := godotenv.Read(s.Config.Common.ConfigurationFile)
-	if err == nil{
-		for name, value := range mp{
+	if err == nil {
+		for name, value := range mp {
 			t.AppendRow(table.Row{
 				name,
 				value,
@@ -51,7 +52,7 @@ func viewEnvironment(s *session.Session){
 }
 
 // View Session Information
-func ViewInformation(s *session.Session){
+func ViewInformation(s *session.Session) {
 	t := s.Stream.GenerateTable()
 	t.SetOutputMirror(os.Stdout)
 	t.AppendHeader(table.Row{
@@ -59,7 +60,7 @@ func ViewInformation(s *session.Session){
 		"Value",
 	})
 	apiStatus := color.Red("offline")
-	if s.Information.ApiStatus{
+	if s.Information.ApiStatus {
 		apiStatus = color.Green("online")
 	}
 
@@ -99,7 +100,7 @@ func ViewInformation(s *session.Session){
 }
 
 // View Api EndPoints Information
-func ViewApiInformation(s *session.Session){
+func ViewApiInformation(s *session.Session) {
 	a := api.PushARestFul(s)
 	r := a.LoadRouter()
 	ta := s.Stream.GenerateTable()

@@ -1,25 +1,26 @@
 package google
 
 import (
-	"github.com/PuerkitoBio/goquery"
-	"github.com/graniet/go-pretty/table"
-	"github.com/graniet/operative-framework/session"
 	"net/http"
 	u "net/url"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/PuerkitoBio/goquery"
+	"github.com/graniet/go-pretty/table"
+	"github.com/graniet/operative-framework/session"
 )
 
-type GoogleTwitterModule struct{
+type GoogleTwitterModule struct {
 	session.SessionModule
-	sess *session.Session `json:"-"`
-	Stream *session.Stream `json:"-"`
+	sess   *session.Session `json:"-"`
+	Stream *session.Stream  `json:"-"`
 }
 
-func PushGoogleTwitterModule(s *session.Session) *GoogleTwitterModule{
+func PushGoogleTwitterModule(s *session.Session) *GoogleTwitterModule {
 	mod := GoogleTwitterModule{
-		sess: s,
+		sess:   s,
 		Stream: &s.Stream,
 	}
 
@@ -28,50 +29,48 @@ func PushGoogleTwitterModule(s *session.Session) *GoogleTwitterModule{
 	return &mod
 }
 
-
-func (module *GoogleTwitterModule) Name() string{
+func (module *GoogleTwitterModule) Name() string {
 	return "google.twitter"
 }
 
-func (module *GoogleTwitterModule) Author() string{
+func (module *GoogleTwitterModule) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *GoogleTwitterModule) Description() string{
+func (module *GoogleTwitterModule) Description() string {
 	return "Find result from google search engine"
 }
 
-func (module *GoogleTwitterModule) GetType() string{
+func (module *GoogleTwitterModule) GetType() string {
 	return "person"
 }
 
-func (module *GoogleTwitterModule) GetInformation() session.ModuleInformation{
+func (module *GoogleTwitterModule) GetInformation() session.ModuleInformation {
 	information := session.ModuleInformation{
-		Name: module.Name(),
+		Name:        module.Name(),
 		Description: module.Description(),
-		Author: module.Author(),
-		Type: module.GetType(),
-		Parameters: module.Parameters,
+		Author:      module.Author(),
+		Type:        module.GetType(),
+		Parameters:  module.Parameters,
 	}
 	return information
 }
 
-
-func (module *GoogleTwitterModule) Start(){
+func (module *GoogleTwitterModule) Start() {
 	paramEnterprise, _ := module.GetParameter("TARGET")
 	target, err := module.sess.GetTarget(paramEnterprise.Value)
-	if err != nil{
+	if err != nil {
 		module.sess.Stream.Error(err.Error())
 		return
 	}
 
-	if target.GetType() != module.GetType(){
-		module.Stream.Error("Target with type '"+target.GetType()+"' isn't valid module need '"+module.GetType()+"' type.")
+	if target.GetType() != module.GetType() {
+		module.Stream.Error("Target with type '" + target.GetType() + "' isn't valid module need '" + module.GetType() + "' type.")
 		return
 	}
 
 	paramLimit, _ := module.GetParameter("LIMIT")
-	url := "https://www.google.com/search?num=" + paramLimit.Value + "&start=0&hl=en&q=" + u.QueryEscape(target.GetName() + " site:twitter.com")
+	url := "https://www.google.com/search?num=" + paramLimit.Value + "&start=0&hl=en&q=" + u.QueryEscape(target.GetName()+" site:twitter.com")
 	client := http.Client{}
 	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36")
@@ -94,7 +93,7 @@ func (module *GoogleTwitterModule) Start(){
 
 	t := module.Stream.GenerateTable()
 	t.SetOutputMirror(os.Stdout)
-	t.SetAllowedColumnLengths([]int{60, 100,})
+	t.SetAllowedColumnLengths([]int{60, 100})
 	t.AppendHeader(table.Row{"Link", "Username"})
 	resultFound := 0
 	doc.Find(".g").Each(func(i int, s *goquery.Selection) {

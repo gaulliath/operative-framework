@@ -1,13 +1,14 @@
 package cron
 
 import (
+	"time"
+
 	"github.com/graniet/operative-framework/cron/email_to_domain.cron"
 	"github.com/graniet/operative-framework/cron/pastebin.cron"
 	"github.com/graniet/operative-framework/cron/societe_com.cron"
 	"github.com/graniet/operative-framework/cron/tweets.cron"
 	"github.com/graniet/operative-framework/session"
 	"github.com/graniet/operative-framework/supervisor"
-	"time"
 )
 
 func Load(sup *supervisor.Supervisor) {

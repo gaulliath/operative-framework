@@ -2,22 +2,23 @@ package phone_buster
 
 import (
 	"fmt"
-	"github.com/graniet/operative-framework/session"
-	"github.com/segmentio/ksuid"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/graniet/operative-framework/session"
+	"github.com/segmentio/ksuid"
 )
 
-type PhoneBuster struct{
+type PhoneBuster struct {
 	session.SessionModule
-	Sess *session.Session `json:"-"`
-	Current int `json:"-"`
+	Sess    *session.Session `json:"-"`
+	Current int              `json:"-"`
 }
 
-func PushPhoneBusterModule(s *session.Session) *PhoneBuster{
+func PushPhoneBusterModule(s *session.Session) *PhoneBuster {
 	mod := PhoneBuster{
-		Sess: s,
+		Sess:    s,
 		Current: 1,
 	}
 
@@ -27,60 +28,60 @@ func PushPhoneBusterModule(s *session.Session) *PhoneBuster{
 	return &mod
 }
 
-func (module *PhoneBuster) Name() string{
+func (module *PhoneBuster) Name() string {
 	return "phone.buster"
 }
 
-func (module *PhoneBuster) Description() string{
+func (module *PhoneBuster) Description() string {
 	return "Brute force phone number and generate VCard(s) (.vcf)"
 }
 
-func (module *PhoneBuster) Author() string{
+func (module *PhoneBuster) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *PhoneBuster) GetType() string{
+func (module *PhoneBuster) GetType() string {
 	return "phone"
 }
 
-func (module *PhoneBuster) GetInformation() session.ModuleInformation{
+func (module *PhoneBuster) GetInformation() session.ModuleInformation {
 	information := session.ModuleInformation{
-		Name: module.Name(),
+		Name:        module.Name(),
 		Description: module.Description(),
-		Author: module.Author(),
-		Type: module.GetType(),
-		Parameters: module.Parameters,
+		Author:      module.Author(),
+		Type:        module.GetType(),
+		Parameters:  module.Parameters,
 	}
 	return information
 }
 
-func (module *PhoneBuster) Start(){
+func (module *PhoneBuster) Start() {
 	trg, err := module.GetParameter("TARGET")
-	if err != nil{
+	if err != nil {
 		module.Sess.Stream.Error(err.Error())
 		return
 	}
 
 	target, err := module.Sess.GetTarget(trg.Value)
-	if err != nil{
+	if err != nil {
 		module.Sess.Stream.Error(err.Error())
 		return
 	}
 
 	argumentCount, err3 := module.GetParameter("RANGE")
-	if err3 != nil{
+	if err3 != nil {
 		module.Sess.Stream.Error(err3.Error())
 		return
 	}
 
 	maxRange, errConv := strconv.Atoi(argumentCount.Value)
-	if errConv != nil{
+	if errConv != nil {
 		module.Sess.Stream.Error(errConv.Error())
 		return
 	}
 
-	argumentFilePath, err2 :=  module.GetParameter("FILE_PATH")
-	if err2 != nil{
+	argumentFilePath, err2 := module.GetParameter("FILE_PATH")
+	if err2 != nil {
 		argumentFilePath = session.Param{
 			Value: "",
 		}
@@ -89,7 +90,7 @@ func (module *PhoneBuster) Start(){
 	var file *os.File
 	var errPath error
 
-	if argumentFilePath.Value != ""{
+	if argumentFilePath.Value != "" {
 		file, errPath = os.OpenFile(strings.TrimSpace(argumentFilePath.Value), os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
 	} else {
 		file, errPath = os.OpenFile("/Users/graniet/Desktop/VCARD/MRROBOT_1.vcf", os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
@@ -101,21 +102,20 @@ func (module *PhoneBuster) Start(){
 
 	minRange := 01
 
-	for{
+	for {
 
 		number := target.Name + strconv.Itoa(minRange)
 		module.Results = append(module.Results, number)
 		module.Sess.Stream.Success(number)
 		minRange = minRange + 1
 
-		if minRange >= maxRange{
+		if minRange >= maxRange {
 			break
 		}
 	}
 
-
 	defer file.Close()
-	for _, number := range module.Results{
+	for _, number := range module.Results {
 		var uuid string
 		uuid = "NY_" + ksuid.New().String()
 		_, _ = file.WriteString("BEGIN:VCARD\nVERSION:3.0\nN:" + uuid + ";;;\nFN:" + uuid + "\nTEL;type=HOME:" + number + "\nEND:VCARD\n")

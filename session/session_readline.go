@@ -2,12 +2,13 @@ package session
 
 import (
 	"fmt"
-	"github.com/chzyer/readline"
-	"github.com/graniet/go-pretty/table"
 	"os"
 	"os/exec"
 	"runtime"
 	"strings"
+
+	"github.com/chzyer/readline"
+	"github.com/graniet/go-pretty/table"
 )
 
 func (s *Session) ClearScreen() {

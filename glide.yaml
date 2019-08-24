@@ -1,0 +1,29 @@
+package: github.com/graniet/operative-framework
+import:
+- package: github.com/Baozisoftware/qrcode-terminal-go
+- package: github.com/ChimeraCoder/anaconda
+- package: github.com/PuerkitoBio/goquery
+- package: github.com/Rhymen/go-whatsapp
+- package: github.com/akamensky/argparse
+- package: github.com/chzyer/readline
+- package: github.com/fatih/color
+- package: github.com/gorilla/mux
+- package: github.com/graniet/go-pretty
+  subpackages:
+  - table
+- package: github.com/imroc/req
+- package: github.com/jinzhu/gorm
+  subpackages:
+  - dialects/sqlite
+- package: github.com/joho/godotenv
+- package: github.com/jung-kurt/gofpdf
+  subpackages:
+  - contrib/httpimg
+- package: github.com/labstack/gommon
+  subpackages:
+  - color
+- package: github.com/pkg/errors
+- package: github.com/segmentio/ksuid
+- package: gopkg.in/ahmdrz/goinsta.v2
+- package: gopkg.in/cheggaaa/pb.v1
+- package: syreclabs.com/go/faker
