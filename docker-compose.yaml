@@ -1,25 +1,21 @@
 ---
+version: '3.5'
 services:
-# https://github.com/dockage/tor-privoxy
-# https://github.com/rdsubhas/docker-tor-privoxy-alpine
-# https://github.com/u1234x1234/torpool
-# https://www.devdungeon.com/content/making-tor-http-requests-go
-# https://github.com/tdh8316/Investigo
-# https://github.com/nogoegst/scallion/blob/master/main.go
 
   tor-privoxy:
     restart: always
-    name: torp
+    container_name: torp
     image: dockage/tor-privoxy:latest
     ports:
-      - "9050:9050" # Tor proxy
-      - "9051:9051" # Tor control port
-      - "8118:8118" # Privoxy
+    - "9050:9050" # Tor proxy
+    - "9051:9051" # Tor control port
+    - "8118:8118" # Privoxy
 
   operative-framework:
-    image: opf
+    image: graniet/operative-framework:latest
+    container_name: opf
     build:
+      dockerfile: Dockerfile
       context: .
     ports:
-      - "8888:8888"
-    
+    - "8888:8888" # Opf API
