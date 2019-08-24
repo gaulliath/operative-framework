@@ -17,5 +17,7 @@ services:
     build:
       dockerfile: Dockerfile
       context: .
+    depends_on:
+    - tor-privoxy
     ports:
     - "8888:8888" # Opf API
