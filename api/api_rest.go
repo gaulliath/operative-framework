@@ -1,23 +1,24 @@
 package api
 
 import (
-	"github.com/graniet/operative-framework/session"
-	"github.com/gorilla/mux"
-	"net/http"
 	"fmt"
+	"net/http"
+
+	"github.com/gorilla/mux"
 	"github.com/graniet/operative-framework/api/core"
+	"github.com/graniet/operative-framework/session"
 )
 
-type ARestFul struct{
-	sess *session.Session
+type ARestFul struct {
+	sess   *session.Session
 	Server *http.Server
-	Core *core.Core
+	Core   *core.Core
 }
 
-func PushARestFul(s *session.Session) *ARestFul{
+func PushARestFul(s *session.Session) *ARestFul {
 	c := core.Core{
-		Host: s.Config.Api.Host,
-		Port: s.Config.Api.Port,
+		Host:    s.Config.Api.Host,
+		Port:    s.Config.Api.Port,
 		Verbose: s.Config.Api.Verbose,
 	}
 	mod := ARestFul{
@@ -30,7 +31,7 @@ func PushARestFul(s *session.Session) *ARestFul{
 	return &mod
 }
 
-func (api *ARestFul) LoadRouter() *mux.Router{
+func (api *ARestFul) LoadRouter() *mux.Router {
 	r := mux.NewRouter()
 
 	r.HandleFunc("/api/sessions", api.Sessions).Methods("GET")
@@ -47,11 +48,11 @@ func (api *ARestFul) LoadRouter() *mux.Router{
 	return r
 }
 
-func (api *ARestFul) Start(){
+func (api *ARestFul) Start() {
 	r := api.LoadRouter()
 	api.Server.Handler = r
 	err := api.Server.ListenAndServe()
-	if err != nil{
+	if err != nil {
 		fmt.Println(err.Error())
 		return
 	}

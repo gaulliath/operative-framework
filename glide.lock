@@ -1,0 +1,133 @@
+hash: 755ccbe48fb1a1bed6353b7242e95eb11ea167cec6abd956e63ec8c954fa07cb
+updated: 2019-08-24T18:45:49.53691792Z
+imports:
+- name: github.com/akamensky/argparse
+  version: 28b0496b54cba23e619418cf64e37c7519638ebf
+- name: github.com/andybalholm/cascadia
+  version: 680b6a57bda4f657485ad44bdea42342ead737bc
+- name: github.com/asaskevich/govalidator
+  version: f61b66f89f4a311bef65f13e575bcf1a2ffadda6
+- name: github.com/azr/backoff
+  version: 53511d3c733003985b0b76f733df1f4d0095ee6a
+- name: github.com/Baozisoftware/qrcode-terminal-go
+  version: c0650d8dff0f053901ff16185217b950d5e7743c
+- name: github.com/ChimeraCoder/anaconda
+  version: fba449f7b405a61af4f8a9246bd557f9625bd7be
+- name: github.com/ChimeraCoder/tokenbucket
+  version: c5a927568de7aad8a58127d80bcd36ca4e71e454
+- name: github.com/chzyer/readline
+  version: 2972be24d48e78746da79ba8e24e8b488c9880de
+- name: github.com/dustin/go-jsonpointer
+  version: ba0abeacc3dcca5b9b20f31509c46794edbc9965
+- name: github.com/dustin/gojson
+  version: 2e71ec9dd5adce3b168cd0dbde03b5cc04951c30
+- name: github.com/fatih/color
+  version: 3f9d52f7176a6927daacff70a3e8d1dc2025c53e
+- name: github.com/garyburd/go-oauth
+  version: bca2e7f09a178fd36b034107a00e2323bca6a82e
+  subpackages:
+  - oauth
+- name: github.com/go-openapi/errors
+  version: 9b273e805998abc751853b4e1574d66e5df888b4
+- name: github.com/go-openapi/strfmt
+  version: 6faa644e1cdafc07f7b38eb06c1af5f92128f289
+- name: github.com/go-stack/stack
+  version: 2fee6af1a9795aafbe0253a0cfbdf668e1fb8a9a
+- name: github.com/golang/protobuf
+  version: 4c88cc3f1a34ffade77b79abc53335d1e511f25b
+  subpackages:
+  - proto
+- name: github.com/gorilla/mux
+  version: e0cdff45b7de56d3ad24ef9871c14fe4238475aa
+- name: github.com/gorilla/websocket
+  version: 7e9819d926e9f51e09eabe119b6d78f94e058c44
+- name: github.com/graniet/go-pretty
+  version: fba20de8a7d32c1f408d85a81c22f9355093eec8
+  subpackages:
+  - table
+- name: github.com/imroc/req
+  version: fc8e4797bca7e3a620d883fda1bb1bd8e807327d
+- name: github.com/jedib0t/go-pretty
+  version: 1ec860a8cda361fb569dcefd79f058d17845f21b
+  subpackages:
+  - text
+- name: github.com/jinzhu/gorm
+  version: 836fb2c19d84dac7b0272958dfb9af7cf0d0ade4
+  subpackages:
+  - dialects/sqlite
+- name: github.com/jinzhu/inflection
+  version: f5c5f50e6090ae76a29240b61ae2a90dd810112e
+- name: github.com/joho/godotenv
+  version: 5c0e6c6ab1a0a9ef0a8822cba3a05d62f7dad941
+- name: github.com/jung-kurt/gofpdf
+  version: 5336f2c016d4b1b5e9399a84aa4657d374dd5cb3
+  subpackages:
+  - contrib/httpimg
+- name: github.com/labstack/gommon
+  version: 4919956f6fb227b548f004da27c7c6b20fba499f
+  subpackages:
+  - color
+- name: github.com/mattn/go-colorable
+  version: 388941e3ea99c461d2bc2747eaf27741b6dda096
+- name: github.com/mattn/go-isatty
+  version: bf9a1dea1961e1d831824fb135332bfb8c10e8b8
+- name: github.com/mattn/go-runewidth
+  version: 703b5e6b11ae25aeb2af9ebb5d5fdf8fa2575211
+- name: github.com/mattn/go-sqlite3
+  version: d3c690956bde8789300d0dd7e868189cb88cf6ad
+- name: github.com/mitchellh/mapstructure
+  version: 3536a929edddb9a5b34bd6861dc4a9647cb459fe
+- name: github.com/pkg/errors
+  version: 27936f6d90f9c8e1145f11ed52ffffbfdb9e0af7
+- name: github.com/PuerkitoBio/goquery
+  version: 3dcf72e6c17f694381a21592651ca1464ded0e10
+- name: github.com/Rhymen/go-whatsapp
+  version: 5c79b2cf277a8bd805c6018798817a5263f2ae6a
+  subpackages:
+  - binary
+  - binary/proto
+  - binary/token
+  - crypto/cbc
+  - crypto/curve25519
+  - crypto/hkdf
+- name: github.com/segmentio/ksuid
+  version: 9349bd0a1b74d652f56881a2418e4b8d5df19321
+- name: github.com/skip2/go-qrcode
+  version: dc11ecdae0a9889dc81a343585516404e8dc6ead
+  subpackages:
+  - bitset
+  - reedsolomon
+- name: go.mongodb.org/mongo-driver
+  version: d7f21ac57c73b88392e0ada3d3bf4b3563ef358e
+  subpackages:
+  - bson
+  - bson/bsoncodec
+  - bson/bsonrw
+  - bson/bsontype
+  - bson/primitive
+  - x/bsonx/bsoncore
+- name: golang.org/x/crypto
+  version: 60c769a6c58655dab1b9adac0d58967dd517cfba
+  subpackages:
+  - curve25519
+  - hkdf
+- name: golang.org/x/net
+  version: 74dc4d7220e7acc4e100824340f3e66577424772
+  subpackages:
+  - context
+  - html
+  - html/atom
+- name: golang.org/x/sys
+  version: fde4db37ae7ad8191b03d30d27f258b5291ae4e3
+  subpackages:
+  - unix
+  - windows
+- name: gopkg.in/ahmdrz/goinsta.v2
+  version: 1fcb9be7b2c624d2c5c6e81b242d8df853368abb
+- name: gopkg.in/cheggaaa/pb.v1
+  version: f907f6f5dd81f77c2bbc1cde92e4c5a04720cb11
+- name: syreclabs.com/go/faker
+  version: ca5d017134d0604dc3ba912dd6de98d6b27b6444
+  subpackages:
+  - locales
+testImports: []

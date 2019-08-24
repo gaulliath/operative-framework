@@ -33,7 +33,7 @@ import (
 	"github.com/graniet/operative-framework/session"
 )
 
-func LoadModules(s *session.Session){
+func LoadModules(s *session.Session) {
 	s.Modules = append(s.Modules, session_help.PushModuleHelp(s))
 	s.Modules = append(s.Modules, header_retrieval.PushModuleHeaderRetrieval(s))
 	s.Modules = append(s.Modules, linkedin_search.PushLinkedinSearchModule(s))
@@ -70,9 +70,9 @@ func LoadModules(s *session.Session){
 	s.Modules = append(s.Modules, darksearch.PushMacVendorModule(s))
 	s.Modules = append(s.Modules, google_dork.PushGoogleDorkModule(s))
 
-	for _, mod := range s.Modules{
+	for _, mod := range s.Modules {
 		s.PushType(mod.GetType())
-		mod.CreateNewParam("FILTER", "Use module filter after execution", "",false, session.STRING)
+		mod.CreateNewParam("FILTER", "Use module filter after execution", "", false, session.STRING)
 		mod.CreateNewParam("BACKGROUND", "Run this task in background", "false", false, session.BOOL)
 	}
 }
