@@ -2,20 +2,21 @@ package twitter
 
 import (
 	"fmt"
-	"github.com/ChimeraCoder/anaconda"
-	"github.com/graniet/go-pretty/table"
-	"github.com/graniet/operative-framework/session"
 	"net/url"
 	"os"
 	"strconv"
+
+	"github.com/ChimeraCoder/anaconda"
+	"github.com/graniet/go-pretty/table"
+	"github.com/graniet/operative-framework/session"
 )
 
-type TwitterFollowing struct{
+type TwitterFollowing struct {
 	session.SessionModule
 	Sess *session.Session `json:"-"`
 }
 
-func PushTwitterFollowingModule(s *session.Session) *TwitterFollowing{
+func PushTwitterFollowingModule(s *session.Session) *TwitterFollowing {
 	mod := TwitterFollowing{
 		Sess: s,
 	}
@@ -25,89 +26,87 @@ func PushTwitterFollowingModule(s *session.Session) *TwitterFollowing{
 	return &mod
 }
 
-func (module *TwitterFollowing) Name() string{
+func (module *TwitterFollowing) Name() string {
 	return "twitter.following"
 }
 
-func (module *TwitterFollowing) Description() string{
+func (module *TwitterFollowing) Description() string {
 	return "Get following from target user twitter account"
 }
 
-func (module *TwitterFollowing) Author() string{
+func (module *TwitterFollowing) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *TwitterFollowing) GetType() string{
+func (module *TwitterFollowing) GetType() string {
 	return "twitter"
 }
 
-func (module *TwitterFollowing) GetInformation() session.ModuleInformation{
+func (module *TwitterFollowing) GetInformation() session.ModuleInformation {
 	information := session.ModuleInformation{
-		Name: module.Name(),
+		Name:        module.Name(),
 		Description: module.Description(),
-		Author: module.Author(),
-		Type: module.GetType(),
-		Parameters: module.Parameters,
+		Author:      module.Author(),
+		Type:        module.GetType(),
+		Parameters:  module.Parameters,
 	}
 	return information
 }
 
-func (module *TwitterFollowing) Start(){
+func (module *TwitterFollowing) Start() {
 
 	var followingIds []int64
 
 	trg, err := module.GetParameter("TARGET")
-	if err != nil{
+	if err != nil {
 		module.Sess.Stream.Error(err.Error())
 		return
 	}
 
 	target, err := module.Sess.GetTarget(trg.Value)
-	if err != nil{
+	if err != nil {
 		module.Sess.Stream.Error(err.Error())
 		return
 	}
-
 
 	api := anaconda.NewTwitterApiWithCredentials(module.Sess.Config.Twitter.Password, module.Sess.Config.Twitter.Api.SKey, module.Sess.Config.Twitter.Login, module.Sess.Config.Twitter.Api.Key)
 	v := url.Values{}
 	user, err := api.GetUserSearch(target.Name, v)
-	if err != nil{
+	if err != nil {
 		module.Sess.Stream.Error(err.Error())
 		return
 	}
 	followers, err := api.GetFriendsUser(user[0].Id, v)
-	if err != nil{
+	if err != nil {
 		module.Sess.Stream.Error(err.Error())
 		return
 	}
 
-
 	argumentCount, errCount := module.GetParameter("COUNT")
-	if errCount != nil{
+	if errCount != nil {
 		module.Sess.Stream.Error("Count parameters as not listed.")
 		return
 	}
 
 	maxCount, errConv := strconv.Atoi(argumentCount.Value)
-	if errConv != nil{
+	if errConv != nil {
 		module.Sess.Stream.Error("Error as occured with parameter 'COUNT'")
 		return
 	}
 	current := 0
-	if followers.Next_cursor_str == "0"{
-		for _, ids := range followers.Ids{
-			if current >= maxCount{
+	if followers.Next_cursor_str == "0" {
+		for _, ids := range followers.Ids {
+			if current >= maxCount {
 				break
 			}
 			followingIds = append(followingIds, ids)
 			current = current + 1
 		}
 	}
-	for followers.Next_cursor_str != "0"{
-		for _, ids := range followers.Ids{
+	for followers.Next_cursor_str != "0" {
+		for _, ids := range followers.Ids {
 			fmt.Println(current)
-			if current >= maxCount{
+			if current >= maxCount {
 				break
 			}
 			followingIds = append(followingIds, ids)
@@ -115,7 +114,7 @@ func (module *TwitterFollowing) Start(){
 		}
 		v.Set("cursor", followers.Next_cursor_str)
 		followers, err = api.GetFollowersUser(user[0].Id, v)
-		if err != nil{
+		if err != nil {
 			module.Sess.Stream.Error(err.Error())
 			break
 		}
@@ -127,14 +126,14 @@ func (module *TwitterFollowing) Start(){
 		"Twitter ID",
 	})
 
-	for _, ids := range followingIds{
+	for _, ids := range followingIds {
 		module.Results = append(module.Results, strconv.Itoa(int(ids)))
 		t.AppendRow(table.Row{
 			ids,
 		})
 		result := session.TargetResults{
 			Header: "Twitter ID",
-			Value: strconv.Itoa(int(ids)),
+			Value:  strconv.Itoa(int(ids)),
 		}
 		target.Save(module, result)
 	}

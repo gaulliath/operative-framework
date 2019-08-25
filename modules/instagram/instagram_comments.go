@@ -2,64 +2,65 @@ package instagram
 
 import (
 	"fmt"
+	"os"
+	"time"
+
 	"github.com/graniet/go-pretty/table"
 	"github.com/graniet/operative-framework/session"
 	"gopkg.in/ahmdrz/goinsta.v2"
-	"os"
-	"time"
 )
 
-type InstagramComments struct{
+type InstagramComments struct {
 	session.SessionModule
 	Sess *session.Session `json:"-"`
 }
 
-func PushInstagramCommentsModule(s *session.Session) *InstagramComments{
+func PushInstagramCommentsModule(s *session.Session) *InstagramComments {
 	mod := InstagramComments{
 		Sess: s,
 	}
 
-	mod.CreateNewParam("TARGET", "INSTAGRAM USER ACCOUNT", "",true,session.STRING)
+	mod.CreateNewParam("TARGET", "INSTAGRAM USER ACCOUNT", "", true, session.STRING)
 	return &mod
 }
 
-func (module *InstagramComments) Name() string{
+func (module *InstagramComments) Name() string {
 	return "instagram.comments"
 }
 
-func (module *InstagramComments) Description() string{
+func (module *InstagramComments) Description() string {
 	return "Get instagram comments from post."
 }
 
-func (module *InstagramComments) Author() string{
+func (module *InstagramComments) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *InstagramComments) GetType() string{
+func (module *InstagramComments) GetType() string {
 	return "instagram"
 }
 
-func (module *InstagramComments) GetInformation() session.ModuleInformation{
+func (module *InstagramComments) GetInformation() session.ModuleInformation {
 	information := session.ModuleInformation{
-		Name: module.Name(),
+		Name:        module.Name(),
 		Description: module.Description(),
-		Author: module.Author(),
-		Type: module.GetType(),
-		Parameters: module.Parameters,
+		Author:      module.Author(),
+		Type:        module.GetType(),
+		Parameters:  module.Parameters,
 	}
 	return information
 }
 
-func (module *InstagramComments) Start(){
+func (module *InstagramComments) Start() {
 
 	trg, err := module.GetParameter("TARGET")
-	if err != nil{
+	if err != nil {
 		module.Sess.Stream.Error(err.Error())
 		return
 	}
 
 	target, err2 := module.Sess.GetTarget(trg.Value)
-	if err2 != nil{
+	if err2 != nil {
 		fmt.Println(err2.Error())
 		return
 	}
@@ -72,11 +73,10 @@ func (module *InstagramComments) Start(){
 	}
 
 	profil, err := insta.Profiles.ByName(target.Name)
-	if err != nil{
+	if err != nil {
 		fmt.Println(err.Error())
 		return
 	}
-
 
 	t := module.Sess.Stream.GenerateTable()
 	separator := target.GetSeparator()
@@ -101,7 +101,7 @@ func (module *InstagramComments) Start(){
 						})
 
 						result := session.TargetResults{
-							Header: "ITEM ID" + separator +"USERNAME" + separator + "COMMENT",
+							Header: "ITEM ID" + separator + "USERNAME" + separator + "COMMENT",
 							Value:  item.ID + separator + c.User.Username + separator + c.Text,
 						}
 

@@ -2,19 +2,20 @@ package report
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
+
 	"github.com/graniet/operative-framework/session"
 	"github.com/jung-kurt/gofpdf"
 	"github.com/jung-kurt/gofpdf/contrib/httpimg"
-	"strconv"
-	"strings"
 )
 
-type ReportPDF struct{
+type ReportPDF struct {
 	session.SessionModule
 	Sess *session.Session `json:"-"`
 }
 
-func PushReportPDFModule(s *session.Session) *ReportPDF{
+func PushReportPDFModule(s *session.Session) *ReportPDF {
 	mod := ReportPDF{
 		Sess: s,
 	}
@@ -23,36 +24,36 @@ func PushReportPDFModule(s *session.Session) *ReportPDF{
 	return &mod
 }
 
-func (module *ReportPDF) Name() string{
+func (module *ReportPDF) Name() string {
 	return "report.pdf"
 }
 
-func (module *ReportPDF) Description() string{
+func (module *ReportPDF) Description() string {
 	return "Generate session report to PDF format"
 }
 
-func (module *ReportPDF) Author() string{
+func (module *ReportPDF) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *ReportPDF) GetType() string{
+func (module *ReportPDF) GetType() string {
 	return ""
 }
 
-func (module *ReportPDF) GetInformation() session.ModuleInformation{
+func (module *ReportPDF) GetInformation() session.ModuleInformation {
 	information := session.ModuleInformation{
-		Name: module.Name(),
+		Name:        module.Name(),
 		Description: module.Description(),
-		Author: module.Author(),
-		Type: module.GetType(),
-		Parameters: module.Parameters,
+		Author:      module.Author(),
+		Type:        module.GetType(),
+		Parameters:  module.Parameters,
 	}
 	return information
 }
 
-func (module *ReportPDF) Start(){
+func (module *ReportPDF) Start() {
 	reportOutput, err := module.GetParameter("EXPORT_FILE")
-	if err != nil{
+	if err != nil {
 		module.Sess.Stream.Error(err.Error())
 		return
 	}
@@ -62,9 +63,9 @@ func (module *ReportPDF) Start(){
 	pdf.SetFont("Arial", "B", 16)
 	url := "http://tristan-granier.com/static/img/operative.png"
 	httpimg.Register(pdf, url, "")
-	pdf.Image(url, 10, 5, 90, 20, false,"", 0, "")
+	pdf.Image(url, 10, 5, 90, 20, false, "", 0, "")
 
-	TextSeparator := func(text string, size float64){
+	TextSeparator := func(text string, size float64) {
 		// Arial 12
 		pdf.SetFont("Arial", "", size)
 		// Background color
@@ -78,24 +79,24 @@ func (module *ReportPDF) Start(){
 		pdf.Ln(4)
 	}
 
-	TextSeparator("Session: " + module.Sess.SessionName, 12)
-	Reset := func(){
+	TextSeparator("Session: "+module.Sess.SessionName, 12)
+	Reset := func() {
 		pdf.SetFont("Arial", "", 12)
 		pdf.SetFillColor(255, 255, 255)
 		pdf.SetTextColor(0, 0, 0)
 	}
 	Reset()
-	pdf.CellFormat(0, 6,fmt.Sprintf("This is a report generated on 10-01-2019 with the operative framework."), "",1,"L",true,0,"")
-	pdf.CellFormat(0,6, fmt.Sprintf("All data below is confidential"), "", 1, "L", true,0,"")
-	Title := func(text string){
+	pdf.CellFormat(0, 6, fmt.Sprintf("This is a report generated on 10-01-2019 with the operative framework."), "", 1, "L", true, 0, "")
+	pdf.CellFormat(0, 6, fmt.Sprintf("All data below is confidential"), "", 1, "L", true, 0, "")
+	Title := func(text string) {
 		pdf.Ln(8)
 		pdf.SetFont("Arial", "", 18)
-		pdf.CellFormat(0, 6, fmt.Sprintf(text),"", 1, "L",true,0, "")
+		pdf.CellFormat(0, 6, fmt.Sprintf(text), "", 1, "L", true, 0, "")
 		pdf.SetFont("Arial", "", 12)
 		pdf.Ln(1)
 	}
-	SubTitle := func(text string){
-		pdf.CellFormat(0,10, fmt.Sprintf(text), "", 1, "L", true,0,"")
+	SubTitle := func(text string) {
+		pdf.CellFormat(0, 10, fmt.Sprintf(text), "", 1, "L", true, 0, "")
 		pdf.Ln(8)
 	}
 	Targets := func() {
@@ -108,7 +109,7 @@ func (module *ReportPDF) Start(){
 			pdf.Ln(-1)
 		}
 	}
-	LinkedTargets := func(target *session.Target){
+	LinkedTargets := func(target *session.Target) {
 		pdf.CellFormat(80, 7, "TARGET", "1", 0, "", false, 0, "")
 		pdf.CellFormat(80, 7, "NAME", "1", 0, "", false, 0, "")
 		pdf.Ln(-1)
@@ -122,7 +123,7 @@ func (module *ReportPDF) Start(){
 					pdf.Ln(-1)
 				}
 			}
-		} else{
+		} else {
 			pdf.CellFormat(80, 6, "No target(s) linked", "1", 0, "", false, 0, "")
 			pdf.CellFormat(80, 6, "", "1", 0, "", false, 0, "")
 			pdf.Ln(-1)
@@ -143,7 +144,7 @@ func (module *ReportPDF) Start(){
 		}
 	}
 
-	ViewResults := func(target *session.Target){
+	ViewResults := func(target *session.Target) {
 		pdf.CellFormat(80, 7, "NAME", "1", 0, "", false, 0, "")
 		pdf.CellFormat(80, 7, "RESULT(S)", "1", 0, "", false, 0, "")
 		pdf.Ln(-1)
@@ -154,7 +155,7 @@ func (module *ReportPDF) Start(){
 		}
 	}
 
-	PrintNote := func(notes []session.Note){
+	PrintNote := func(notes []session.Note) {
 		for _, note := range notes {
 			pdf.SetFillColor(230, 126, 0)
 			pdf.SetTextColor(255, 255, 255)
@@ -165,22 +166,22 @@ func (module *ReportPDF) Start(){
 		}
 	}
 
-	PrintResults := func(target *session.Target){
+	PrintResults := func(target *session.Target) {
 		for mod, result := range target.Results {
 			Title(mod)
 			SubTitle("results listed bellow:")
-			if len(result) > 0{
-				for _, res := range result{
+			if len(result) > 0 {
+				for _, res := range result {
 					headers := strings.Split(result[0].Header, target.GetSeparator())
 					values := strings.Split(res.Value, target.GetSeparator())
-					for k, h := range headers{
+					for k, h := range headers {
 						pdf.CellFormat(80, 7, h, "1", 0, "", false, 0, "")
 						pdf.CellFormat(110, 7, values[k], "1", 0, "", false, 0, "")
 						pdf.Ln(-1)
 
 					}
 
-					if len(res.Notes) > 0{
+					if len(res.Notes) > 0 {
 						PrintNote(res.Notes)
 					}
 					pdf.Ln(-1)
@@ -199,8 +200,8 @@ func (module *ReportPDF) Start(){
 	SubTitle("The targets of the session are listed below")
 	Targets()
 
-	for _, target := range module.Sess.Targets{
-		TextSeparator("TARGET: " + target.GetId() + " - " + target.GetName(), 14)
+	for _, target := range module.Sess.Targets {
+		TextSeparator("TARGET: "+target.GetId()+" - "+target.GetName(), 14)
 		Reset()
 		Title("LINKED TARGET(S)")
 		SubTitle("You can see if below the targets link automatically by operative.")
@@ -214,12 +215,8 @@ func (module *ReportPDF) Start(){
 
 	}
 
-
-
-
-
 	err = pdf.OutputFileAndClose(reportOutput.Value)
-	if err != nil{
+	if err != nil {
 		module.Sess.Stream.Error(err.Error())
 		return
 	}

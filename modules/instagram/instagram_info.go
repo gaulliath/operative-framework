@@ -2,64 +2,65 @@ package instagram
 
 import (
 	"fmt"
+	"os"
+	"strconv"
+
 	"github.com/graniet/go-pretty/table"
 	"github.com/graniet/operative-framework/session"
 	"gopkg.in/ahmdrz/goinsta.v2"
-	"os"
-	"strconv"
 )
 
-type InstagramInfo struct{
+type InstagramInfo struct {
 	session.SessionModule
 	Sess *session.Session `json:"-"`
 }
 
-func PushInstagramInfoModule(s *session.Session) *InstagramInfo{
+func PushInstagramInfoModule(s *session.Session) *InstagramInfo {
 	mod := InstagramInfo{
 		Sess: s,
 	}
 
-	mod.CreateNewParam("TARGET", "INSTAGRAM USER ACCOUNT", "",true,session.STRING)
+	mod.CreateNewParam("TARGET", "INSTAGRAM USER ACCOUNT", "", true, session.STRING)
 	return &mod
 }
 
-func (module *InstagramInfo) Name() string{
+func (module *InstagramInfo) Name() string {
 	return "instagram.info"
 }
 
-func (module *InstagramInfo) Description() string{
+func (module *InstagramInfo) Description() string {
 	return "Get instagram account information"
 }
 
-func (module *InstagramInfo) Author() string{
+func (module *InstagramInfo) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *InstagramInfo) GetType() string{
+func (module *InstagramInfo) GetType() string {
 	return "instagram"
 }
 
-func (module *InstagramInfo) GetInformation() session.ModuleInformation{
+func (module *InstagramInfo) GetInformation() session.ModuleInformation {
 	information := session.ModuleInformation{
-		Name: module.Name(),
+		Name:        module.Name(),
 		Description: module.Description(),
-		Author: module.Author(),
-		Type: module.GetType(),
-		Parameters: module.Parameters,
+		Author:      module.Author(),
+		Type:        module.GetType(),
+		Parameters:  module.Parameters,
 	}
 	return information
 }
 
-func (module *InstagramInfo) Start(){
+func (module *InstagramInfo) Start() {
 
 	trg, err := module.GetParameter("TARGET")
-	if err != nil{
+	if err != nil {
 		module.Sess.Stream.Error(err.Error())
 		return
 	}
 
 	target, err2 := module.Sess.GetTarget(trg.Value)
-	if err2 != nil{
+	if err2 != nil {
 		fmt.Println(err2.Error())
 		return
 	}
@@ -72,7 +73,7 @@ func (module *InstagramInfo) Start(){
 	}
 
 	profil, err := insta.Profiles.ByName(target.Name)
-	if err != nil{
+	if err != nil {
 		fmt.Println(err.Error())
 		return
 	}

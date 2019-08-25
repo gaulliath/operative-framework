@@ -2,63 +2,64 @@ package instagram
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/graniet/go-pretty/table"
 	"github.com/graniet/operative-framework/session"
 	"gopkg.in/ahmdrz/goinsta.v2"
-	"os"
 )
 
-type InstagramFollowing struct{
+type InstagramFollowing struct {
 	session.SessionModule
 	Sess *session.Session `json:"-"`
 }
 
-func PushInstagramFollowingModule(s *session.Session) *InstagramFollowing{
+func PushInstagramFollowingModule(s *session.Session) *InstagramFollowing {
 	mod := InstagramFollowing{
 		Sess: s,
 	}
 
-	mod.CreateNewParam("TARGET", "INSTAGRAM USER ACCOUNT", "",true,session.STRING)
+	mod.CreateNewParam("TARGET", "INSTAGRAM USER ACCOUNT", "", true, session.STRING)
 	return &mod
 }
 
-func (module *InstagramFollowing) Name() string{
+func (module *InstagramFollowing) Name() string {
 	return "instagram.following"
 }
 
-func (module *InstagramFollowing) Description() string{
+func (module *InstagramFollowing) Description() string {
 	return "Get following for target user instagram account"
 }
 
-func (module *InstagramFollowing) Author() string{
+func (module *InstagramFollowing) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *InstagramFollowing) GetType() string{
+func (module *InstagramFollowing) GetType() string {
 	return "instagram"
 }
 
-func (module *InstagramFollowing) GetInformation() session.ModuleInformation{
+func (module *InstagramFollowing) GetInformation() session.ModuleInformation {
 	information := session.ModuleInformation{
-		Name: module.Name(),
+		Name:        module.Name(),
 		Description: module.Description(),
-		Author: module.Author(),
-		Type: module.GetType(),
-		Parameters: module.Parameters,
+		Author:      module.Author(),
+		Type:        module.GetType(),
+		Parameters:  module.Parameters,
 	}
 	return information
 }
 
-func (module *InstagramFollowing) Start(){
+func (module *InstagramFollowing) Start() {
 
 	trg, err := module.GetParameter("TARGET")
-	if err != nil{
+	if err != nil {
 		fmt.Println(err.Error())
 		return
 	}
 
 	target, err2 := module.Sess.GetTarget(trg.Value)
-	if err2 != nil{
+	if err2 != nil {
 		fmt.Println(err2.Error())
 		return
 	}
@@ -71,7 +72,7 @@ func (module *InstagramFollowing) Start(){
 	}
 
 	profil, err := insta.Profiles.ByName(target.Name)
-	if err != nil{
+	if err != nil {
 		fmt.Println(err.Error())
 		return
 	}
@@ -84,15 +85,15 @@ func (module *InstagramFollowing) Start(){
 	})
 	followings := profil.Following()
 	separator := target.GetSeparator()
-	for followings.Next(){
-		for _, following := range followings.Users{
+	for followings.Next() {
+		for _, following := range followings.Users {
 			t.AppendRow(table.Row{
 				following.Username,
 				following.FullName,
 			})
 			result := session.TargetResults{
 				Header: "username" + separator + "full_name",
-				Value: following.Username + separator + following.FullName,
+				Value:  following.Username + separator + following.FullName,
 			}
 			target.Save(module, result)
 		}

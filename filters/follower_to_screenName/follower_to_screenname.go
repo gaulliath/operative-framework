@@ -1,20 +1,21 @@
 package follower_to_screenName
 
 import (
-	"github.com/ChimeraCoder/anaconda"
-	"github.com/graniet/go-pretty/table"
-	"github.com/graniet/operative-framework/session"
 	"net/url"
 	"os"
 	"strconv"
+
+	"github.com/ChimeraCoder/anaconda"
+	"github.com/graniet/go-pretty/table"
+	"github.com/graniet/operative-framework/session"
 )
 
-type FollowerScreenName struct{
+type FollowerScreenName struct {
 	session.SessionFilter
 	Sess *session.Session `json:"-"`
 }
 
-func PushFollowerScreenNameFilter(s *session.Session) *FollowerScreenName{
+func PushFollowerScreenNameFilter(s *session.Session) *FollowerScreenName {
 	mod := FollowerScreenName{
 		Sess: s,
 	}
@@ -23,19 +24,19 @@ func PushFollowerScreenNameFilter(s *session.Session) *FollowerScreenName{
 	return &mod
 }
 
-func (filter *FollowerScreenName) Name() string{
+func (filter *FollowerScreenName) Name() string {
 	return "follower_to_screen"
 }
 
-func (filter *FollowerScreenName) Description() string{
+func (filter *FollowerScreenName) Description() string {
 	return "Find screen name from twitter ID list"
 }
 
-func (filter *FollowerScreenName) Author() string{
+func (filter *FollowerScreenName) Author() string {
 	return "Tristan Granier"
 }
 
-func (filter *FollowerScreenName) Start(mod session.Module){
+func (filter *FollowerScreenName) Start(mod session.Module) {
 	api := anaconda.NewTwitterApiWithCredentials(filter.Sess.Config.Twitter.Password, filter.Sess.Config.Twitter.Api.SKey, filter.Sess.Config.Twitter.Login, filter.Sess.Config.Twitter.Api.Key)
 	v := url.Values{}
 
@@ -45,15 +46,14 @@ func (filter *FollowerScreenName) Start(mod session.Module){
 		"id",
 		"screen_name",
 	})
-	for _, id := range mod.GetResults(){
+	for _, id := range mod.GetResults() {
 		id64, err := strconv.ParseInt(id, 10, 64)
 		if err == nil {
-			user, errU := api.GetUsersShowById(id64,v)
-			if errU == nil{
+			user, errU := api.GetUsersShowById(id64, v)
+			if errU == nil {
 				t.AppendRow(table.Row{
 					id,
 					user.ScreenName,
-
 				})
 			}
 		}

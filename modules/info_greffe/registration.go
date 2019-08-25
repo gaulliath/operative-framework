@@ -2,20 +2,21 @@ package info_greffe
 
 import (
 	"encoding/json"
-	"github.com/graniet/go-pretty/table"
-	"github.com/graniet/operative-framework/session"
 	"io/ioutil"
 	"net/http"
 	url2 "net/url"
 	"os"
 	"strconv"
 	"time"
+
+	"github.com/graniet/go-pretty/table"
+	"github.com/graniet/operative-framework/session"
 )
 
-type InfoGreffeRegistration struct{
+type InfoGreffeRegistration struct {
 	session.SessionModule
-	sess *session.Session `json:"-"`
-	Stream *session.Stream `json:"-"`
+	sess   *session.Session `json:"-"`
+	Stream *session.Stream  `json:"-"`
 }
 
 type InfoGreffe struct {
@@ -67,9 +68,9 @@ type InfoGreffe struct {
 	} `json:"facet_groups"`
 }
 
-func PushInfoGreffeRegistrationModule(s *session.Session) *InfoGreffeRegistration{
+func PushInfoGreffeRegistrationModule(s *session.Session) *InfoGreffeRegistration {
 	mod := InfoGreffeRegistration{
-		sess: s,
+		sess:   s,
 		Stream: &s.Stream,
 	}
 
@@ -77,35 +78,34 @@ func PushInfoGreffeRegistrationModule(s *session.Session) *InfoGreffeRegistratio
 	return &mod
 }
 
-func (module *InfoGreffeRegistration) Name() string{
+func (module *InfoGreffeRegistration) Name() string {
 	return "info_greffe.registration"
 }
 
-func (module *InfoGreffeRegistration) Description() string{
+func (module *InfoGreffeRegistration) Description() string {
 	return "Search enterprise registration in info greffe open data"
 }
 
-func (module *InfoGreffeRegistration) Author() string{
+func (module *InfoGreffeRegistration) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *InfoGreffeRegistration) GetType() string{
+func (module *InfoGreffeRegistration) GetType() string {
 	return "text"
 }
 
-
-func (module *InfoGreffeRegistration) GetInformation() session.ModuleInformation{
+func (module *InfoGreffeRegistration) GetInformation() session.ModuleInformation {
 	information := session.ModuleInformation{
-		Name: module.Name(),
+		Name:        module.Name(),
 		Description: module.Description(),
-		Author: module.Author(),
-		Type: module.GetType(),
-		Parameters: module.Parameters,
+		Author:      module.Author(),
+		Type:        module.GetType(),
+		Parameters:  module.Parameters,
 	}
 	return information
 }
 
-func (module *InfoGreffeRegistration) Start(){
+func (module *InfoGreffeRegistration) Start() {
 	keywordTarget, err := module.GetParameter("TARGET")
 	if err != nil {
 		module.Stream.Error(err.Error())
@@ -118,7 +118,7 @@ func (module *InfoGreffeRegistration) Start(){
 		return
 	}
 
-	url := "https://opendata.datainfogreffe.fr/api/records/1.0/search/?dataset=entreprises-immatriculees-2015&q="+url2.QueryEscape(keyword.Name)+"&facet=libelle&facet=forme_juridique&facet=code_postal&facet=ville&facet=region&facet=greffe&facet=date"
+	url := "https://opendata.datainfogreffe.fr/api/records/1.0/search/?dataset=entreprises-immatriculees-2015&q=" + url2.QueryEscape(keyword.Name) + "&facet=libelle&facet=forme_juridique&facet=code_postal&facet=ville&facet=region&facet=greffe&facet=date"
 	client := http.Client{}
 	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36")
@@ -140,7 +140,7 @@ func (module *InfoGreffeRegistration) Start(){
 	for _, record := range results.Records {
 		t := module.Stream.GenerateTable()
 		t.SetOutputMirror(os.Stdout)
-		t.SetAllowedColumnLengths([]int{0, 30,})
+		t.SetAllowedColumnLengths([]int{0, 30})
 
 		t.AppendRow(table.Row{
 			"NAME",
@@ -189,7 +189,7 @@ func (module *InfoGreffeRegistration) Start(){
 
 		result := session.TargetResults{
 			Header: "NAME" + separator + "SIREN" + separator + "ADDRESS" + separator + "CITY",
-			Value: record.Fields.Denomination + separator + record.Fields.Siren + separator + record.Fields.Adresse + separator + record.Fields.Ville,
+			Value:  record.Fields.Denomination + separator + record.Fields.Siren + separator + record.Fields.Adresse + separator + record.Fields.Ville,
 		}
 		keyword.Save(module, result)
 	}

@@ -1,24 +1,25 @@
 package linkedin_search
 
 import (
-	"github.com/graniet/operative-framework/session"
-	"github.com/graniet/go-pretty/table"
-	"github.com/PuerkitoBio/goquery"
 	"net/http"
-	"strings"
 	"os"
 	"strconv"
+	"strings"
+
+	"github.com/PuerkitoBio/goquery"
+	"github.com/graniet/go-pretty/table"
+	"github.com/graniet/operative-framework/session"
 )
 
-type LinkedinSearchModule struct{
+type LinkedinSearchModule struct {
 	session.SessionModule
-	sess *session.Session `json:"-"`
-	Stream *session.Stream `json:"-"`
+	sess   *session.Session `json:"-"`
+	Stream *session.Stream  `json:"-"`
 }
 
-func PushLinkedinSearchModule(s *session.Session) *LinkedinSearchModule{
+func PushLinkedinSearchModule(s *session.Session) *LinkedinSearchModule {
 	mod := LinkedinSearchModule{
-		sess: s,
+		sess:   s,
 		Stream: &s.Stream,
 	}
 
@@ -27,43 +28,43 @@ func PushLinkedinSearchModule(s *session.Session) *LinkedinSearchModule{
 	return &mod
 }
 
-func (module *LinkedinSearchModule) Name() string{
+func (module *LinkedinSearchModule) Name() string {
 	return "linkedin.search"
 }
 
-func (module *LinkedinSearchModule) Description() string{
+func (module *LinkedinSearchModule) Description() string {
 	return "Search employee on selected enterprise with Linkedin"
 }
 
-func (module *LinkedinSearchModule) Author() string{
+func (module *LinkedinSearchModule) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *LinkedinSearchModule) GetType() string{
+func (module *LinkedinSearchModule) GetType() string {
 	return "enterprise"
 }
 
-func (module *LinkedinSearchModule) GetInformation() session.ModuleInformation{
+func (module *LinkedinSearchModule) GetInformation() session.ModuleInformation {
 	information := session.ModuleInformation{
-		Name: module.Name(),
+		Name:        module.Name(),
 		Description: module.Description(),
-		Author: module.Author(),
-		Type: module.GetType(),
-		Parameters: module.Parameters,
+		Author:      module.Author(),
+		Type:        module.GetType(),
+		Parameters:  module.Parameters,
 	}
 	return information
 }
 
-func (module *LinkedinSearchModule) Start(){
+func (module *LinkedinSearchModule) Start() {
 	paramEnterprise, _ := module.GetParameter("TARGET")
 	target, err := module.sess.GetTarget(paramEnterprise.Value)
-	if err != nil{
+	if err != nil {
 		module.sess.Stream.Error(err.Error())
 		return
 	}
 
-	if target.GetType() != module.GetType(){
-		module.Stream.Error("Target with type '"+target.GetType()+"' isn't valid module need '"+module.GetType()+"' type.")
+	if target.GetType() != module.GetType() {
+		module.Stream.Error("Target with type '" + target.GetType() + "' isn't valid module need '" + module.GetType() + "' type.")
 		return
 	}
 
@@ -91,7 +92,7 @@ func (module *LinkedinSearchModule) Start(){
 
 	t := module.Stream.GenerateTable()
 	t.SetOutputMirror(os.Stdout)
-	t.SetAllowedColumnLengths([]int{0, 30,})
+	t.SetAllowedColumnLengths([]int{0, 30})
 	t.AppendHeader(table.Row{"Name", "Work", "Link"})
 
 	resultFound := 0
@@ -100,7 +101,7 @@ func (module *LinkedinSearchModule) Start(){
 		line = strings.Replace(line, "| LinkedIn", "", 1)
 		line = strings.Replace(line, "LinkedIn", "", 1)
 		line = strings.Replace(line, "on LinkedIn", "", 1)
-		if strings.Contains(line,"-") && len(strings.Split(strings.TrimSpace(line), "-")) > 1{
+		if strings.Contains(line, "-") && len(strings.Split(strings.TrimSpace(line), "-")) > 1 {
 			name := strings.Split(strings.TrimSpace(line), "-")[0]
 			work := strings.Split(strings.TrimSpace(line), "-")[1]
 			link := s.Find("cite").Text()
@@ -108,7 +109,7 @@ func (module *LinkedinSearchModule) Start(){
 			t.AppendRow([]interface{}{name, work, link})
 			result := session.TargetResults{
 				Header: "Name" + separator + "Work" + separator + "Link",
-				Value: name + separator + work + separator + link,
+				Value:  name + separator + work + separator + link,
 			}
 			target.Save(module, result)
 			resultFound = resultFound + 1

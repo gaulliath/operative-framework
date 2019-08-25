@@ -1,20 +1,21 @@
 package twitter
 
 import (
-	"github.com/ChimeraCoder/anaconda"
-	"github.com/graniet/go-pretty/table"
-	"github.com/graniet/operative-framework/session"
 	"net/url"
 	"os"
 	"strconv"
+
+	"github.com/ChimeraCoder/anaconda"
+	"github.com/graniet/go-pretty/table"
+	"github.com/graniet/operative-framework/session"
 )
 
-type TwitterInfo struct{
+type TwitterInfo struct {
 	session.SessionModule
 	Sess *session.Session `json:"-"`
 }
 
-func PushTwitterInfoModule(s *session.Session) *TwitterInfo{
+func PushTwitterInfoModule(s *session.Session) *TwitterInfo {
 	mod := TwitterInfo{
 		Sess: s,
 	}
@@ -23,53 +24,51 @@ func PushTwitterInfoModule(s *session.Session) *TwitterInfo{
 	return &mod
 }
 
-func (module *TwitterInfo) Name() string{
+func (module *TwitterInfo) Name() string {
 	return "twitter.info"
 }
 
-func (module *TwitterInfo) Description() string{
+func (module *TwitterInfo) Description() string {
 	return "Get (re)tweets from target user twitter account"
 }
 
-func (module *TwitterInfo) Author() string{
+func (module *TwitterInfo) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *TwitterInfo) GetType() string{
+func (module *TwitterInfo) GetType() string {
 	return "twitter"
 }
 
-func (module *TwitterInfo) GetInformation() session.ModuleInformation{
+func (module *TwitterInfo) GetInformation() session.ModuleInformation {
 	information := session.ModuleInformation{
-		Name: module.Name(),
+		Name:        module.Name(),
 		Description: module.Description(),
-		Author: module.Author(),
-		Type: module.GetType(),
-		Parameters: module.Parameters,
+		Author:      module.Author(),
+		Type:        module.GetType(),
+		Parameters:  module.Parameters,
 	}
 	return information
 }
 
-func (module *TwitterInfo) Start(){
+func (module *TwitterInfo) Start() {
 
 	trg, err := module.GetParameter("TARGET")
-	if err != nil{
+	if err != nil {
 		module.Sess.Stream.Error(err.Error())
 		return
 	}
 
 	target, err := module.Sess.GetTarget(trg.Value)
-	if err != nil{
+	if err != nil {
 		module.Sess.Stream.Error(err.Error())
 		return
 	}
 
-
-
 	api := anaconda.NewTwitterApiWithCredentials(module.Sess.Config.Twitter.Password, module.Sess.Config.Twitter.Api.SKey, module.Sess.Config.Twitter.Login, module.Sess.Config.Twitter.Api.Key)
 	v := url.Values{}
 	user, err := api.GetUserSearch(target.Name, v)
-	if err != nil{
+	if err != nil {
 		module.Sess.Stream.Error(err.Error())
 		return
 	}
@@ -121,6 +120,5 @@ func (module *TwitterInfo) Start(){
 	target.Save(module, result)
 
 	module.Sess.Stream.Render(t)
-
 
 }

@@ -2,17 +2,18 @@ package pictures
 
 import (
 	"encoding/json"
+	"os"
+
 	"github.com/graniet/go-pretty/table"
 	"github.com/graniet/operative-framework/session"
 	"github.com/rwcarlsen/goexif/exif"
 	"github.com/rwcarlsen/goexif/mknote"
-	"os"
 )
 
-type PictureExifModule struct{
+type PictureExifModule struct {
 	session.SessionModule
-	sess *session.Session `json:"-"`
-	Stream *session.Stream `json:"-"`
+	sess   *session.Session `json:"-"`
+	Stream *session.Stream  `json:"-"`
 }
 
 type Exif struct {
@@ -36,9 +37,9 @@ type Exif struct {
 	YResolution                      []string `json:"YResolution"`
 }
 
-func PushPictureExifModule(s *session.Session) *PictureExifModule{
+func PushPictureExifModule(s *session.Session) *PictureExifModule {
 	mod := PictureExifModule{
-		sess: s,
+		sess:   s,
 		Stream: &s.Stream,
 	}
 
@@ -47,37 +48,37 @@ func PushPictureExifModule(s *session.Session) *PictureExifModule{
 	return &mod
 }
 
-func (module *PictureExifModule) Name() string{
+func (module *PictureExifModule) Name() string {
 	return "picture.exif"
 }
 
-func (module *PictureExifModule) Description() string{
+func (module *PictureExifModule) Description() string {
 	return "View exif data on selected picture"
 }
 
-func (module *PictureExifModule) Author() string{
+func (module *PictureExifModule) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *PictureExifModule) GetType() string{
+func (module *PictureExifModule) GetType() string {
 	return "file"
 }
 
-func (module *PictureExifModule) GetInformation() session.ModuleInformation{
+func (module *PictureExifModule) GetInformation() session.ModuleInformation {
 	information := session.ModuleInformation{
-		Name: module.Name(),
+		Name:        module.Name(),
 		Description: module.Description(),
-		Author: module.Author(),
-		Type: module.GetType(),
-		Parameters: module.Parameters,
+		Author:      module.Author(),
+		Type:        module.GetType(),
+		Parameters:  module.Parameters,
 	}
 	return information
 }
 
-func (module *PictureExifModule) Start(){
+func (module *PictureExifModule) Start() {
 	paramEnterprise, _ := module.GetParameter("TARGET")
 	target, err := module.sess.GetTarget(paramEnterprise.Value)
-	if err != nil{
+	if err != nil {
 		module.sess.Stream.Error(err.Error())
 		return
 	}

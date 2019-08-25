@@ -2,16 +2,17 @@ package report
 
 import (
 	"encoding/json"
-	"github.com/graniet/operative-framework/session"
 	"io/ioutil"
+
+	"github.com/graniet/operative-framework/session"
 )
 
-type ReportJSON struct{
+type ReportJSON struct {
 	session.SessionModule
 	Sess *session.Session `json:"-"`
 }
 
-func PushReportJSONModule(s *session.Session) *ReportJSON{
+func PushReportJSONModule(s *session.Session) *ReportJSON {
 	mod := ReportJSON{
 		Sess: s,
 	}
@@ -20,36 +21,36 @@ func PushReportJSONModule(s *session.Session) *ReportJSON{
 	return &mod
 }
 
-func (module *ReportJSON) Name() string{
+func (module *ReportJSON) Name() string {
 	return "report.json"
 }
 
-func (module *ReportJSON) Description() string{
+func (module *ReportJSON) Description() string {
 	return "Generate session report to JSON format"
 }
 
-func (module *ReportJSON) Author() string{
+func (module *ReportJSON) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *ReportJSON) GetType() string{
+func (module *ReportJSON) GetType() string {
 	return ""
 }
 
-func (module *ReportJSON) GetInformation() session.ModuleInformation{
+func (module *ReportJSON) GetInformation() session.ModuleInformation {
 	information := session.ModuleInformation{
-		Name: module.Name(),
+		Name:        module.Name(),
 		Description: module.Description(),
-		Author: module.Author(),
-		Type: module.GetType(),
-		Parameters: module.Parameters,
+		Author:      module.Author(),
+		Type:        module.GetType(),
+		Parameters:  module.Parameters,
 	}
 	return information
 }
 
-func (module *ReportJSON) Start(){
+func (module *ReportJSON) Start() {
 	reportOutput, err := module.GetParameter("EXPORT_FILE")
-	if err != nil{
+	if err != nil {
 		module.Sess.Stream.Error(err.Error())
 		return
 	}

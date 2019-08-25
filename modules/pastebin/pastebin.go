@@ -1,23 +1,24 @@
 package pastebin
 
 import (
-	"github.com/PuerkitoBio/goquery"
-	"github.com/graniet/go-pretty/table"
-	"github.com/graniet/operative-framework/session"
 	"net/http"
 	"os"
 	"strings"
+
+	"github.com/PuerkitoBio/goquery"
+	"github.com/graniet/go-pretty/table"
+	"github.com/graniet/operative-framework/session"
 )
 
-type PasteBin struct{
+type PasteBin struct {
 	session.SessionModule
-	sess *session.Session `json:"-"`
-	Stream *session.Stream `json:"-"`
+	sess   *session.Session `json:"-"`
+	Stream *session.Stream  `json:"-"`
 }
 
-func PushPasteBinModule(s *session.Session) *PasteBin{
+func PushPasteBinModule(s *session.Session) *PasteBin {
 	mod := PasteBin{
-		sess: s,
+		sess:   s,
 		Stream: &s.Stream,
 	}
 
@@ -26,51 +27,50 @@ func PushPasteBinModule(s *session.Session) *PasteBin{
 	return &mod
 }
 
-func (module *PasteBin) Name() string{
+func (module *PasteBin) Name() string {
 	return "pastebin.search"
 }
 
-func (module *PasteBin) Description() string{
+func (module *PasteBin) Description() string {
 	return "Check possible text on pastebin.com"
 }
 
-func (module *PasteBin) Author() string{
+func (module *PasteBin) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *PasteBin) GetType() string{
+func (module *PasteBin) GetType() string {
 	return "text"
 }
 
-
-func (module *PasteBin) GetInformation() session.ModuleInformation{
+func (module *PasteBin) GetInformation() session.ModuleInformation {
 	information := session.ModuleInformation{
-		Name: module.Name(),
+		Name:        module.Name(),
 		Description: module.Description(),
-		Author: module.Author(),
-		Type: module.GetType(),
-		Parameters: module.Parameters,
+		Author:      module.Author(),
+		Type:        module.GetType(),
+		Parameters:  module.Parameters,
 	}
 	return information
 }
 
-func (module *PasteBin) Start(){
+func (module *PasteBin) Start() {
 	paramEmail, _ := module.GetParameter("TARGET")
 	target, err := module.sess.GetTarget(paramEmail.Value)
-	if err != nil{
+	if err != nil {
 		module.sess.Stream.Error(err.Error())
 		return
 	}
 
-	if target.GetType() != module.GetType(){
-		module.Stream.Error("Target with type '"+target.GetType()+"' isn't valid module need '"+module.GetType()+"' type.")
+	if target.GetType() != module.GetType() {
+		module.Stream.Error("Target with type '" + target.GetType() + "' isn't valid module need '" + module.GetType() + "' type.")
 		return
 	}
 
 	paramLimit, _ := module.GetParameter("limit")
 	urlEnd := strings.Replace(target.GetName(), "@", "%40", -1)
 	urlEnd = strings.Replace(urlEnd, " ", "+", -1)
-	url := "https://www.google.com/search?q=site%3Apastebin.com+\""+urlEnd+"\"&num="+paramLimit.Value+"&hl=com"
+	url := "https://www.google.com/search?q=site%3Apastebin.com+\"" + urlEnd + "\"&num=" + paramLimit.Value + "&hl=com"
 	client := http.Client{}
 	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36")
@@ -92,7 +92,7 @@ func (module *PasteBin) Start(){
 
 	t := module.Stream.GenerateTable()
 	t.SetOutputMirror(os.Stdout)
-	t.SetAllowedColumnLengths([]int{60,})
+	t.SetAllowedColumnLengths([]int{60})
 	t.AppendHeader(table.Row{"Link"})
 
 	resultFound := 0
@@ -108,7 +108,7 @@ func (module *PasteBin) Start(){
 			})
 			result := session.TargetResults{
 				Header: "link",
-				Value: link,
+				Value:  link,
 			}
 			module.Results = append(module.Results, link)
 			target.Save(module, result)

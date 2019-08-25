@@ -2,16 +2,17 @@ package searchsploit
 
 import (
 	"encoding/json"
-	"github.com/graniet/go-pretty/table"
-	"github.com/graniet/operative-framework/session"
 	"os"
 	"os/exec"
+
+	"github.com/graniet/go-pretty/table"
+	"github.com/graniet/operative-framework/session"
 )
 
-type SearchSploitModule struct{
+type SearchSploitModule struct {
 	session.SessionModule
-	sess *session.Session `json:"-"`
-	Stream *session.Stream `json:"-"`
+	sess   *session.Session `json:"-"`
+	Stream *session.Stream  `json:"-"`
 }
 
 type Exploit struct {
@@ -30,9 +31,9 @@ type Exploit struct {
 	} `json:"RESULTS_PAPER"`
 }
 
-func PushSearchSploitModule(s *session.Session) *SearchSploitModule{
+func PushSearchSploitModule(s *session.Session) *SearchSploitModule {
 	mod := SearchSploitModule{
-		sess: s,
+		sess:   s,
 		Stream: &s.Stream,
 	}
 
@@ -41,42 +42,42 @@ func PushSearchSploitModule(s *session.Session) *SearchSploitModule{
 	return &mod
 }
 
-func (module *SearchSploitModule) Name() string{
+func (module *SearchSploitModule) Name() string {
 	return "search_exploit"
 }
 
-func (module *SearchSploitModule) Description() string{
+func (module *SearchSploitModule) Description() string {
 	return "Search exploit for specific software"
 }
 
-func (module *SearchSploitModule) Author() string{
+func (module *SearchSploitModule) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *SearchSploitModule) GetType() string{
+func (module *SearchSploitModule) GetType() string {
 	return "software"
 }
 
-func (module *SearchSploitModule) GetInformation() session.ModuleInformation{
+func (module *SearchSploitModule) GetInformation() session.ModuleInformation {
 	information := session.ModuleInformation{
-		Name: module.Name(),
+		Name:        module.Name(),
 		Description: module.Description(),
-		Author: module.Author(),
-		Type: module.GetType(),
-		Parameters: module.Parameters,
+		Author:      module.Author(),
+		Type:        module.GetType(),
+		Parameters:  module.Parameters,
 	}
 	return information
 }
 
-func (module *SearchSploitModule) Start(){
+func (module *SearchSploitModule) Start() {
 	trg, err := module.GetParameter("TARGET")
-	if err != nil{
+	if err != nil {
 		module.sess.Stream.Error(err.Error())
 		return
 	}
 
 	target, err := module.sess.GetTarget(trg.Value)
-	if err != nil{
+	if err != nil {
 		module.sess.Stream.Error(err.Error())
 		return
 	}
@@ -90,12 +91,12 @@ func (module *SearchSploitModule) Start(){
 	var exploits Exploit
 
 	err = json.Unmarshal(output, &exploits)
-	if err != nil{
+	if err != nil {
 		module.sess.Stream.Error("No result found.")
 		return
 	}
 
-	if len(exploits.RESULTSEXPLOIT) < 1{
+	if len(exploits.RESULTSEXPLOIT) < 1 {
 		module.sess.Stream.Error("No result found.")
 		return
 	}
@@ -107,7 +108,7 @@ func (module *SearchSploitModule) Start(){
 		"TITLE",
 		"URL",
 	})
-	for _, exploit := range exploits.RESULTSEXPLOIT{
+	for _, exploit := range exploits.RESULTSEXPLOIT {
 		t.AppendRow(table.Row{
 			exploit.Title,
 			exploit.URL,
@@ -115,7 +116,7 @@ func (module *SearchSploitModule) Start(){
 
 		result := session.TargetResults{
 			Header: "TITLE" + target.GetSeparator() + "URL",
-			Value: exploit.Title + target.GetSeparator() + exploit.URL,
+			Value:  exploit.Title + target.GetSeparator() + exploit.URL,
 		}
 		target.Save(module, result)
 

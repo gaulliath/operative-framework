@@ -1,20 +1,21 @@
 package system
 
 import (
-	"github.com/graniet/operative-framework/session"
 	"os"
 	"os/exec"
+
+	"github.com/graniet/operative-framework/session"
 )
 
-type SystemModule struct{
+type SystemModule struct {
 	session.SessionModule
-	sess *session.Session `json:"-"`
-	Stream *session.Stream `json:"-"`
+	sess   *session.Session `json:"-"`
+	Stream *session.Stream  `json:"-"`
 }
 
-func PushSystemModuleModule(s *session.Session) *SystemModule{
+func PushSystemModuleModule(s *session.Session) *SystemModule {
 	mod := SystemModule{
-		sess: s,
+		sess:   s,
 		Stream: &s.Stream,
 	}
 
@@ -22,36 +23,36 @@ func PushSystemModuleModule(s *session.Session) *SystemModule{
 	return &mod
 }
 
-func (module *SystemModule) Name() string{
+func (module *SystemModule) Name() string {
 	return "sh"
 }
 
-func (module *SystemModule) Description() string{
+func (module *SystemModule) Description() string {
 	return "Execute system command"
 }
 
-func (module *SystemModule) Author() string{
+func (module *SystemModule) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *SystemModule) GetType() string{
+func (module *SystemModule) GetType() string {
 	return "command"
 }
 
-func (module *SystemModule) GetInformation() session.ModuleInformation{
+func (module *SystemModule) GetInformation() session.ModuleInformation {
 	information := session.ModuleInformation{
-		Name: module.Name(),
+		Name:        module.Name(),
 		Description: module.Description(),
-		Author: module.Author(),
-		Type: module.GetType(),
-		Parameters: module.Parameters,
+		Author:      module.Author(),
+		Type:        module.GetType(),
+		Parameters:  module.Parameters,
 	}
 	return information
 }
 
-func (module *SystemModule) Start(){
+func (module *SystemModule) Start() {
 	command, err := module.GetParameter("CMD")
-	if err != nil{
+	if err != nil {
 		module.sess.Stream.Error(err.Error())
 		return
 	}
@@ -61,7 +62,7 @@ func (module *SystemModule) Start(){
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin
 	err = cmd.Run()
-	if err != nil{
+	if err != nil {
 		module.sess.Stream.Error(err.Error())
 		return
 	}

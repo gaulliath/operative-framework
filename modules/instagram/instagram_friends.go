@@ -2,60 +2,61 @@ package instagram
 
 import (
 	"fmt"
-	"github.com/graniet/go-pretty/table"
-	"github.com/graniet/operative-framework/session"
-	"gopkg.in/ahmdrz/goinsta.v2"
 	"os"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/graniet/go-pretty/table"
+	"github.com/graniet/operative-framework/session"
+	"gopkg.in/ahmdrz/goinsta.v2"
 )
 
-type InstagramFriends struct{
+type InstagramFriends struct {
 	session.SessionModule
-	Sess *session.Session `json:"-"`
+	Sess    *session.Session  `json:"-"`
 	Friends map[string]string `json:"-"`
 }
 
-func PushInstagramFriendsModule(s *session.Session) *InstagramFriends{
+func PushInstagramFriendsModule(s *session.Session) *InstagramFriends {
 	mod := InstagramFriends{
 		Sess: s,
 	}
 
-	mod.CreateNewParam("TARGET", "INSTAGRAM USER ACCOUNT", "",true,session.STRING)
+	mod.CreateNewParam("TARGET", "INSTAGRAM USER ACCOUNT", "", true, session.STRING)
 	mod.CreateNewParam("LIKES", "Search relationship including likes", "false", false, session.BOOL)
 	mod.CreateNewParam("LIKE_ONLY", "Print only liked relationship", "false", false, session.BOOL)
 	return &mod
 }
 
-func (module *InstagramFriends) Name() string{
+func (module *InstagramFriends) Name() string {
 	return "instagram.friends"
 }
 
-func (module *InstagramFriends) Description() string{
+func (module *InstagramFriends) Description() string {
 	return "Get possible friend on instagram (can take a time)"
 }
 
-func (module *InstagramFriends) Author() string{
+func (module *InstagramFriends) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *InstagramFriends) GetType() string{
+func (module *InstagramFriends) GetType() string {
 	return "instagram"
 }
 
-func (module *InstagramFriends) GetInformation() session.ModuleInformation{
+func (module *InstagramFriends) GetInformation() session.ModuleInformation {
 	information := session.ModuleInformation{
-		Name: module.Name(),
+		Name:        module.Name(),
 		Description: module.Description(),
-		Author: module.Author(),
-		Type: module.GetType(),
-		Parameters: module.Parameters,
+		Author:      module.Author(),
+		Type:        module.GetType(),
+		Parameters:  module.Parameters,
 	}
 	return information
 }
 
-func (module *InstagramFriends) InFollowers(username string) bool{
+func (module *InstagramFriends) InFollowers(username string) bool {
 	if _, ok := module.Friends[username]; ok {
 		return true
 	}
@@ -64,27 +65,27 @@ func (module *InstagramFriends) InFollowers(username string) bool{
 
 func (module *InstagramFriends) InSlice(slice []string, search string) bool {
 	for _, element := range slice {
-		if strings.ToLower(element) == strings.ToLower(search){
+		if strings.ToLower(element) == strings.ToLower(search) {
 			return true
 		}
 	}
 	return false
 }
 
-func (module *InstagramFriends) Start(){
+func (module *InstagramFriends) Start() {
 
 	module.Friends = make(map[string]string)
 
 	var verifiedFriend []string
 
 	trg, err := module.GetParameter("TARGET")
-	if err != nil{
+	if err != nil {
 		fmt.Println(err.Error())
 		return
 	}
 
 	target, err2 := module.Sess.GetTarget(trg.Value)
-	if err2 != nil{
+	if err2 != nil {
 		fmt.Println(err2.Error())
 		return
 	}
@@ -97,7 +98,7 @@ func (module *InstagramFriends) Start(){
 	}
 
 	profil, err := insta.Profiles.ByName(target.Name)
-	if err != nil{
+	if err != nil {
 		fmt.Println(err.Error())
 		return
 	}
@@ -124,16 +125,16 @@ func (module *InstagramFriends) Start(){
 	var friends []string
 
 	followers := profil.Followers()
-	for followers.Next(){
-		for _, follower := range followers.Users{
+	for followers.Next() {
+		for _, follower := range followers.Users {
 			module.Friends[follower.Username] = follower.FullName
 		}
 		time.Sleep(1 * time.Second)
 	}
 
 	followings := profil.Following()
-	for followings.Next(){
-		for _, following := range followings.Users{
+	for followings.Next() {
+		for _, following := range followings.Users {
 			if module.InFollowers(following.Username) {
 				friends = append(friends, following.Username)
 			}
@@ -141,14 +142,13 @@ func (module *InstagramFriends) Start(){
 		time.Sleep(1 * time.Second)
 	}
 
-
 	if withLike {
 		media := profil.Feed()
 		for media.Next() {
 			if len(media.Items) > 0 {
 				for _, item := range media.Items {
 					if item.Likes > 0 {
-						for _, like := range item.Likers{
+						for _, like := range item.Likers {
 							if module.InSlice(friends, like.Username) {
 								if !module.InSlice(verifiedFriend, like.Username) {
 									verifiedFriend = append(verifiedFriend, like.Username)
@@ -167,7 +167,7 @@ func (module *InstagramFriends) Start(){
 
 	t := module.Sess.Stream.GenerateTable()
 	t.SetOutputMirror(os.Stdout)
-	t.SetAllowedColumnLengths([]int{30, 2,})
+	t.SetAllowedColumnLengths([]int{30, 2})
 	if withLike {
 		t.AppendHeader(table.Row{
 			"friends",
@@ -179,7 +179,7 @@ func (module *InstagramFriends) Start(){
 		})
 	}
 
-	for _, username := range friends{
+	for _, username := range friends {
 		if withLike {
 			if module.InSlice(verifiedFriend, username) {
 				t.AppendRow(table.Row{
@@ -206,7 +206,6 @@ func (module *InstagramFriends) Start(){
 	}
 
 	module.Sess.Stream.Render(t)
-	module.Sess.Stream.Standard("Possible friend(s) '"+strconv.Itoa(len(friends))+"'")
-
+	module.Sess.Stream.Standard("Possible friend(s) '" + strconv.Itoa(len(friends)) + "'")
 
 }

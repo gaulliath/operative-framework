@@ -2,19 +2,20 @@ package darksearch
 
 import (
 	"encoding/json"
-	"github.com/graniet/go-pretty/table"
-	"github.com/graniet/operative-framework/session"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
 	"strconv"
+
+	"github.com/graniet/go-pretty/table"
+	"github.com/graniet/operative-framework/session"
 )
 
-type DarkSearchModule struct{
+type DarkSearchModule struct {
 	session.SessionModule
 	Session *session.Session `json:"-"`
-	Stream  *session.Stream `json:"-"`
+	Stream  *session.Stream  `json:"-"`
 }
 
 type DarkSearchResults struct {
@@ -31,52 +32,52 @@ type DarkSearchResults struct {
 	} `json:"data"`
 }
 
-func PushMacVendorModule(s *session.Session) *DarkSearchModule{
+func PushMacVendorModule(s *session.Session) *DarkSearchModule {
 	mod := DarkSearchModule{
 		Session: s,
-		Stream: &s.Stream,
+		Stream:  &s.Stream,
 	}
 
-	mod.CreateNewParam("TARGET", "Text to search", "", true,session.STRING)
+	mod.CreateNewParam("TARGET", "Text to search", "", true, session.STRING)
 	return &mod
 }
 
-func (module *DarkSearchModule) Name() string{
+func (module *DarkSearchModule) Name() string {
 	return "dark_search"
 }
 
-func (module *DarkSearchModule) Description() string{
+func (module *DarkSearchModule) Description() string {
 	return "Retrieve a results from TOR hidden service with DarkSearch.io"
 }
 
-func (module *DarkSearchModule) Author() string{
+func (module *DarkSearchModule) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *DarkSearchModule) GetType() string{
+func (module *DarkSearchModule) GetType() string {
 	return "text"
 }
 
-func (module *DarkSearchModule) GetInformation() session.ModuleInformation{
+func (module *DarkSearchModule) GetInformation() session.ModuleInformation {
 	information := session.ModuleInformation{
-		Name: module.Name(),
+		Name:        module.Name(),
 		Description: module.Description(),
-		Author: module.Author(),
-		Type: module.GetType(),
-		Parameters: module.Parameters,
+		Author:      module.Author(),
+		Type:        module.GetType(),
+		Parameters:  module.Parameters,
 	}
 	return information
 }
 
-func (module *DarkSearchModule) Start(){
+func (module *DarkSearchModule) Start() {
 	target, err := module.GetParameter("TARGET")
-	if err != nil{
+	if err != nil {
 		module.Stream.Error(err.Error())
 		return
 	}
 
 	text, err := module.Session.GetTarget(target.Value)
-	if err != nil{
+	if err != nil {
 		module.Stream.Error(err.Error())
 		return
 	}
@@ -84,18 +85,18 @@ func (module *DarkSearchModule) Start(){
 	u := "https://darksearch.io/api/search?query=" + url.QueryEscape(text.GetName())
 	client := http.Client{}
 	req, err := http.NewRequest("GET", u, nil)
-	if err != nil{
+	if err != nil {
 		module.Stream.Error(err.Error())
 		return
 	}
 
 	res, err := client.Do(req)
-	if err != nil{
+	if err != nil {
 		module.Stream.Error(err.Error())
 		return
 	}
 
-	if res.StatusCode != 200{
+	if res.StatusCode != 200 {
 		module.Stream.Error("Status Code: " + strconv.Itoa(res.StatusCode))
 		return
 	}
@@ -104,7 +105,7 @@ func (module *DarkSearchModule) Start(){
 	var results DarkSearchResults
 
 	err = json.Unmarshal(body, &results)
-	if err != nil{
+	if err != nil {
 		module.Stream.Error(err.Error())
 		return
 	}
@@ -117,7 +118,7 @@ func (module *DarkSearchModule) Start(){
 		"Link",
 	})
 	t.SetAllowedColumnLengths([]int{30, 30, 30})
-	for _, element := range results.Data{
+	for _, element := range results.Data {
 		t.AppendRow(table.Row{
 			element.Title,
 			element.Description,
@@ -126,7 +127,7 @@ func (module *DarkSearchModule) Start(){
 
 		results := session.TargetResults{
 			Header: "title" + text.GetSeparator() + "Resume" + text.GetSeparator() + "Link",
-			Value: element.Title + text.GetSeparator() + element.Description + text.GetSeparator() + element.Link,
+			Value:  element.Title + text.GetSeparator() + element.Description + text.GetSeparator() + element.Link,
 		}
 		text.Save(module, results)
 	}

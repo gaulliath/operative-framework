@@ -1,20 +1,21 @@
 package session
 
 import (
-	"github.com/graniet/go-pretty/table"
-	"github.com/fatih/color"
 	"fmt"
 	"time"
+
+	"github.com/fatih/color"
+	"github.com/graniet/go-pretty/table"
 )
 
-type Stream struct{
-	Sess *Session `json:"-"`
-	Verbose bool `json:"verbose"`
-	JSON bool `json:"json"`
+type Stream struct {
+	Sess    *Session          `json:"-"`
+	Verbose bool              `json:"verbose"`
+	JSON    bool              `json:"json"`
 	History map[string]string `json:"history"`
 }
 
-func (stream *Stream) Standard(text string){
+func (stream *Stream) Standard(text string) {
 	if stream.Verbose {
 		t := time.Now()
 		timeText := t.Format("2006-01-02 15:04:05")
@@ -23,7 +24,7 @@ func (stream *Stream) Standard(text string){
 	}
 }
 
-func (stream *Stream) Error(text string){
+func (stream *Stream) Error(text string) {
 	if stream.Verbose {
 		t := time.Now()
 		timeText := t.Format("2006-01-02 15:04:05")
@@ -49,18 +50,18 @@ func (stream *Stream) Warning(text string) {
 	}
 }
 
-func (stream *Stream) WithoutDate(text string){
+func (stream *Stream) WithoutDate(text string) {
 	if stream.Verbose {
 		fmt.Printf("%s\n", text)
 		stream.Sess.Information.AddEvent()
 	}
 }
 
-func (stream *Stream) GenerateTable() table.Writer{
+func (stream *Stream) GenerateTable() table.Writer {
 	return table.NewWriter()
 }
 
-func (stream *Stream) Render(t table.Writer){
+func (stream *Stream) Render(t table.Writer) {
 	if stream.Verbose {
 		t.Render()
 	}
