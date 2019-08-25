@@ -23,6 +23,10 @@ import:
   subpackages:
   - color
 - package: github.com/pkg/errors
+- package: github.com/rwcarlsen/goexif
+  subpackages:
+  - exif
+  - mknote
 - package: github.com/segmentio/ksuid
 - package: gopkg.in/ahmdrz/goinsta.v2
 - package: gopkg.in/cheggaaa/pb.v1

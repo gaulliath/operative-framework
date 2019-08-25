@@ -1,5 +1,3 @@
-hash: 755ccbe48fb1a1bed6353b7242e95eb11ea167cec6abd956e63ec8c954fa07cb
-updated: 2019-08-24T18:45:49.53691792Z
 imports:
 - name: github.com/akamensky/argparse
   version: 28b0496b54cba23e619418cf64e37c7519638ebf
@@ -40,7 +38,7 @@ imports:
 - name: github.com/gorilla/mux
   version: e0cdff45b7de56d3ad24ef9871c14fe4238475aa
 - name: github.com/gorilla/websocket
-  version: 7e9819d926e9f51e09eabe119b6d78f94e058c44
+  version: c3e18be99d19e6b3e8f1559eea2c161a665c4b6b
 - name: github.com/graniet/go-pretty
   version: fba20de8a7d32c1f408d85a81c22f9355093eec8
   subpackages:
@@ -90,6 +88,12 @@ imports:
   - crypto/cbc
   - crypto/curve25519
   - crypto/hkdf
+- name: github.com/rwcarlsen/goexif
+  version: 9e8deecbddbd4989a3e8d003684b783412b41e7a
+  subpackages:
+  - exif
+  - mknote
+  - tiff
 - name: github.com/segmentio/ksuid
   version: 9349bd0a1b74d652f56881a2418e4b8d5df19321
 - name: github.com/skip2/go-qrcode

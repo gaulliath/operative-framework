@@ -27,12 +27,33 @@ RUN glide install --strip-vendor && \
 ############################
 # Runtime image
 ############################
-FROM alpine:3.10
-EXPOSE 8888
-RUN apk update && \
+FROM alpine:3.10 AS runtime
+
+# Install tini to /usr/local/sbin
+ADD https://github.com/krallin/tini/releases/download/v0.18.0/tini-muslc-amd64 /usr/local/sbin/tini
+
+# Install runtime dependencies & create runtime user
+RUN \
+	apk update && \
 	apk add --no-cache --no-progress ca-certificates && \
-	rm -rf /var/cache/apk/*
+	rm -rf /var/cache/apk/* && \
+		\
+		chmod +x /usr/local/sbin/tini && \
+		mkdir -p /opt && \
+ 			\
+	 		adduser -D opf -h /opt/operative-framework -s /bin/sh && \
+ 			su opf -c 'cd /opt/operative-framework; mkdir -p bin config data services'
 
-COPY --from=builder /opf /opf
-ENTRYPOINT [ "/opf" ]
+# Switch to user context
+USER opf
+WORKDIR /opt/operative-framework
 
+COPY --from=builder /opf /opt/operative-framework/bin/opf
+ENV PATH $PATH:/opt/operative-framework/bin
+
+# Container configuration
+EXPOSE 8888
+VOLUME ["/opt/operative-framework/data"]
+# ENTRYPOINT ["tini", "-g", "--"]
+ENTRYPOINT [ "/opt/operative-framework/bin/opf" ]
+# CMD [ "/opt/operative-framework/bin/opf" ]
