@@ -18,7 +18,7 @@ services:
       dockerfile: Dockerfile
       context: .
     # env_file: .env
-    volume:
+    volumes:
     - .env:/opt/operative-framework/.opf/.env
     #  - ./shared/opf/cron/:/opt/operative-framework/.opf/cron/
     depends_on:
