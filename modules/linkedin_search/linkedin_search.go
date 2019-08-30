@@ -1,7 +1,6 @@
 package linkedin_search
 
 import (
-	"net/http"
 	"os"
 	"strconv"
 	"strings"
@@ -56,6 +55,7 @@ func (module *LinkedinSearchModule) GetInformation() session.ModuleInformation {
 }
 
 func (module *LinkedinSearchModule) Start() {
+	opfClient := module.sess.Client
 	paramEnterprise, _ := module.GetParameter("TARGET")
 	target, err := module.sess.GetTarget(paramEnterprise.Value)
 	if err != nil {
@@ -70,10 +70,8 @@ func (module *LinkedinSearchModule) Start() {
 
 	paramLimit, _ := module.GetParameter("limit")
 	url := "https://www.google.com/search?num=" + paramLimit.Value + "&start=0&hl=en&q=site:linkedin.com/in+" + strings.Replace(target.GetName(), " ", "+", -1)
-	client := http.Client{}
-	req, _ := http.NewRequest("GET", url, nil)
-	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36")
-	res, err := client.Do(req)
+	opfClient.Header.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36")
+	res, err := opfClient.Perform("GET", url, nil)
 	if err != nil {
 		module.Stream.Error("Argument 'URL' can't be reached.")
 		return

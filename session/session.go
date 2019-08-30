@@ -12,10 +12,11 @@ import (
 )
 
 type Session struct {
-	Id            int               `json:"-" gorm:"primary_key:yes;column:id;AUTO_INCREMENT"`
-	SessionName   string            `json:"session_name"`
-	Information   Information       `json:"information"`
-	Connection    Connection        `json:"-" sql:"-"`
+	Id            int         `json:"-" gorm:"primary_key:yes;column:id;AUTO_INCREMENT"`
+	SessionName   string      `json:"session_name"`
+	Information   Information `json:"information"`
+	Connection    Connection  `json:"-" sql:"-"`
+	Client        OpfClient
 	Config        config.Config     `json:"config" sql:"-"`
 	Version       string            `json:"version" sql:"-"`
 	Targets       []*Target         `json:"subjects" sql:"-"`

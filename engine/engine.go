@@ -39,6 +39,7 @@ func New() *session.Session {
 			ORM:        db,
 			Migrations: make(map[string]interface{}),
 		},
+		Client: session.GetOpfClient(),
 		Config: conf,
 		Alias:  make(map[string]string),
 	}
@@ -74,6 +75,7 @@ func Load(id int) *session.Session {
 			ORM:        db,
 			Migrations: make(map[string]interface{}),
 		},
+		Client: session.GetOpfClient(),
 		Config: conf,
 	}
 	s.Connection.ORM.Where(&session.Session{
