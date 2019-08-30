@@ -1,26 +1,26 @@
 package config
 
 import (
-	"github.com/joho/godotenv"
-	"github.com/pkg/errors"
 	"os"
 	"os/user"
+
+	"github.com/joho/godotenv"
+	"github.com/pkg/errors"
 )
 
-func ParseConfig() (Config, error){
+func ParseConfig() (Config, error) {
 	conf := Config{}
 	errConfig := godotenv.Load(".env")
-	u,_ := user.Current()
-	if errConfig != nil{
-		if _, err := os.Stat(u.HomeDir + "/.opf/.env"); os.IsNotExist(err){
+	u, _ := user.Current()
+	if errConfig != nil {
+		if _, err := os.Stat(u.HomeDir + "/.opf/.env"); os.IsNotExist(err) {
 			return Config{}, errors.New("Please create .env file on root path.")
 		}
 		err := godotenv.Load(u.HomeDir + "/.opf/.env")
-		if err != nil{
+		if err != nil {
 			return Config{}, errors.New("Please create .env file on root path.")
 		}
 	}
-
 
 	conf.Instagram.Login = os.Getenv("INSTAGRAM_LOGIN")
 	conf.Instagram.Password = os.Getenv("INSTAGRAM_PASSWORD")

@@ -4,57 +4,57 @@ import (
 	"github.com/graniet/operative-framework/session"
 )
 
-type SampleModule struct{
+type SampleModule struct {
 	session.SessionModule
-	sess *session.Session
-	Stream *session.Stream
+	sess   *session.Session `json:"-"`
+	Stream *session.Stream  `json:"-"`
 }
 
-func PushSampleModuleModule(s *session.Session) *SampleModule{
+func PushSampleModuleModule(s *session.Session) *SampleModule {
 	mod := SampleModule{
-		sess: s,
+		sess:   s,
 		Stream: &s.Stream,
 	}
 	mod.CreateNewParam("TARGET", "TWITTER ID e.g: 4378543", "", true, session.STRING)
 	return &mod
 }
 
-func (module *SampleModule) Name() string{
+func (module *SampleModule) Name() string {
 	return "sample_module"
 }
 
-func (module *SampleModule) Description() string{
+func (module *SampleModule) Description() string {
 	return "Print hello with twitter ID"
 }
 
-func (module *SampleModule) Author() string{
+func (module *SampleModule) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *SampleModule) GetType() string{
+func (module *SampleModule) GetType() string {
 	return "twitter"
 }
 
-func (module *SampleModule) GetInformation() session.ModuleInformation{
+func (module *SampleModule) GetInformation() session.ModuleInformation {
 	information := session.ModuleInformation{
-		Name: module.Name(),
+		Name:        module.Name(),
 		Description: module.Description(),
-		Author: module.Author(),
-		Type: module.GetType(),
-		Parameters: module.Parameters,
+		Author:      module.Author(),
+		Type:        module.GetType(),
+		Parameters:  module.Parameters,
 	}
 	return information
 }
 
-func (module *SampleModule) Start(){
+func (module *SampleModule) Start() {
 	trg, err := module.GetParameter("TARGET")
-	if err != nil{
+	if err != nil {
 		module.sess.Stream.Error(err.Error())
 		return
 	}
 
 	target, err := module.sess.GetTarget(trg.Value)
-	if err != nil{
+	if err != nil {
 		module.sess.Stream.Error(err.Error())
 		return
 	}

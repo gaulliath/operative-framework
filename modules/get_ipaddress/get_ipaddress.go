@@ -1,22 +1,23 @@
 package get_ipaddress
 
 import (
-	"github.com/graniet/go-pretty/table"
-	"github.com/graniet/operative-framework/session"
 	"net"
 	"os"
 	"strings"
+
+	"github.com/graniet/go-pretty/table"
+	"github.com/graniet/operative-framework/session"
 )
 
-type GetIpAddressModule struct{
+type GetIpAddressModule struct {
 	session.SessionModule
-	sess *session.Session
-	Stream *session.Stream
+	sess   *session.Session `json:"-"`
+	Stream *session.Stream  `json:"-"`
 }
 
-func PushGetIpAddressModule(s *session.Session) *GetIpAddressModule{
+func PushGetIpAddressModule(s *session.Session) *GetIpAddressModule {
 	mod := GetIpAddressModule{
-		sess: s,
+		sess:   s,
 		Stream: &s.Stream,
 	}
 
@@ -24,59 +25,58 @@ func PushGetIpAddressModule(s *session.Session) *GetIpAddressModule{
 	return &mod
 }
 
-
-func (module *GetIpAddressModule) Name() string{
-	return "get_ip_address"
+func (module *GetIpAddressModule) Name() string {
+	return "get.ip_address"
 }
 
-func (module *GetIpAddressModule) Author() string{
+func (module *GetIpAddressModule) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *GetIpAddressModule) Description() string{
+func (module *GetIpAddressModule) Description() string {
 	return "Get internet protocol address from specific target"
 }
 
-func (module *GetIpAddressModule) GetType() string{
+func (module *GetIpAddressModule) GetType() string {
 	return "website"
 }
 
-func (module *GetIpAddressModule) GetInformation() session.ModuleInformation{
+func (module *GetIpAddressModule) GetInformation() session.ModuleInformation {
 	information := session.ModuleInformation{
-		Name: module.Name(),
+		Name:        module.Name(),
 		Description: module.Description(),
-		Author: module.Author(),
-		Type: module.GetType(),
-		Parameters: module.Parameters,
+		Author:      module.Author(),
+		Type:        module.GetType(),
+		Parameters:  module.Parameters,
 	}
 	return information
 }
 
-func (module *GetIpAddressModule) Start(){
+func (module *GetIpAddressModule) Start() {
 
 	trg, err := module.GetParameter("TARGET")
-	if err != nil{
+	if err != nil {
 		module.sess.Stream.Error(err.Error())
 		return
 	}
 
 	target, err := module.sess.GetTarget(trg.Value)
-	if err != nil{
+	if err != nil {
 		module.sess.Stream.Error(err.Error())
 		return
 	}
 
-	if strings.Contains(target.GetName(), "://"){
+	if strings.Contains(target.GetName(), "://") {
 		expProto := strings.Split(target.GetName(), "://")
 		proto := expProto[0]
 		expURL := ""
-		if strings.Contains(target.GetName(), "/"){
+		if strings.Contains(target.GetName(), "/") {
 			expURL = strings.Split(expProto[1], "/")[0]
 			target.Name = proto + "://" + expURL
 		}
-	} else{
+	} else {
 
-		if strings.Contains(target.GetName(), "/"){
+		if strings.Contains(target.GetName(), "/") {
 			expURL := strings.Split(target.GetName(), "/")[0]
 			target.Name = "https://" + expURL
 		}
@@ -87,25 +87,25 @@ func (module *GetIpAddressModule) Start(){
 	}
 
 	ipAddress, _ := net.LookupIP(target.GetName()) // take from 1st argument
-	if len(ipAddress) > 0{
+	if len(ipAddress) > 0 {
 		t := module.sess.Stream.GenerateTable()
 		t.SetOutputMirror(os.Stdout)
 		t.AppendHeader(table.Row{
 			"IP",
 		})
-		for _, ip := range ipAddress{
+		for _, ip := range ipAddress {
 			t.AppendRow(table.Row{
 				ip.String(),
 			})
 			result := session.TargetResults{
 				Header: "IP" + target.GetSeparator(),
-				Value: ip.String() + target.GetSeparator(),
+				Value:  ip.String() + target.GetSeparator(),
 			}
 			target.Save(module, result)
 			module.Results = append(module.Results, ip.String())
 		}
 		module.sess.Stream.Render(t)
-	} else{
+	} else {
 		module.sess.Stream.Error("No result found")
 		return
 	}

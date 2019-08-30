@@ -1,23 +1,24 @@
 package bing_vhost
 
 import (
-	"github.com/PuerkitoBio/goquery"
-	"github.com/graniet/go-pretty/table"
-	"github.com/graniet/operative-framework/session"
 	"net/http"
 	"os"
 	"strings"
+
+	"github.com/PuerkitoBio/goquery"
+	"github.com/graniet/go-pretty/table"
+	"github.com/graniet/operative-framework/session"
 )
 
-type BingVirtualHostModule struct{
+type BingVirtualHostModule struct {
 	session.SessionModule
-	sess *session.Session
-	Stream *session.Stream
+	sess   *session.Session `json:"-"`
+	Stream *session.Stream  `json:"-"`
 }
 
-func PushBingVirtualHostModule(s *session.Session) *BingVirtualHostModule{
+func PushBingVirtualHostModule(s *session.Session) *BingVirtualHostModule {
 	mod := BingVirtualHostModule{
-		sess: s,
+		sess:   s,
 		Stream: &s.Stream,
 	}
 
@@ -25,49 +26,48 @@ func PushBingVirtualHostModule(s *session.Session) *BingVirtualHostModule{
 	return &mod
 }
 
-
-func (module *BingVirtualHostModule) Name() string{
-	return "bing_vhost"
+func (module *BingVirtualHostModule) Name() string {
+	return "bing.vhost"
 }
 
-func (module *BingVirtualHostModule) Author() string{
+func (module *BingVirtualHostModule) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *BingVirtualHostModule) Description() string{
+func (module *BingVirtualHostModule) Description() string {
 	return "Checking possible virtual host with target IP"
 }
 
-func (module *BingVirtualHostModule) GetType() string{
+func (module *BingVirtualHostModule) GetType() string {
 	return "ip_address"
 }
 
-func (module *BingVirtualHostModule) GetInformation() session.ModuleInformation{
+func (module *BingVirtualHostModule) GetInformation() session.ModuleInformation {
 	information := session.ModuleInformation{
-		Name: module.Name(),
+		Name:        module.Name(),
 		Description: module.Description(),
-		Author: module.Author(),
-		Type: module.GetType(),
-		Parameters: module.Parameters,
+		Author:      module.Author(),
+		Type:        module.GetType(),
+		Parameters:  module.Parameters,
 	}
 	return information
 }
 
-func (module *BingVirtualHostModule) Start(){
+func (module *BingVirtualHostModule) Start() {
 	ipAddress, err := module.GetParameter("TARGET")
-	if err != nil{
+	if err != nil {
 		module.Stream.Error("Argument 'TARGET' isn't valid.")
 		return
 	}
 
 	target, err := module.sess.GetTarget(ipAddress.Value)
-	if err != nil{
+	if err != nil {
 		module.sess.Stream.Error(err.Error())
 		return
 	}
 
-	if target.GetType() != module.GetType(){
-		module.Stream.Error("Target with type '"+target.GetType()+"' isn't valid module need '"+module.GetType()+"' type.")
+	if target.GetType() != module.GetType() {
+		module.Stream.Error("Target with type '" + target.GetType() + "' isn't valid module need '" + module.GetType() + "' type.")
 		return
 	}
 
@@ -102,7 +102,7 @@ func (module *BingVirtualHostModule) Start(){
 		t.AppendRow(table.Row{line})
 		result := session.TargetResults{
 			Header: "Link",
-			Value: line,
+			Value:  line,
 		}
 		target.Save(module, result)
 		module.Results = append(module.Results, line)

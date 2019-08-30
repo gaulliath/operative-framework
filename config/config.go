@@ -1,40 +1,40 @@
 package config
 
-type Config struct{
-	Api ApiConfig
-	Database DataBase
-	Common Common
+type Config struct {
+	Api       ApiConfig
+	Database  DataBase
+	Common    Common
 	Instagram Network
-	Twitter Network
+	Twitter   Network
 }
 
-type Network struct{
-	Login string
+type Network struct {
+	Login    string
 	Password string
-	Api ApiConfig
+	Api      ApiConfig
 }
 
-type DataBase struct{
-	Name string
-	User string
-	Pass string
-	Host string
+type DataBase struct {
+	Name   string
+	User   string
+	Pass   string
+	Host   string
 	Driver string
-	Port string
+	Port   string
 }
 
-type Common struct{
-	HistoryFile string
-	BaseDirectory string
-	ExportDirectory string
+type Common struct {
+	HistoryFile       string
+	BaseDirectory     string
+	ExportDirectory   string
 	ConfigurationFile string
-	ConfigurationService string
+	ConfigurationJobs string
 }
 
-type ApiConfig struct{
-	Host string
-	Port string
-	Key string
-	SKey string
+type ApiConfig struct {
+	Host    string
+	Port    string
+	Key     string
+	SKey    string
 	Verbose string
 }

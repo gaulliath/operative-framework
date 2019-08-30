@@ -2,23 +2,24 @@ package image_reverse_search
 
 import (
 	"bytes"
-	"errors"
 	"encoding/json"
+	"errors"
 	"fmt"
-	"github.com/PuerkitoBio/goquery"
-	"github.com/graniet/go-pretty/table"
-	"github.com/graniet/operative-framework/session"
 	"io"
 	"mime/multipart"
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/PuerkitoBio/goquery"
+	"github.com/graniet/go-pretty/table"
+	"github.com/graniet/operative-framework/session"
 )
 
-type ImageReverseModule struct{
+type ImageReverseModule struct {
 	session.SessionModule
-	sess *session.Session
-	Stream *session.Stream
+	sess   *session.Session `json:"-"`
+	Stream *session.Stream  `json:"-"`
 }
 
 const (
@@ -144,9 +145,9 @@ func (im *Imgdata) ImgFromFile(file string) []string {
 	return ar
 }
 
-func PushImageReverseModule(s *session.Session) *ImageReverseModule{
+func PushImageReverseModule(s *session.Session) *ImageReverseModule {
 	mod := ImageReverseModule{
-		sess: s,
+		sess:   s,
 		Stream: &s.Stream,
 	}
 
@@ -155,65 +156,65 @@ func PushImageReverseModule(s *session.Session) *ImageReverseModule{
 	return &mod
 }
 
-func (module *ImageReverseModule) Name() string{
+func (module *ImageReverseModule) Name() string {
 	return "image_search"
 }
 
-func (module *ImageReverseModule) Description() string{
+func (module *ImageReverseModule) Description() string {
 	return "Search possible image(s) connection on the internet"
 }
 
-func (module *ImageReverseModule) Author() string{
+func (module *ImageReverseModule) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *ImageReverseModule) GetType() string{
+func (module *ImageReverseModule) GetType() string {
 	return "file"
 }
 
-func (module *ImageReverseModule) GetInformation() session.ModuleInformation{
+func (module *ImageReverseModule) GetInformation() session.ModuleInformation {
 	information := session.ModuleInformation{
-		Name: module.Name(),
+		Name:        module.Name(),
 		Description: module.Description(),
-		Author: module.Author(),
-		Type: module.GetType(),
-		Parameters: module.Parameters,
+		Author:      module.Author(),
+		Type:        module.GetType(),
+		Parameters:  module.Parameters,
 	}
 	return information
 }
 
-func (module *ImageReverseModule) Start(){
+func (module *ImageReverseModule) Start() {
 	trg, err := module.GetParameter("TARGET")
-	if err != nil{
+	if err != nil {
 		module.sess.Stream.Error(err.Error())
 		return
 	}
 	target, err2 := module.sess.GetTarget(trg.Value)
-	if err2 != nil{
+	if err2 != nil {
 		module.sess.Stream.Error(err2.Error())
 		return
 	}
 	results := DefImg(false).ImgFromFile(target.GetName())
-	if len(results) > 0{
+	if len(results) > 0 {
 		t := module.sess.Stream.GenerateTable()
 		t.SetOutputMirror(os.Stdout)
 		t.AppendHeader(table.Row{
 			"URL",
 		})
-		t.SetAllowedColumnLengths([]int{90,})
-		for _, url := range results{
+		t.SetAllowedColumnLengths([]int{90})
+		for _, url := range results {
 			t.AppendRow(table.Row{
 				url,
 			})
 			res := session.TargetResults{
 				Header: "URL" + target.GetSeparator(),
-				Value: url + target.GetSeparator(),
+				Value:  url + target.GetSeparator(),
 			}
 			module.Results = append(module.Results, url)
 			target.Save(module, res)
 		}
 		module.sess.Stream.Render(t)
-	} else{
+	} else {
 		module.Stream.Warning("No result found.")
 	}
 }

@@ -1,67 +1,68 @@
 package header_retrieval
 
 import (
-	"github.com/imroc/req"
-	"github.com/graniet/operative-framework/session"
-	"github.com/graniet/go-pretty/table"
 	"net/url"
 	"os"
 	"strings"
+
+	"github.com/graniet/go-pretty/table"
+	"github.com/graniet/operative-framework/session"
+	"github.com/imroc/req"
 )
 
-type HeaderRetrievalModule struct{
+type HeaderRetrievalModule struct {
 	session.SessionModule
-	sess *session.Session
-	Stream *session.Stream
+	sess   *session.Session `json:"-"`
+	Stream *session.Stream  `json:"-"`
 }
 
-func PushModuleHeaderRetrieval(s *session.Session) *HeaderRetrievalModule{
+func PushModuleHeaderRetrieval(s *session.Session) *HeaderRetrievalModule {
 	mod := HeaderRetrievalModule{
-		sess: s,
+		sess:   s,
 		Stream: &s.Stream,
 	}
-	mod.CreateNewParam("TARGET","target URL","", true, session.STRING)
+	mod.CreateNewParam("TARGET", "target URL", "", true, session.STRING)
 	mod.CreateNewParam("METHOD", "Method used", "GET", true, session.STRING)
 	return &mod
 }
 
-func (module *HeaderRetrievalModule) Name() string{
-	return "header_retrieval"
+func (module *HeaderRetrievalModule) Name() string {
+	return "get.header"
 }
 
-func (module *HeaderRetrievalModule) Author() string{
+func (module *HeaderRetrievalModule) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *HeaderRetrievalModule) Description() string{
+func (module *HeaderRetrievalModule) Description() string {
 	return "Get headers from selected URL"
 }
 
-func (module *HeaderRetrievalModule) GetType() string{
+func (module *HeaderRetrievalModule) GetType() string {
 	return "url"
 }
 
-func (module *HeaderRetrievalModule) GetInformation() session.ModuleInformation{
+func (module *HeaderRetrievalModule) GetInformation() session.ModuleInformation {
 	information := session.ModuleInformation{
-		Name: module.Name(),
+		Name:        module.Name(),
 		Description: module.Description(),
-		Author: module.Author(),
-		Type: module.GetType(),
-		Parameters: module.Parameters,
+		Author:      module.Author(),
+		Type:        module.GetType(),
+		Parameters:  module.Parameters,
 	}
 	return information
 }
 
-func (module *HeaderRetrievalModule) Start(){
+func (module *HeaderRetrievalModule) Start() {
 	paramURL, _ := module.GetParameter("TARGET")
 	target, err := module.sess.GetTarget(paramURL.Value)
-	if err != nil{
+	if err != nil {
 		module.Stream.Error(err.Error())
 		return
 	}
 
-	if target.GetType() != module.GetType(){
-		module.Stream.Error("Target with type '"+target.GetType()+"' isn't valid module need '"+module.GetType()+"' type.")
+	if target.GetType() != module.GetType() {
+		module.Stream.Error("Target with type '" + target.GetType() + "' isn't valid module need '" + module.GetType() + "' type.")
 		return
 	}
 
@@ -73,31 +74,31 @@ func (module *HeaderRetrievalModule) Start(){
 	}
 
 	header := req.Header{
-		"Accept":        "application/json",
+		"Accept":     "application/json",
 		"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.103 Safari/537.36",
 	}
 
-	if !strings.Contains(target.GetName(), "://"){
+	if !strings.Contains(target.GetName(), "://") {
 		target.Name = "http://" + target.Name
 	}
 
 	r, err := req.Get(target.GetName(), header)
-	if err != nil{
+	if err != nil {
 		module.Stream.Error("Argument 'URL' can't be reached.")
 		return
 	}
 	t := module.Stream.GenerateTable()
 	t.SetOutputMirror(os.Stdout)
-	t.SetAllowedColumnLengths([]int{0, 60,})
+	t.SetAllowedColumnLengths([]int{0, 60})
 	t.AppendHeader(table.Row{"KEY", "VALUE"})
-	for index, header := range r.Response().Header{
+	for index, header := range r.Response().Header {
 		t.AppendRow([]interface{}{index, header})
 		separator := target.GetSeparator()
-		if len(header) > 0{
-			for _, l := range header{
+		if len(header) > 0 {
+			for _, l := range header {
 				result := session.TargetResults{
 					Header: "Index" + separator + "Header",
-					Value: index + separator + l,
+					Value:  index + separator + l,
 				}
 				target.Save(module, result)
 			}

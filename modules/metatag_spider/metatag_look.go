@@ -1,71 +1,72 @@
 package metatag_spider
 
 import (
-	"github.com/graniet/operative-framework/session"
-	"github.com/graniet/go-pretty/table"
 	"net/http"
 	"net/url"
 	"os"
+
 	"github.com/PuerkitoBio/goquery"
+	"github.com/graniet/go-pretty/table"
+	"github.com/graniet/operative-framework/session"
 )
 
-type MetaTagModule struct{
+type MetaTagModule struct {
 	session.SessionModule
-	sess *session.Session
-	Stream *session.Stream
+	sess   *session.Session `json:"-"`
+	Stream *session.Stream  `json:"-"`
 }
 
-func PushMetaTagModule(s *session.Session) *MetaTagModule{
+func PushMetaTagModule(s *session.Session) *MetaTagModule {
 	mod := MetaTagModule{
-		sess: s,
+		sess:   s,
 		Stream: &s.Stream,
 	}
-	mod.CreateNewParam("TARGET", "Target website URL","", true, session.STRING)
+	mod.CreateNewParam("TARGET", "Target website URL", "", true, session.STRING)
 	return &mod
 }
 
-func (module *MetaTagModule) Name() string{
-	return "metatag_spider"
+func (module *MetaTagModule) Name() string {
+	return "get.meta_tags"
 }
 
-func (module *MetaTagModule) Description() string{
+func (module *MetaTagModule) Description() string {
 	return "Crawl a meta tags elements for selected target"
 }
 
-func (module *MetaTagModule) Author() string{
+func (module *MetaTagModule) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *MetaTagModule) GetType() string{
+func (module *MetaTagModule) GetType() string {
 	return "url"
 }
 
-func (module *MetaTagModule) GetInformation() session.ModuleInformation{
+func (module *MetaTagModule) GetInformation() session.ModuleInformation {
 	information := session.ModuleInformation{
-		Name: module.Name(),
+		Name:        module.Name(),
 		Description: module.Description(),
-		Author: module.Author(),
-		Type: module.GetType(),
-		Parameters: module.Parameters,
+		Author:      module.Author(),
+		Type:        module.GetType(),
+		Parameters:  module.Parameters,
 	}
 	return information
 }
 
-func (module *MetaTagModule) Start(){
+func (module *MetaTagModule) Start() {
 	targetUrl, err := module.GetParameter("TARGET")
-	if err != nil{
+	if err != nil {
 		module.Stream.Error("Argument 'URL' can't be parsed.")
 		return
 	}
 
 	target, err := module.sess.GetTarget(targetUrl.Value)
-	if err != nil{
+	if err != nil {
 		module.sess.Stream.Error(err.Error())
 		return
 	}
 
-	if target.GetType() != module.GetType(){
-		module.Stream.Error("Target with type '"+target.GetType()+"' isn't valid module need '"+module.GetType()+"' type.")
+	if target.GetType() != module.GetType() {
+		module.Stream.Error("Target with type '" + target.GetType() + "' isn't valid module need '" + module.GetType() + "' type.")
 		return
 	}
 
@@ -77,29 +78,29 @@ func (module *MetaTagModule) Start(){
 	}
 
 	res, err := http.Get(target.GetName())
-	if err != nil{
+	if err != nil {
 		module.Stream.Error("Argument 'URL' can't be reached.")
 		return
 	}
 
 	doc, err := goquery.NewDocumentFromReader(res.Body)
-	if err != nil{
+	if err != nil {
 		module.Stream.Error("Argument 'URL' can't be reached.")
 		return
 	}
 
 	tagFound := make(map[string]string)
 
-	doc.Find("meta").Each(func(i int, s *goquery.Selection){
-		tagContent,_ := s.Attr("content")
-		tagName,_ := s.Attr("name")
+	doc.Find("meta").Each(func(i int, s *goquery.Selection) {
+		tagContent, _ := s.Attr("content")
+		tagName, _ := s.Attr("name")
 		separator := target.GetSeparator()
-		if _, ok := tagFound[tagName]; !ok{
+		if _, ok := tagFound[tagName]; !ok {
 			if tagName != "" {
 				tagFound[tagName] = tagContent
 				result := session.TargetResults{
 					Header: "KEY" + separator + "VALUE",
-					Value: tagName + separator + tagContent,
+					Value:  tagName + separator + tagContent,
 				}
 				target.Save(module, result)
 			}
@@ -107,7 +108,7 @@ func (module *MetaTagModule) Start(){
 	})
 	t := module.Stream.GenerateTable()
 	t.SetOutputMirror(os.Stdout)
-	t.SetAllowedColumnLengths([]int{0, 60,})
+	t.SetAllowedColumnLengths([]int{0, 60})
 	t.AppendHeader(table.Row{"KEY", "VALUE"})
 
 	if len(tagFound) > 0 {

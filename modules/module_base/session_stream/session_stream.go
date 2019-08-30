@@ -4,52 +4,52 @@ import (
 	"github.com/graniet/operative-framework/session"
 )
 
-type SessionStreamModule struct{
+type SessionStreamModule struct {
 	session.SessionModule
-	sess *session.Session
-	Stream *session.Stream
+	sess   *session.Session `json:"-"`
+	Stream *session.Stream  `json:"-"`
 }
 
-func PushSessionStreamModule(s *session.Session) *SessionStreamModule{
+func PushSessionStreamModule(s *session.Session) *SessionStreamModule {
 	mod := SessionStreamModule{
-		sess:s,
+		sess:   s,
 		Stream: &s.Stream,
 	}
-	mod.CreateNewParam("VERBOSE","Change Verbosity (true/false)",mod.sess.BooleanToString(mod.Stream.Verbose),false,session.BOOL)
+	mod.CreateNewParam("VERBOSE", "Change Verbosity (true/false)", mod.sess.BooleanToString(mod.Stream.Verbose), false, session.BOOL)
 	mod.CreateNewParam("JSON", "Print a response with JSON format", mod.sess.BooleanToString(mod.Stream.JSON), false, session.BOOL)
 	return &mod
 }
 
-func (module *SessionStreamModule) Name() string{
+func (module *SessionStreamModule) Name() string {
 	return "session_stream"
 }
 
-func (module *SessionStreamModule) Description() string{
+func (module *SessionStreamModule) Description() string {
 	return "Set a session event stream settings"
 }
 
-func (module *SessionStreamModule) Author() string{
+func (module *SessionStreamModule) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *SessionStreamModule) GetType() string{
+func (module *SessionStreamModule) GetType() string {
 	return "session"
 }
 
-func (module *SessionStreamModule) GetInformation() session.ModuleInformation{
+func (module *SessionStreamModule) GetInformation() session.ModuleInformation {
 	information := session.ModuleInformation{
-		Name: module.Name(),
+		Name:        module.Name(),
 		Description: module.Description(),
-		Author: module.Author(),
-		Type: module.GetType(),
-		Parameters: module.Parameters,
+		Author:      module.Author(),
+		Type:        module.GetType(),
+		Parameters:  module.Parameters,
 	}
 	return information
 }
 
-func (module *SessionStreamModule) Start(){
+func (module *SessionStreamModule) Start() {
 	paramVerbosity, err := module.GetParameter("VERBOSE")
-	if err != nil{
+	if err != nil {
 		module.Stream.Error(err.Error())
 		return
 	}

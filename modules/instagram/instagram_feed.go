@@ -2,60 +2,61 @@ package instagram
 
 import (
 	"fmt"
-	"github.com/graniet/go-pretty/table"
-	"github.com/graniet/operative-framework/session"
-	"gopkg.in/ahmdrz/goinsta.v2"
 	"os"
 	"strconv"
 	"time"
+
+	"github.com/graniet/go-pretty/table"
+	"github.com/graniet/operative-framework/session"
+	"gopkg.in/ahmdrz/goinsta.v2"
 )
 
-type InstagramFeed struct{
+type InstagramFeed struct {
 	session.SessionModule
-	Sess *session.Session
+	Sess *session.Session `json:"-"`
 }
 
-func PushInstagramFeedModule(s *session.Session) *InstagramFeed{
+func PushInstagramFeedModule(s *session.Session) *InstagramFeed {
 	mod := InstagramFeed{
 		Sess: s,
 	}
 
-	mod.CreateNewParam("TARGET", "INSTAGRAM USER ACCOUNT", "",true,session.STRING)
+	mod.CreateNewParam("TARGET", "INSTAGRAM USER ACCOUNT", "", true, session.STRING)
 	mod.CreateNewParam("DOWNLOAD", "DOWNLOAD INSTAGRAM USER FEED", "false", false, session.BOOL)
 	return &mod
 }
 
-func (module *InstagramFeed) Name() string{
-	return "instagram_feed"
+func (module *InstagramFeed) Name() string {
+	return "instagram.feed"
 }
 
-func (module *InstagramFeed) Description() string{
+func (module *InstagramFeed) Description() string {
 	return "Get instagram feed from selected target"
 }
 
-func (module *InstagramFeed) Author() string{
+func (module *InstagramFeed) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *InstagramFeed) GetType() string{
+func (module *InstagramFeed) GetType() string {
 	return "instagram"
 }
 
-func (module *InstagramFeed) GetInformation() session.ModuleInformation{
+func (module *InstagramFeed) GetInformation() session.ModuleInformation {
 	information := session.ModuleInformation{
-		Name: module.Name(),
+		Name:        module.Name(),
 		Description: module.Description(),
-		Author: module.Author(),
-		Type: module.GetType(),
-		Parameters: module.Parameters,
+		Author:      module.Author(),
+		Type:        module.GetType(),
+		Parameters:  module.Parameters,
 	}
 	return information
 }
 
-func (module *InstagramFeed) Start(){
+func (module *InstagramFeed) Start() {
 
 	trg, err := module.GetParameter("TARGET")
-	if err != nil{
+	if err != nil {
 		module.Sess.Stream.Error(err.Error())
 		return
 	}
@@ -66,10 +67,10 @@ func (module *InstagramFeed) Start(){
 		return
 	}
 
-	hasDownload  := module.Sess.StringToBoolean(download.Value)
+	hasDownload := module.Sess.StringToBoolean(download.Value)
 	exportPath := module.Sess.Config.Common.ExportDirectory + module.Name() + "/"
 	target, err2 := module.Sess.GetTarget(trg.Value)
-	if err2 != nil{
+	if err2 != nil {
 		fmt.Println(err2.Error())
 		return
 	}
@@ -82,7 +83,7 @@ func (module *InstagramFeed) Start(){
 	}
 
 	profil, err := insta.Profiles.ByName(target.Name)
-	if err != nil{
+	if err != nil {
 		fmt.Println(err.Error())
 		return
 	}
@@ -118,7 +119,7 @@ func (module *InstagramFeed) Start(){
 				target.Save(module, result)
 
 				if hasDownload {
-					_, _, err = item.Download(exportPath + target.Name, "")
+					_, _, err = item.Download(exportPath+target.Name, "")
 					if err != nil {
 						downloaded = downloaded + len(media.Items)
 					}

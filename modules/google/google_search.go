@@ -1,25 +1,26 @@
-package google_search
+package google
 
 import (
-	"github.com/PuerkitoBio/goquery"
-	"github.com/graniet/operative-framework/session"
-	"github.com/graniet/go-pretty/table"
 	"net/http"
 	u "net/url"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/PuerkitoBio/goquery"
+	"github.com/graniet/go-pretty/table"
+	"github.com/graniet/operative-framework/session"
 )
 
-type GoogleSearchModule struct{
+type GoogleSearchModule struct {
 	session.SessionModule
-	sess *session.Session
-	Stream *session.Stream
+	sess   *session.Session `json:"-"`
+	Stream *session.Stream  `json:"-"`
 }
 
-func PushGoogleSearchModule(s *session.Session) *GoogleSearchModule{
+func PushGoogleSearchModule(s *session.Session) *GoogleSearchModule {
 	mod := GoogleSearchModule{
-		sess: s,
+		sess:   s,
 		Stream: &s.Stream,
 	}
 
@@ -28,51 +29,52 @@ func PushGoogleSearchModule(s *session.Session) *GoogleSearchModule{
 	return &mod
 }
 
-
-func (module *GoogleSearchModule) Name() string{
-	return "google_search"
+func (module *GoogleSearchModule) Name() string {
+	return "google.search"
 }
 
-func (module *GoogleSearchModule) Author() string{
+func (module *GoogleSearchModule) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *GoogleSearchModule) Description() string{
+func (module *GoogleSearchModule) Description() string {
 	return "Find result from google search engine"
 }
 
-func (module *GoogleSearchModule) GetType() string{
+func (module *GoogleSearchModule) GetType() string {
 	return "text"
 }
 
-func (module *GoogleSearchModule) GetInformation() session.ModuleInformation{
+func (module *GoogleSearchModule) GetInformation() session.ModuleInformation {
 	information := session.ModuleInformation{
-		Name: module.Name(),
+		Name:        module.Name(),
 		Description: module.Description(),
-		Author: module.Author(),
-		Type: module.GetType(),
-		Parameters: module.Parameters,
+		Author:      module.Author(),
+		Type:        module.GetType(),
+		Parameters:  module.Parameters,
 	}
 	return information
 }
 
-
-func (module *GoogleSearchModule) Start(){
+func (module *GoogleSearchModule) Start() {
 	paramEnterprise, _ := module.GetParameter("TARGET")
 	target, err := module.sess.GetTarget(paramEnterprise.Value)
-	if err != nil{
+	if err != nil {
 		module.sess.Stream.Error(err.Error())
 		return
 	}
 
-	if target.GetType() != module.GetType(){
-		module.Stream.Error("Target with type '"+target.GetType()+"' isn't valid module need '"+module.GetType()+"' type.")
+	if target.GetType() != module.GetType() {
+		module.Stream.Error("Target with type '" + target.GetType() + "' isn't valid module need '" + module.GetType() + "' type.")
 		return
 	}
 
 	paramLimit, _ := module.GetParameter("LIMIT")
-	url := "https://encrypted.google.com/search?num=" + paramLimit.Value + "&start=0&hl=en&q=" + u.QueryEscape(target.GetName())
-	res, err := http.Get(url)
+	url := "https://www.google.com/search?num=" + paramLimit.Value + "&start=0&hl=en&q=" + u.QueryEscape(target.GetName())
+	client := http.Client{}
+	req, _ := http.NewRequest("GET", url, nil)
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36")
+	res, err := client.Do(req)
 	if err != nil {
 		module.Stream.Error("Argument 'URL' can't be reached.")
 		return
@@ -91,7 +93,7 @@ func (module *GoogleSearchModule) Start(){
 
 	t := module.Stream.GenerateTable()
 	t.SetOutputMirror(os.Stdout)
-	t.SetAllowedColumnLengths([]int{30, 100,})
+	t.SetAllowedColumnLengths([]int{30, 100})
 	t.AppendHeader(table.Row{"Name", "Link"})
 
 	resultFound := 0
@@ -103,7 +105,7 @@ func (module *GoogleSearchModule) Start(){
 		t.AppendRow([]interface{}{name, link})
 		result := session.TargetResults{
 			Header: "Name" + separator + "Link",
-			Value: name + separator + link,
+			Value:  name + separator + link,
 		}
 		target.Save(module, result)
 		resultFound = resultFound + 1

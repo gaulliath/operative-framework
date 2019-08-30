@@ -1,18 +1,19 @@
 package engine
 
 import (
+	"time"
+
 	"github.com/graniet/operative-framework/config"
 	"github.com/graniet/operative-framework/filters"
 	"github.com/graniet/operative-framework/modules"
 	"github.com/graniet/operative-framework/session"
 	"github.com/jinzhu/gorm"
-	"time"
 )
 
 // Generate New Session
-func New() *session.Session{
+func New() *session.Session {
 	conf, err := config.ParseConfig()
-	if err != nil{
+	if err != nil {
 		panic(err.Error())
 	}
 	db, err := gorm.Open(conf.Database.Driver, conf.Database.Name)
@@ -25,20 +26,22 @@ func New() *session.Session{
 
 	s := session.Session{
 		SessionName: "opf_" + timeText,
-		Version: "1.00 (reborn)",
-		Information:session.Information{
-			ApiStatus: false,
+		Version:     "1.00 (reborn)",
+		Information: session.Information{
+			ApiStatus:      false,
 			ModuleLaunched: 0,
-			Event: 0,
+			Event:          0,
 		},
-		Stream:session.Stream{
+		Stream: session.Stream{
 			Verbose: true,
 		},
 		Connection: session.Connection{
-			ORM: db,
+			ORM:        db,
 			Migrations: make(map[string]interface{}),
 		},
+		Client: session.GetOpfClient(),
 		Config: conf,
+		Alias:  make(map[string]string),
 	}
 	s.Stream.Sess = &s
 	s.Connection.Migrate()
@@ -49,9 +52,9 @@ func New() *session.Session{
 }
 
 // Load Session With ID
-func Load(id int) *session.Session{
+func Load(id int) *session.Session {
 	conf, err := config.ParseConfig()
-	if err != nil{
+	if err != nil {
 		panic(err.Error())
 	}
 	db, err := gorm.Open(conf.Database.Driver, conf.Database.Name)
@@ -60,19 +63,20 @@ func Load(id int) *session.Session{
 	}
 	s := session.Session{
 		Version: "1.00 (reborn)",
-		Stream:session.Stream{
+		Stream: session.Stream{
 			Verbose: true,
 		},
-		Information:session.Information{
-			ApiStatus: false,
+		Information: session.Information{
+			ApiStatus:      false,
 			ModuleLaunched: 0,
-			Event: 0,
+			Event:          0,
 		},
 		Connection: session.Connection{
-			ORM: db,
+			ORM:        db,
 			Migrations: make(map[string]interface{}),
 		},
-		Config:conf,
+		Client: session.GetOpfClient(),
+		Config: conf,
 	}
 	s.Connection.ORM.Where(&session.Session{
 		Id: id,
@@ -87,10 +91,9 @@ func Load(id int) *session.Session{
 	s.Connection.ORM.Where("session_id = ?", id).Find(&targets)
 	s.Targets = targets
 
-
 	// Load target results
-	if len(s.Targets) > 0{
-		for k, target := range s.Targets{
+	if len(s.Targets) > 0 {
+		for k, target := range s.Targets {
 			var linked []session.Linking
 			target.Results = make(map[string][]*session.TargetResults)
 			s.Connection.ORM.Where("session_id = ?", id).Where("target_base = ?", target.GetId()).Find(&linked)

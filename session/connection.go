@@ -2,13 +2,14 @@ package session
 
 import (
 	"database/sql"
+
 	"github.com/jinzhu/gorm"
 )
 
 type Connection struct {
 	ConnectionInstance
-	ORM *gorm.DB
-	Migrations map[string]interface{}
+	ORM        *gorm.DB               `json:"-"`
+	Migrations map[string]interface{} `json:"-"`
 }
 
 type ConnectionInstance interface {
@@ -17,24 +18,24 @@ type ConnectionInstance interface {
 	Migrate() bool
 }
 
-func (c *Connection) GetORM() *gorm.DB{
+func (c *Connection) GetORM() *gorm.DB {
 	return c.ORM
 }
 
-func (c *Connection) GetDB() *sql.DB{
+func (c *Connection) GetDB() *sql.DB {
 	return c.ORM.DB()
 }
 
-func (c *Connection) LoadMigration(){
+func (c *Connection) LoadMigration() {
 	c.Migrations["sessions"] = Session{}
 	c.Migrations["targets"] = Target{}
 	c.Migrations["target_links"] = Linking{}
 	c.Migrations["target_results"] = TargetResults{}
 }
 
-func (c *Connection) Migrate() bool{
+func (c *Connection) Migrate() bool {
 	c.LoadMigration()
-	for _, migration := range c.Migrations{
+	for _, migration := range c.Migrations {
 		//if c.ORM.HasTable(migration){
 		//	c.ORM.DropTable(migration)
 		//}
