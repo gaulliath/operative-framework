@@ -50,7 +50,6 @@ func LoadModules(s *session.Session) {
 	s.Modules = append(s.Modules, instagram.PushInstagramFriendsModule(s))
 	s.Modules = append(s.Modules, instagram.PushInstagramInfoModule(s))
 	s.Modules = append(s.Modules, instagram.PushInstagramCommentsModule(s))
-	s.Modules = append(s.Modules, instagram.PushInstagramGeoPostModule(s))
 	s.Modules = append(s.Modules, image_reverse_search.PushImageReverseModule(s))
 	s.Modules = append(s.Modules, info_greffe.PushInfoGreffeRegistrationModule(s))
 	s.Modules = append(s.Modules, linkedin_search.PushLinkedinSearchModule(s))
