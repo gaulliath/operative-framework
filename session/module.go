@@ -200,3 +200,19 @@ func (module *SessionModule) GetResults() []string {
 func (module *SessionModule) GetExternal() []string {
 	return module.External
 }
+
+func (s *Session) ListModules() {
+	t := s.Stream.GenerateTable()
+	t.SetOutputMirror(os.Stdout)
+	t.AppendHeader(table.Row{
+		"NAME",
+		"DESCRIPTION",
+	})
+	for _, module := range s.Modules {
+		t.AppendRow(table.Row{
+			module.Name(),
+			module.Description(),
+		})
+	}
+	s.Stream.Render(t)
+}

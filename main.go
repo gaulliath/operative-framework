@@ -86,6 +86,10 @@ func main() {
 		Required: false,
 		Help:     "Set target to '-e/--execute' argument",
 	})
+	parameters := parser.String("p", "parameters", &argparse.Options{
+		Required: false,
+		Help:     "Set parameters to '-e/--execute' argument",
+	})
 	loadSession := parser.Int("s", "session", &argparse.Options{
 		Required: false,
 		Help:     "Load specific session id",
@@ -104,6 +108,11 @@ func main() {
 	quiet := parser.Flag("q", "quiet", &argparse.Options{
 		Required: false,
 		Help:     "Don't prompt operative shell",
+	})
+
+	modules := parser.Flag("l", "list", &argparse.Options{
+		Required: false,
+		Help:     "List available modules",
 	})
 
 	err = parser.Parse(os.Args)
@@ -129,6 +138,11 @@ func main() {
 	// Load supervised cron job.
 	sp = supervisor.GetNewSupervisor(sess)
 	cron.Load(sp)
+
+	if *modules {
+		sess.ListModules()
+		return
+	}
 
 	if *rSupervisor {
 		// Reading loaded cron job
@@ -158,6 +172,33 @@ func main() {
 			return
 		}
 		_, _ = module.SetParameter("TARGET", target)
+
+		if *parameters != "" {
+
+			if !strings.Contains(*parameters, "=") {
+				sess.Stream.Error("Please use a correct format. example: limit=50;id=1")
+				return
+			}
+
+			if strings.Contains(*parameters, ";") {
+				lists := strings.Split(*parameters, ";")
+				for _, parameter := range lists {
+					template := strings.Split(parameter, "=")
+					_, err := module.SetParameter(template[0], template[1])
+					if err != nil {
+						sess.Stream.Error(err.Error())
+						return
+					}
+				}
+			} else {
+				template := strings.Split(*parameters, "=")
+				_, err := module.SetParameter(template[0], template[1])
+				if err != nil {
+					sess.Stream.Error(err.Error())
+					return
+				}
+			}
+		}
 		module.Start()
 		return
 	}
