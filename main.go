@@ -78,6 +78,14 @@ func main() {
 		Required: false,
 		Help:     "Do not run framework cli",
 	})
+	execute := parser.String("e", "execute", &argparse.Options{
+		Required: false,
+		Help:     "Execute a single module",
+	})
+	target := parser.String("t", "target", &argparse.Options{
+		Required: false,
+		Help:     "Set target to '-e/--execute' argument",
+	})
 	loadSession := parser.Int("s", "session", &argparse.Options{
 		Required: false,
 		Help:     "Load specific session id",
@@ -132,6 +140,28 @@ func main() {
 		fmt.Print(parser.Usage(""))
 		return
 	}
+
+	if *execute != "" {
+		if *target == "" {
+			sess.Stream.Error("'-e/--execute' argument need a target argument '-t/--target'")
+			return
+		}
+		module, err := sess.SearchModule(*execute)
+		if err != nil {
+			sess.Stream.Error(err.Error())
+			return
+		}
+
+		target, err := sess.AddTarget(module.GetType(), *target)
+		if err != nil {
+			sess.Stream.Error(err.Error())
+			return
+		}
+		_, _ = module.SetParameter("TARGET", target)
+		module.Start()
+		return
+	}
+
 	if *rApi {
 		if *cli {
 			sess.Stream.Standard("running operative framework api...")

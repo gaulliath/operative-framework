@@ -30,3 +30,8 @@ func (s *Session) StringToInteger(element string) int {
 	converted, _ := strconv.Atoi(element)
 	return converted
 }
+
+func (s *Session) StringToInt64(element string) int64 {
+	n, _ := strconv.ParseInt(element, 10, 64)
+	return n
+}
