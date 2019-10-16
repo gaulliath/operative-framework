@@ -2,7 +2,7 @@
 # Builder image
 ############################
 ARG GOLANG_BUILDER_VERSION=1.13rc1-alpine
-FROM golang:$GOLANG_BUILDER_VERSION AS builder
+FROM golang:${GOLANG_BUILDER_VERSION} AS builder
 
 # Here's a oneliner for your Dockerfile that fails if the Alpine image is vulnerable.
 # RUN apk add --no-network --no-cache --repositories-file /dev/null "apk-tools>2.10.1"
