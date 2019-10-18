@@ -5,6 +5,7 @@ import (
 	"github.com/graniet/operative-framework/modules/bing_vhost"
 	"github.com/graniet/operative-framework/modules/darksearch"
 	"github.com/graniet/operative-framework/modules/directory_search"
+	"github.com/graniet/operative-framework/modules/find"
 	"github.com/graniet/operative-framework/modules/get_ipaddress"
 	"github.com/graniet/operative-framework/modules/google"
 	"github.com/graniet/operative-framework/modules/header_retrieval"
@@ -22,6 +23,7 @@ import (
 	"github.com/graniet/operative-framework/modules/phone_generator"
 	"github.com/graniet/operative-framework/modules/phone_generator_fr"
 	"github.com/graniet/operative-framework/modules/pictures"
+	"github.com/graniet/operative-framework/modules/regex"
 	"github.com/graniet/operative-framework/modules/report"
 	"github.com/graniet/operative-framework/modules/sample"
 	"github.com/graniet/operative-framework/modules/searchsploit"
@@ -37,6 +39,7 @@ import (
 func LoadModules(s *session.Session) {
 	s.Modules = append(s.Modules, account_checker.PushAccountCheckerModule(s))
 	s.Modules = append(s.Modules, bing_vhost.PushBingVirtualHostModule(s))
+	s.Modules = append(s.Modules, find.PushFindModule(s))
 	s.Modules = append(s.Modules, darksearch.PushMacVendorModule(s))
 	s.Modules = append(s.Modules, directory_search.PushModuleDirectorySearch(s))
 	s.Modules = append(s.Modules, get_ipaddress.PushGetIpAddressModule(s))
@@ -61,6 +64,7 @@ func LoadModules(s *session.Session) {
 	s.Modules = append(s.Modules, phone_generator.PushPhoneGeneratorModule(s))
 	s.Modules = append(s.Modules, phone_generator_fr.PushPhoneGeneratorFrModule(s))
 	s.Modules = append(s.Modules, pictures.PushPictureExifModule(s))
+	s.Modules = append(s.Modules, regex.PushFindWithRegexModule(s))
 	s.Modules = append(s.Modules, report.PushReportPDFModule(s))
 	s.Modules = append(s.Modules, report.PushReportJSONModule(s))
 	s.Modules = append(s.Modules, sample.PushSampleModuleModule(s))

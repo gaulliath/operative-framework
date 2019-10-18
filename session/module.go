@@ -90,7 +90,7 @@ func (s *Session) SearchModule(name string) (Module, error) {
 
 func (module *SessionModule) GetParameter(name string) (Param, error) {
 	for _, param := range module.Parameters {
-		if param.Name == name {
+		if strings.ToUpper(param.Name) == strings.ToUpper(name) {
 			return param, nil
 		}
 	}
@@ -99,7 +99,7 @@ func (module *SessionModule) GetParameter(name string) (Param, error) {
 
 func (module *SessionModule) SetParameter(name string, value string) (bool, error) {
 	for k, param := range module.Parameters {
-		if param.Name == name {
+		if strings.ToUpper(param.Name) == strings.ToUpper(name) {
 			module.Parameters[k].Value = value
 			return true, nil
 		}

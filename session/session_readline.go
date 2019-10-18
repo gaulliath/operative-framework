@@ -230,6 +230,21 @@ func (s *Session) ParseCommand(line string) []string {
 			_, _ = module.SetParameter("CMD", value[1])
 			module.Start()
 			return nil
+		} else if strings.HasPrefix(line, "find ") || strings.HasPrefix(line, "regex ") {
+			arguments := strings.Split(strings.TrimSpace(line), " ")
+			if len(arguments) < 3 {
+				s.Stream.Error("Please use find / regex <search> <source> e.g: find operative framework results")
+				return nil
+			}
+
+			search := strings.SplitN(strings.TrimSpace(line), " ", 2)[1]
+			searchIn := arguments[len(arguments)-1]
+			search = strings.TrimSpace(strings.Replace(search, searchIn, "", -1))
+
+			_, _ = module.SetParameter("search", search)
+			_, _ = module.SetParameter("source", searchIn)
+			module.Start()
+			return nil
 		} else if strings.HasPrefix(line, "alias ") {
 			arguments := strings.Split(strings.TrimSpace(line), " ")
 			switch arguments[1] {
