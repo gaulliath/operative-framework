@@ -62,6 +62,18 @@ func (module *HelpModule) Start() {
 		{"api <run/stop>", "(Run/Stop) restful API"},
 	})
 	module.sess.Stream.Render(t)
+	fmt.Println("INTERVAL:")
+	t = module.sess.Stream.GenerateTable()
+	t.SetOutputMirror(os.Stdout)
+	t.AppendHeader(table.Row{"command", "description"})
+	t.AppendRows([]table.Row{
+		{"interval generate <command>", "Add new interval to session"},
+		{"interval list", "Listing of interval(s) available in current session"},
+		{"interval set <intervalId> <DELAY> <TIME>", "Set interval delay to command e.g: 10 for 10 minutes"},
+		{"interval up <intervalId>", "Run interval command in background every <DELAY>"},
+		{"interval down <intervalId>", "Stop interval"},
+	})
+	module.sess.Stream.Render(t)
 	fmt.Println("NOTES:")
 	t = module.sess.Stream.GenerateTable()
 	t.SetOutputMirror(os.Stdout)

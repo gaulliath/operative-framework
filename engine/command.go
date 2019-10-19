@@ -49,6 +49,7 @@ func viewEnvironment(s *session.Session) {
 		}
 	}
 	s.Stream.Render(t)
+	s.Stream.Standard("Environment loaded at '" + s.Config.Common.ConfigurationFile + "'")
 }
 
 // View Session Information

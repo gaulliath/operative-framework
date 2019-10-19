@@ -241,6 +241,7 @@ func main() {
 	defer l.Close()
 
 	// Run Operative Framework Menu
+	go sess.WaitInterval()
 	for {
 		line, err := l.Readline()
 		if err == readline.ErrInterrupt {

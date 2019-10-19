@@ -28,6 +28,7 @@ type Session struct {
 	ServiceFolder string            `json:"home_folder"`
 	Services      []Listener        `json:"services"`
 	Alias         map[string]string `json:"-" sql:"-"`
+	Interval      []*Interval       `json:"-"`
 }
 
 type SessionExport struct {

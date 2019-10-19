@@ -144,20 +144,37 @@ func (target *Target) GetSeparator() string {
 	return base64.StdEncoding.EncodeToString([]byte(";operativeframework;"))[0:5]
 }
 
+func (target *Target) ResultExist(result TargetResults) bool {
+	for module, results := range target.Results {
+		if module == result.ModuleName {
+			for _, r := range results {
+				if r.Header == result.Header {
+					if r.Value == result.Value {
+						return true
+					}
+				}
+			}
+		}
+	}
+	return false
+}
+
 func (target *Target) Save(module Module, result TargetResults) bool {
 	result.ResultId = ksuid.New().String()
 	result.TargetId = target.GetId()
 	result.SessionId = target.Sess.GetId()
 	result.ModuleName = module.Name()
-	target.Results[module.Name()] = append(target.Results[module.Name()], &result)
-	target.Sess.Connection.ORM.Create(&result).Table("target_results")
-	targets, err := target.Sess.FindLinked(module.Name(), result)
-	if err == nil {
-		for _, id := range targets {
-			target.Link(Linking{
-				TargetId:       id,
-				TargetResultId: result.ResultId,
-			})
+	if !target.ResultExist(result) {
+		target.Results[module.Name()] = append(target.Results[module.Name()], &result)
+		target.Sess.Connection.ORM.Create(&result).Table("target_results")
+		targets, err := target.Sess.FindLinked(module.Name(), result)
+		if err == nil {
+			for _, id := range targets {
+				target.Link(Linking{
+					TargetId:       id,
+					TargetResultId: result.ResultId,
+				})
+			}
 		}
 	}
 	module.SetExport(result)
