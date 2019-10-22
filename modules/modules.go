@@ -40,7 +40,7 @@ func LoadModules(s *session.Session) {
 	s.Modules = append(s.Modules, account_checker.PushAccountCheckerModule(s))
 	s.Modules = append(s.Modules, bing_vhost.PushBingVirtualHostModule(s))
 	s.Modules = append(s.Modules, find.PushFindModule(s))
-	s.Modules = append(s.Modules, darksearch.PushMacVendorModule(s))
+	s.Modules = append(s.Modules, darksearch.PushDarkSearchModule(s))
 	s.Modules = append(s.Modules, directory_search.PushModuleDirectorySearch(s))
 	s.Modules = append(s.Modules, get_ipaddress.PushGetIpAddressModule(s))
 	s.Modules = append(s.Modules, header_retrieval.PushModuleHeaderRetrieval(s))

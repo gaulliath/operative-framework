@@ -50,6 +50,10 @@ func GenerateEnv(path string) (string, error) {
 	Env.Add("TWITTER_CONSUMER_SECRET", "")
 	Env.Add("TWITTER_ACCESS_TOKEN", "")
 	Env.Add("TWITTER_ACCESS_TOKEN_SECRET", "")
+	Env.Add("PUSH_DRIVER", "ONLY_SCREEN")
+	Env.Add("GATE_URL", "")
+	Env.Add("GATE_METHOD", "POST")
+	Env.Add("GATE_TOR", "false")
 
 	// Generate a .env
 	var file *os.File

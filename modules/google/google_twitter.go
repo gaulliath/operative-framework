@@ -102,10 +102,23 @@ func (module *GoogleTwitterModule) Start() {
 			var username string
 			if strings.Contains(link, "://") {
 				username = strings.Split(link, "://")[1]
-			} else {
+			}
+			if strings.Contains(link, "twitter.com ›") {
+				checking := strings.Split(link, "›")
+				username = strings.TrimSpace(checking[1])
+			}
+
+			if username == "" {
 				username = link
 			}
-			username = strings.Split(username, "/")[1]
+
+			if strings.Contains(username, "/") {
+				splitting := strings.Split(username, "/")
+				if len(splitting) > 1 {
+					username = strings.Split(username, "/")[1]
+				}
+			}
+
 			separator := target.GetSeparator()
 			t.AppendRow([]interface{}{link, username})
 			result := session.TargetResults{

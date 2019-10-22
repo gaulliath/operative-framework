@@ -3,8 +3,10 @@ package session
 import (
 	"encoding/base64"
 	"errors"
+	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/graniet/go-pretty/table"
 	"github.com/segmentio/ksuid"
@@ -20,7 +22,7 @@ type Target struct {
 	Results      map[string][]*TargetResults `sql:"-" json:"results"`
 	TargetLinked []Linking                   `json:"target_linked" sql:"-"`
 	Notes        []Note                      `json:"notes" sql:"-"`
-	Tags         []string                    `json:"tags"  sql:"-"`
+	Tags         []Tags                      `json:"tags"  sql:"-"`
 }
 
 type Linking struct {
@@ -37,28 +39,28 @@ func (Linking) TableName() string {
 	return "target_links"
 }
 
-func (sub *Target) GetId() string {
-	return sub.TargetId
+func (target *Target) GetId() string {
+	return target.TargetId
 }
 
-func (sub *Target) GetName() string {
-	return sub.Name
+func (target *Target) GetName() string {
+	return target.Name
 }
 
-func (sub *Target) GetType() string {
-	return sub.Type
+func (target *Target) GetType() string {
+	return target.Type
 }
 
-func (sub *Target) GetResults() map[string][]*TargetResults {
-	return sub.Results
+func (target *Target) GetResults() map[string][]*TargetResults {
+	return target.Results
 }
 
-func (sub *Target) GetLinked() []Linking {
-	return sub.TargetLinked
+func (target *Target) GetLinked() []Linking {
+	return target.TargetLinked
 }
 
-func (sub *Target) PushLinked(t Linking) {
-	sub.TargetLinked = append(sub.TargetLinked, t)
+func (target *Target) PushLinked(t Linking) {
+	target.TargetLinked = append(target.TargetLinked, t)
 }
 
 func (target *Target) CheckType() bool {
@@ -160,10 +162,11 @@ func (target *Target) ResultExist(result TargetResults) bool {
 }
 
 func (target *Target) Save(module Module, result TargetResults) bool {
-	result.ResultId = ksuid.New().String()
+	result.ResultId = "R_" + ksuid.New().String()
 	result.TargetId = target.GetId()
 	result.SessionId = target.Sess.GetId()
 	result.ModuleName = module.Name()
+	result.CreatedAt = time.Now()
 	if !target.ResultExist(result) {
 		target.Results[module.Name()] = append(target.Results[module.Name()], &result)
 		target.Sess.Connection.ORM.Create(&result).Table("target_results")
@@ -216,31 +219,8 @@ func (target *Target) GetFormatedResults(module string) ([]map[string]string, er
 	return formated, nil
 }
 
-func (target *Target) AddNote(text string) {
-	target.Notes = append(target.Notes, Note{
-		Text: text,
-	})
-	return
-}
-
-func (target *Target) GetTags() []string {
-	return target.Tags
-}
-
-func (target *Target) HasTag(tag string) bool {
-	tag = strings.TrimSpace(tag)
-	for _, element := range target.Tags {
-		if strings.ToLower(element) == strings.ToLower(tag) {
-			return true
-		}
+func (target *Target) GetLastResults(module string) {
+	if results, ok := target.Results[module]; ok {
+		fmt.Println(results)
 	}
-	return false
-}
-
-func (target *Target) AddTag(tag string) (bool, error) {
-	if target.HasTag(tag) {
-		return false, errors.New("Tag already exist for target '" + target.GetName() + "'")
-	}
-	target.Tags = append(target.Tags, strings.ToLower(tag))
-	return true, nil
 }

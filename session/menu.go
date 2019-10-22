@@ -1,6 +1,7 @@
 package session
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/fatih/color"
 	"github.com/graniet/go-pretty/table"
@@ -33,59 +34,16 @@ func LoadAliasMenu(line string, module Module, s *Session) []string {
 // @todo solve error in parsing line
 func LoadNoteMenu(line string, module Module, s *Session) []string {
 	arguments := strings.Split(strings.TrimSpace(line), " ")
-	switch arguments[1] {
+	switch strings.ToLower(arguments[1]) {
 	case "add":
-		value := strings.SplitN(strings.TrimSpace(line), " ", 4)
-		findTarget, err := s.GetTarget(value[2])
-		if err != nil {
-			findResult, err := s.GetResult(value[2])
-			if err != nil {
-				s.Stream.Error("can't be find target/result with id '" + value[2] + "'")
-				return nil
-			}
-			findResult.AddNote(value[3])
-			s.Stream.Success("Note as been added to '" + value[2] + "'")
+		if len(arguments) < 4 {
+			s.Stream.Error("required argument are missing. E.g: note add <targetId/resultId> <text>")
 			return nil
 		}
-		findTarget.AddNote(value[3])
-		s.Stream.Success("Note as been added to '" + value[2] + "'")
+		return nil
+	case "delete":
 		return nil
 	case "view":
-		value := strings.SplitN(strings.TrimSpace(line), " ", 3)
-		findTarget, err := s.GetTarget(value[2])
-		t := s.Stream.GenerateTable()
-		t.SetOutputMirror(os.Stdin)
-		if err != nil {
-			findResult, err := s.GetResult(value[2])
-			fmt.Println(findResult)
-			if err != nil {
-				s.Stream.Error("can't be find target/result with id '" + value[2] + "'")
-				return nil
-			}
-			t.AppendHeader(table.Row{
-				"ID",
-				"NOTE",
-			})
-			for _, note := range findResult.Notes {
-				t.AppendRow(table.Row{
-					note.Id,
-					note.Text,
-				})
-			}
-			s.Stream.Render(t)
-			return nil
-		}
-		t.AppendHeader(table.Row{
-			"ID",
-			"NOTE",
-		})
-		for _, note := range findTarget.Notes {
-			t.AppendRow(table.Row{
-				note.Id,
-				note.Text,
-			})
-		}
-		s.Stream.Render(t)
 		return nil
 	}
 	return nil
@@ -162,7 +120,7 @@ func LoadTargetMenu(line string, module Module, s *Session) []string {
 				return nil
 			}
 
-			_, err = trg.AddTag(value[4])
+			_, err = s.AddTag(trg, value[4])
 			if err != nil {
 				s.Stream.Error(err.Error())
 				return nil
@@ -184,14 +142,16 @@ func LoadTargetMenu(line string, module Module, s *Session) []string {
 			t := s.Stream.GenerateTable()
 			t.SetOutputMirror(os.Stdout)
 			t.SetAllowedColumnLengths([]int{40, 30, 30, 30})
-			headerRow := table.Row{}
-			resRow := table.Row{}
-			headerRow = append(headerRow, "TAG")
+			t.AppendHeader(table.Row{
+				"TAG ID",
+				"TEXT",
+			})
 			for _, tag := range trg.GetTags() {
-				resRow = append(resRow, tag)
+				t.AppendRow(table.Row{
+					tag.TagId,
+					tag.Text,
+				})
 			}
-			t.AppendHeader(headerRow)
-			t.AppendRow(resRow)
 			s.Stream.Render(t)
 			return nil
 
@@ -367,7 +327,7 @@ func LoadShCommandMenu(line string, module Module, s *Session) []string {
 
 func LoadModuleMenu(line string, module Module, s *Session) []string {
 	arguments := strings.Split(strings.TrimSpace(line), " ")
-	switch arguments[1] {
+	switch strings.ToLower(arguments[1]) {
 	case "target":
 		if len(arguments) < 3 {
 			s.Stream.Error("Please use <module> <set> <argument> <value>")
@@ -454,6 +414,7 @@ func LoadModuleMenu(line string, module Module, s *Session) []string {
 					s.Stream.Success("Module '" + module.Name() + "' executed")
 				}(s, module)
 			} else {
+				startedAt := time.Now()
 				module.Start()
 				r := module.GetResults()
 				filter, err := module.GetParameter("FILTER")
@@ -465,6 +426,26 @@ func LoadModuleMenu(line string, module Module, s *Session) []string {
 					}
 					s.Stream.Success("Start filter '" + filter.Value + "'...")
 					flt.Start(module)
+				}
+
+				if s.Config.PushDriver == "ONLY_SERVER" ||
+					s.Config.PushDriver == "SCREEN_AND_SERVER" {
+
+					targetId, err := module.GetParameter("TARGET")
+					if err != nil {
+						s.Stream.Error("error with a push to webserver: " + err.Error())
+						return nil
+					}
+
+					target, err := s.GetTarget(targetId.Value)
+					if err != nil {
+						s.Stream.Error("error with a push to webserver: " + err.Error())
+						return nil
+					}
+
+					if _, ok := target.Results[module.Name()]; ok {
+						s.PushResultsToGate(target.Results[module.Name()], startedAt)
+					}
 				}
 				return r
 			}
@@ -573,5 +554,73 @@ func LoadIntervalCommandMenu(line string, module Module, s *Session) []string {
 		break
 	}
 
+	return nil
+}
+
+func LoadModuleByTypeMenu(line string, module Module, s *Session) []string {
+	arguments := strings.Split(strings.TrimSpace(line), " ")
+	if len(arguments) < 2 {
+		s.ListModules()
+		return nil
+	}
+
+	stype := arguments[1]
+	if !s.CheckTypeExist(stype) {
+		s.Stream.Error("Please select a valid type : " + strings.Join(s.ListType(), ","))
+		return nil
+	}
+	t := s.Stream.GenerateTable()
+	t.SetOutputMirror(os.Stdout)
+	t.AppendHeader(table.Row{
+		"NAME",
+		"DESCRIPTION",
+	})
+	for _, module := range s.Modules {
+		if strings.ToLower(module.GetType()) == strings.ToLower(stype) {
+			t.AppendRow(table.Row{
+				module.Name(),
+				module.Description(),
+			})
+		}
+	}
+	s.Stream.Render(t)
+	return nil
+}
+
+func LoadAnalyticsWebBased(line string, module Module, s *Session) []string {
+	arguments := strings.Split(strings.TrimSpace(line), " ")
+	switch strings.ToLower(arguments[1]) {
+	case "up":
+		a, al := s.GenerateAnalytics()
+		aJson, _ := json.Marshal(a)
+		alJson, _ := json.Marshal(al)
+
+		fmt.Println(string(aJson))
+		fmt.Println("====")
+		fmt.Println(string(alJson))
+		break
+	}
+
+	return nil
+}
+
+func LoadEventsMenu(line string, module Module, s *Session) []string {
+	t := s.Stream.GenerateTable()
+	t.SetOutputMirror(os.Stdout)
+	t.SetAllowedColumnLengths([]int{0, 30})
+	t.AppendHeader(table.Row{
+		"ID",
+		"TYPE",
+		"VALUE",
+	})
+
+	for _, event := range s.Events {
+		t.AppendRow(table.Row{
+			event.EventId,
+			event.Type,
+			event.Value,
+		})
+	}
+	s.Stream.Render(t)
 	return nil
 }

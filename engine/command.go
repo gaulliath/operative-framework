@@ -27,6 +27,9 @@ func CommandBase(line string, s *session.Session) bool {
 	} else if line == "clear" {
 		s.ClearScreen()
 		return true
+	} else if line == "modules" {
+		s.ListModules()
+		return true
 	}
 	return false
 }

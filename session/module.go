@@ -2,9 +2,12 @@ package session
 
 import (
 	"errors"
+	"github.com/joho/godotenv"
 	"os"
+	"os/user"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/graniet/go-pretty/table"
 )
@@ -70,13 +73,7 @@ type TargetResults struct {
 	Header     string `json:"key" gorm:"result_header"`
 	Value      string `json:"value" gorm:"result_value"`
 	Notes      []Note
-}
-
-func (result *TargetResults) AddNote(text string) {
-	result.Notes = append(result.Notes, Note{
-		Text: text,
-	})
-	return
+	CreatedAt  time.Time `json:"created_at"`
 }
 
 func (s *Session) SearchModule(name string) (Module, error) {
@@ -215,4 +212,27 @@ func (s *Session) ListModules() {
 		})
 	}
 	s.Stream.Render(t)
+}
+
+func (s *Session) ParseModuleConfig() {
+	u, _ := user.Current()
+	for _, module := range s.Modules {
+		fileName := u.HomeDir + "/.opf/external/modules/" + module.Name() + ".conf"
+		if _, err := os.Stat(fileName); os.IsNotExist(err) {
+			continue
+		}
+		configuration, err := godotenv.Read(fileName)
+		if err == nil {
+			s.Config.Modules[module.Name()] = configuration
+		}
+	}
+}
+
+func (s *Session) LoadModuleConfiguration(module string) (map[string]string, error) {
+
+	if _, ok := s.Config.Modules[module]; !ok {
+		return nil, errors.New("Configuration not found")
+	}
+
+	return s.Config.Modules[module], nil
 }

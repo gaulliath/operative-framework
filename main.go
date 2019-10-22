@@ -16,6 +16,7 @@ import (
 	"log"
 	"os"
 	"os/user"
+	"strconv"
 	"strings"
 )
 
@@ -133,6 +134,7 @@ func main() {
 	sess.Config.Common.ConfigurationJobs = configJob
 	sess.Config.Common.BaseDirectory = opfBaseDirectory
 	sess.Config.Common.ExportDirectory = opfExport
+	sess.ParseModuleConfig()
 	apiRest := api.PushARestFul(sess)
 
 	// Load supervised cron job.
@@ -232,6 +234,7 @@ func main() {
 		_, _ = c.Println("OPERATIVE FRAMEWORK - DIGITAL INVESTIGATION FRAMEWORK")
 		sess.Stream.WithoutDate("Loading a configuration file '" + configFile + "'")
 		sess.Stream.WithoutDate("Loading a cron job configuration '" + sess.Config.Common.ConfigurationJobs + "'")
+		sess.Stream.WithoutDate("Loading '" + strconv.Itoa(len(sess.Config.Modules)) + "' module(s) configuration(s)")
 	}
 
 	l, errP := readline.NewEx(sess.Prompt)

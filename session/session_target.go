@@ -43,7 +43,7 @@ func (s *Session) GetResult(id string) (*TargetResults, error) {
 func (s *Session) AddTarget(t string, name string) (string, error) {
 	subject := Target{
 		SessionId: s.GetId(),
-		TargetId:  ksuid.New().String(),
+		TargetId:  "T_" + ksuid.New().String(),
 		Name:      name,
 		Type:      t,
 		Results:   make(map[string][]*TargetResults),
@@ -186,4 +186,13 @@ func (s *Session) FindLinkedTargetByResult(t *Target) {
 			}
 		}
 	}
+}
+
+func (s *Session) CheckTypeExist(t string) bool {
+	for _, stype := range s.ListType() {
+		if stype == t {
+			return true
+		}
+	}
+	return false
 }

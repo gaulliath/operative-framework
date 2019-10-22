@@ -111,24 +111,14 @@ func (module *HelpModule) Start() {
 	t.SetOutputMirror(os.Stdout)
 	t.AppendHeader(table.Row{"command", "description"})
 	t.AppendRows([]table.Row{
-		{"<module> target <target_id>", "Set a target argument"},
-		{"<module> filter <filter>", "Set a filter argument"},
-		{"<module> set <argument> <value>", "Set specific argument"},
-		{"<module> list", "List module arguments"},
-		{"<module> run", "Run selected module"},
+		{"modules", "List available modules"},
+		{"modules <target_type>", "List available modules for target type"},
+		{"<module_name> target <target_id>", "Set a target argument"},
+		{"<module_name> filter <filter>", "Set a filter argument"},
+		{"<module_name> set <argument> <value>", "Set specific argument"},
+		{"<module_name> list", "List module arguments"},
+		{"<module_name> run", "Run selected module"},
 	})
-	module.sess.Stream.Render(t)
-
-	t = module.sess.Stream.GenerateTable()
-	t.SetOutputMirror(os.Stdout)
-	t.AppendHeader(table.Row{"Module Name", "Module Description", "Target"})
-	for _, mod := range module.sess.Modules {
-		if mod.GetType() == "" {
-			t.AppendRow([]interface{}{mod.Name(), mod.Description(), "<blank>"})
-		} else {
-			t.AppendRow([]interface{}{mod.Name(), mod.Description(), mod.GetType()})
-		}
-	}
 	module.sess.Stream.Render(t)
 
 }

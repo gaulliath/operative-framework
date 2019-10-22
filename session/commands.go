@@ -35,11 +35,20 @@ func (s *Session) ParseCommand(line string) []string {
 		} else if strings.HasPrefix(line, "interval ") {
 			LoadIntervalCommandMenu(line, module, s)
 
+		} else if strings.HasPrefix(line, "modules ") {
+			LoadModuleByTypeMenu(line, module, s)
+
+		} else if strings.HasPrefix(line, "analytics ") {
+			LoadAnalyticsWebBased(line, module, s)
 		} else {
 			if errModule == nil {
 				LoadModuleMenu(line, module, s)
 			}
 		}
+	}
+	if line == "events" {
+		LoadEventsMenu(line, module, s)
+		return nil
 	}
 	if moduleName == "help" {
 		module.Start()

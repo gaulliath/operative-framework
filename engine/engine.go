@@ -26,7 +26,7 @@ func New() *session.Session {
 
 	s := session.Session{
 		SessionName: "opf_" + timeText,
-		Version:     "1.00 (reborn)",
+		Version:     "1.10 (voyager)",
 		Information: session.Information{
 			ApiStatus:      false,
 			ModuleLaunched: 0,
@@ -62,7 +62,7 @@ func Load(id int) *session.Session {
 		panic(err.Error())
 	}
 	s := session.Session{
-		Version: "1.00 (reborn)",
+		Version: "1.10 (voyager)",
 		Stream: session.Stream{
 			Verbose: true,
 		},
