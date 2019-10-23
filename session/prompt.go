@@ -69,6 +69,16 @@ func (s *Session) ReadLineAutoCompleteInterval() func(string) []string {
 	}
 }
 
+func (s *Session) ReadLineAutoCompleteMonitor() func(string) []string {
+	return func(line string) []string {
+		monitors := make([]string, 0)
+		for _, monitor := range s.Monitors {
+			monitors = append(monitors, monitor.MonitorId)
+		}
+		return monitors
+	}
+}
+
 func (s *Session) ReadLineAutoCompleteModuleResults() func(string) []string {
 	return func(line string) []string {
 		value := strings.Split(line, " ")
@@ -135,6 +145,15 @@ func (s *Session) PushPrompt() {
 	var completer = readline.NewPrefixCompleter(
 		readline.PcItem("modules"),
 		readline.PcItem("events"),
+		readline.PcItem("monitor",
+			readline.PcItem("generate"),
+			readline.PcItem("list"),
+			readline.PcItem("results",
+				readline.PcItemDynamic(s.ReadLineAutoCompleteMonitor())),
+			readline.PcItem("up",
+				readline.PcItemDynamic(s.ReadLineAutoCompleteMonitor())),
+			readline.PcItem("down",
+				readline.PcItemDynamic(s.ReadLineAutoCompleteMonitor()))),
 		readline.PcItem("analytics",
 			readline.PcItem("up"),
 			readline.PcItem("down")),
