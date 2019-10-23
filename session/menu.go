@@ -465,7 +465,7 @@ func LoadIntervalCommandMenu(line string, module Module, s *Session) []string {
 			return nil
 		}
 		command := strings.SplitN(line, " ", 3)
-		newInterval := s.GenerateInterval(command[2])
+		newInterval := s.NewInterval(command[2])
 		s.Stream.Success("new interval as generated with id '" + newInterval.Id + "'")
 		break
 	case "list":
@@ -521,7 +521,7 @@ func LoadIntervalCommandMenu(line string, module Module, s *Session) []string {
 		break
 	case "up":
 		if len(arguments) < 3 {
-			s.Stream.Error("Please use : interval run <intervalId>")
+			s.Stream.Error("Please use : interval up <intervalId>")
 			return nil
 		}
 		options := strings.SplitN(line, " ", 3)
@@ -540,7 +540,7 @@ func LoadIntervalCommandMenu(line string, module Module, s *Session) []string {
 		break
 	case "down":
 		if len(arguments) < 3 {
-			s.Stream.Error("Please use : interval run <intervalId>")
+			s.Stream.Error("Please use : interval down <intervalId>")
 			return nil
 		}
 		options := strings.SplitN(line, " ", 3)
@@ -607,11 +607,12 @@ func LoadAnalyticsWebBased(line string, module Module, s *Session) []string {
 func LoadEventsMenu(line string, module Module, s *Session) []string {
 	t := s.Stream.GenerateTable()
 	t.SetOutputMirror(os.Stdout)
-	t.SetAllowedColumnLengths([]int{0, 30})
+	t.SetAllowedColumnLengths([]int{0, 30, 30, 30})
 	t.AppendHeader(table.Row{
 		"ID",
 		"TYPE",
 		"VALUE",
+		"DATE",
 	})
 
 	for _, event := range s.Events {
@@ -619,8 +620,99 @@ func LoadEventsMenu(line string, module Module, s *Session) []string {
 			event.EventId,
 			event.Type,
 			event.Value,
+			event.Date.Format("2006-01-02 15:04:05"),
 		})
 	}
 	s.Stream.Render(t)
+	return nil
+}
+
+func LoadMonitorCommandMenu(line string, module Module, s *Session) []string {
+	arguments := strings.Split(strings.TrimSpace(line), " ")
+	switch arguments[1] {
+	case "generate":
+		if len(arguments) < 3 {
+			s.Stream.Error("Please use monitor generate <search term>")
+			return nil
+		}
+		command := strings.SplitN(line, " ", 3)
+		newMonitor := s.NewMonitor(command[2])
+		s.Stream.Success("new monitor as generated with id '" + newMonitor.MonitorId + "'")
+		break
+	case "list":
+		t := s.Stream.GenerateTable()
+		t.SetOutputMirror(os.Stdout)
+		t.SetAllowedColumnLengths([]int{30, 30, 30})
+		t.AppendHeader(table.Row{
+			"ID",
+			"ACTIVATE",
+			"SEARCH",
+			"RESULTS",
+			"CREATED_AT",
+			"LAST RESULT",
+		})
+
+		for _, monitor := range s.Monitors {
+			ActivatedString := color.RedString("false")
+			if monitor.Status {
+				ActivatedString = color.GreenString("true")
+			}
+			t.AppendRow(table.Row{
+				monitor.MonitorId,
+				ActivatedString,
+				monitor.Search,
+				len(monitor.Result),
+				monitor.CreatedAt.Format("2006-01-02 15:04:05"),
+				monitor.UpdatedAt.Format("2006-01-02 15:04:05"),
+			})
+		}
+
+		s.Stream.Render(t)
+		break
+	case "up":
+		if len(arguments) < 3 {
+			s.Stream.Error("Please use : monitor up <monitorId>")
+			return nil
+		}
+		options := strings.SplitN(line, " ", 3)
+		monitor, err := s.GetMonitor(options[2])
+		if err != nil {
+			s.Stream.Error(err.Error())
+			return nil
+		}
+
+		monitor.Up()
+		s.Stream.Success("Monitor '" + monitor.MonitorId + "' as started at '" + time.Now().Format("2006-01-02 15:04:05") + "'")
+		break
+	case "down":
+		if len(arguments) < 3 {
+			s.Stream.Error("Please use : monitor down <monitorId>")
+			return nil
+		}
+		options := strings.SplitN(line, " ", 3)
+		monitor, err := s.GetMonitor(options[2])
+		if err != nil {
+			s.Stream.Error(err.Error())
+			return nil
+		}
+		monitor.Down()
+		s.Stream.Success("Monitor '" + monitor.MonitorId + "' as stopped at '" + time.Now().Format("2006-01-02 15:04:05") + "'")
+		break
+	case "results":
+		if len(arguments) < 3 {
+			s.Stream.Error("Please use : monitor results <monitorId>")
+			return nil
+		}
+		options := strings.SplitN(line, " ", 3)
+		monitor, err := s.GetMonitor(options[2])
+		if err != nil {
+			s.Stream.Error(err.Error())
+			return nil
+		}
+		monitor.ViewResults()
+		break
+
+	}
+
 	return nil
 }

@@ -57,6 +57,7 @@ func (module *HelpModule) Start() {
 		{"info session", "Print current session information"},
 		{"info api", "Print api rest endpoints information"},
 		{"env", "Print environment variable"},
+		{"events", "View registered session events"},
 		{"help", "Print help information"},
 		{"clear", "Clear current screen"},
 		{"api <run/stop>", "(Run/Stop) restful API"},
@@ -72,6 +73,17 @@ func (module *HelpModule) Start() {
 		{"interval set <intervalId> <DELAY> <TIME>", "Set interval delay to command e.g: 10 for 10 minutes"},
 		{"interval up <intervalId>", "Run interval command in background every <DELAY>"},
 		{"interval down <intervalId>", "Stop interval"},
+	})
+	module.sess.Stream.Render(t)
+	fmt.Println("MONITOR:")
+	t = module.sess.Stream.GenerateTable()
+	t.SetOutputMirror(os.Stdout)
+	t.AppendHeader(table.Row{"command", "description"})
+	t.AppendRows([]table.Row{
+		{"monitor generate <search term>", "Add new monitor to session"},
+		{"monitor list", "Listing of monitor(s) available in current session"},
+		{"monitor up <monitorId>", "Run monitor"},
+		{"monitor down <monitorId>", "Stop monitor"},
 	})
 	module.sess.Stream.Render(t)
 	fmt.Println("NOTES:")

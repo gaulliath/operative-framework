@@ -19,6 +19,7 @@ type Session struct {
 	Version       string            `json:"version" sql:"-"`
 	Targets       []*Target         `json:"subjects" sql:"-"`
 	Modules       []Module          `json:"modules" sql:"-"`
+	Monitors      Monitors          `json:"monitors"`
 	Filters       []ModuleFilter    `json:"filters" sql:"-"`
 	Prompt        *readline.Config  `json:"-" sql:"-"`
 	Stream        Stream            `json:"-" sql:"-"`

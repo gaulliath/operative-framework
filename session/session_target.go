@@ -1,6 +1,7 @@
 package session
 
 import (
+	"encoding/base64"
 	"errors"
 	"os"
 	"strings"
@@ -195,4 +196,8 @@ func (s *Session) CheckTypeExist(t string) bool {
 		}
 	}
 	return false
+}
+
+func (s *Session) GetSeparator() string {
+	return base64.StdEncoding.EncodeToString([]byte(";operativeframework;"))[0:5]
 }

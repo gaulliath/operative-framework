@@ -134,6 +134,10 @@ func (s *Session) ReadLineAutoCompleteResults() func(string) []string {
 func (s *Session) PushPrompt() {
 	var completer = readline.NewPrefixCompleter(
 		readline.PcItem("modules"),
+		readline.PcItem("events"),
+		readline.PcItem("analytics",
+			readline.PcItem("up"),
+			readline.PcItem("down")),
 		readline.PcItem("interval",
 			readline.PcItem("list"),
 			readline.PcItem("generate"),

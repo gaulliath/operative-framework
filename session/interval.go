@@ -19,7 +19,7 @@ type Interval struct {
 	Activated        bool          `json:"activated"`
 }
 
-func (s *Session) GenerateInterval(command string) *Interval {
+func (s *Session) NewInterval(command string) *Interval {
 	newInterval := &Interval{
 		Id:               "i_" + ksuid.New().String(),
 		S:                s,

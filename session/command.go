@@ -7,6 +7,7 @@ import (
 func (s *Session) ParseCommand(line string) []string {
 	moduleName := strings.Split(line, " ")[0]
 	module, errModule := s.SearchModule(moduleName)
+	s.NewEvent("EXEC_COMMAND", "execute command '"+line+"'")
 	if errModule != nil {
 		alias, err := s.GetAlias(moduleName)
 		module, err = s.SearchModule(alias)
@@ -40,6 +41,8 @@ func (s *Session) ParseCommand(line string) []string {
 
 		} else if strings.HasPrefix(line, "analytics ") {
 			LoadAnalyticsWebBased(line, module, s)
+		} else if strings.HasPrefix(line, "monitor ") {
+			LoadMonitorCommandMenu(line, module, s)
 		} else {
 			if errModule == nil {
 				LoadModuleMenu(line, module, s)

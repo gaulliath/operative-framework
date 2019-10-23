@@ -243,8 +243,13 @@ func main() {
 	}
 	defer l.Close()
 
-	// Run Operative Framework Menu
+	// Checking in background available interval
 	go sess.WaitInterval()
+
+	// Checking in background available monitor
+	go sess.WaitMonitor()
+
+	// Run Operative Framework Menu
 	for {
 		line, err := l.Readline()
 		if err == readline.ErrInterrupt {

@@ -3,6 +3,7 @@ package session
 import (
 	"github.com/pkg/errors"
 	"github.com/segmentio/ksuid"
+	"time"
 )
 
 type Events []*Event
@@ -11,6 +12,7 @@ type Event struct {
 	EventId string
 	Type    string
 	Value   string
+	Date    time.Time
 }
 
 func (s *Session) NewEvent(t string, value string) *Event {
@@ -18,6 +20,7 @@ func (s *Session) NewEvent(t string, value string) *Event {
 		EventId: "E_" + ksuid.New().String(),
 		Type:    t,
 		Value:   value,
+		Date:    time.Now(),
 	}
 	s.Events = append(s.Events, event)
 	return event
