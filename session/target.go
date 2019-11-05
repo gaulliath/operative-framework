@@ -26,13 +26,14 @@ type Target struct {
 }
 
 type Linking struct {
-	LinkingId      int    `json:"-" gorm:"primary_key:yes;column:id;AUTO_INCREMENT"`
-	SessionId      int    `json:"session_id" gorm:"column:session_id"`
-	TargetBase     string `json:"target_base" gorm:"column:target_base"`
-	TargetId       string `json:"target_id" gorm:"column:target_id"`
-	TargetName     string `json:"target_name" gorm:"column:target_name"`
-	TargetType     string `json:"target_type" gorm:"column:target_type"`
-	TargetResultId string `json:"target_result_id" gorm:"column:target_result_id"`
+	LinkingId       int    `json:"-" gorm:"primary_key:yes;column:id;AUTO_INCREMENT"`
+	SessionId       int    `json:"session_id" gorm:"column:session_id"`
+	TargetBase      string `json:"target_base" gorm:"column:target_base"`
+	TargetId        string `json:"target_id" gorm:"column:target_id"`
+	TargetName      string `json:"target_name" gorm:"column:target_name"`
+	TargetType      string `json:"target_type" gorm:"column:target_type"`
+	TargetResultId  string `json:"target_result_id" gorm:"column:target_result_id"`
+	TargetResultsTo string `json:"target_results_to"`
 }
 
 func (Linking) TableName() string {
@@ -82,16 +83,18 @@ func (target *Target) Link(target2 Linking) {
 		return
 	}
 
-	for _, trg := range target.TargetLinked {
+	/*for _, trg := range target.TargetLinked {
 		if trg.TargetId == t2.GetId() {
 			return
 		}
-	}
+	}*/
+
 	target2.TargetType = t2.GetType()
 	target2.TargetName = t2.GetName()
 	target2.TargetBase = target.GetId()
 	target2.SessionId = target.Sess.GetId()
 	target.PushLinked(target2)
+
 	t2.PushLinked(Linking{
 		SessionId:      target.Sess.GetId(),
 		TargetBase:     t2.GetId(),
@@ -167,6 +170,7 @@ func (target *Target) Save(module Module, result TargetResults) bool {
 	result.SessionId = target.Sess.GetId()
 	result.ModuleName = module.Name()
 	result.CreatedAt = time.Now()
+
 	if !target.ResultExist(result) {
 		target.Results[module.Name()] = append(target.Results[module.Name()], &result)
 		target.Sess.Connection.ORM.Create(&result).Table("target_results")

@@ -9,25 +9,28 @@ import (
 )
 
 type Session struct {
-	Id            int         `json:"-" gorm:"primary_key:yes;column:id;AUTO_INCREMENT"`
-	SessionName   string      `json:"session_name"`
-	Information   Information `json:"information"`
-	Connection    Connection  `json:"-" sql:"-"`
-	Client        OpfClient
-	Events        Events            `json:"events"`
-	Config        config.Config     `json:"config" sql:"-"`
-	Version       string            `json:"version" sql:"-"`
-	Targets       []*Target         `json:"subjects" sql:"-"`
-	Modules       []Module          `json:"modules" sql:"-"`
-	Monitors      Monitors          `json:"monitors"`
-	Filters       []ModuleFilter    `json:"filters" sql:"-"`
-	Prompt        *readline.Config  `json:"-" sql:"-"`
-	Stream        Stream            `json:"-" sql:"-"`
-	TypeLists     []string          `json:"type_lists" sql:"-"`
-	ServiceFolder string            `json:"home_folder"`
-	Services      []Listener        `json:"services"`
-	Alias         map[string]string `json:"-" sql:"-"`
-	Interval      []*Interval       `json:"-"`
+	Id                 int         `json:"-" gorm:"primary_key:yes;column:id;AUTO_INCREMENT"`
+	SessionName        string      `json:"session_name"`
+	Information        Information `json:"information"`
+	Connection         Connection  `json:"-" sql:"-"`
+	Client             OpfClient
+	Events             Events            `json:"events"`
+	Config             config.Config     `json:"config" sql:"-"`
+	Version            string            `json:"version" sql:"-"`
+	Targets            []*Target         `json:"subjects" sql:"-"`
+	Modules            []Module          `json:"modules" sql:"-"`
+	Monitors           Monitors          `json:"monitors"`
+	Filters            []ModuleFilter    `json:"filters" sql:"-"`
+	Prompt             *readline.Config  `json:"-" sql:"-"`
+	Stream             Stream            `json:"-" sql:"-"`
+	TypeLists          []string          `json:"type_lists" sql:"-"`
+	ServiceFolder      string            `json:"home_folder"`
+	Services           []Listener        `json:"services"`
+	Alias              map[string]string `json:"-" sql:"-"`
+	Interval           []*Interval       `json:"-"`
+	Analytics          *Analytics        `json:"analytics"`
+	LastAnalyticsModel string            `json:"analytics_model"`
+	LastAnalyticsLinks string            `json:"last_analytics_links"`
 }
 
 type SessionExport struct {

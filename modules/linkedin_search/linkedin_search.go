@@ -102,7 +102,7 @@ func (module *LinkedinSearchModule) Start() {
 		if strings.Contains(line, "-") && len(strings.Split(strings.TrimSpace(line), "-")) > 1 {
 			name := strings.Split(strings.TrimSpace(line), "-")[0]
 			work := strings.Split(strings.TrimSpace(line), "-")[1]
-			link := s.Find("cite").Text()
+			link, _ := s.Find("a[href]").First().Attr("href")
 			separator := target.GetSeparator()
 			t.AppendRow([]interface{}{name, work, link})
 			result := session.TargetResults{

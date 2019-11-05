@@ -1,8 +1,6 @@
 package session
 
 import (
-	"encoding/json"
-	"fmt"
 	"github.com/fatih/color"
 	"github.com/graniet/go-pretty/table"
 	"github.com/graniet/torindex/helper"
@@ -64,6 +62,7 @@ func LoadTargetMenu(line string, module Module, s *Session) []string {
 			return nil
 		}
 		s.Stream.Success("target '" + value[3] + "' as successfully added with id '" + id + "'")
+		s.NewEvent(TARGET_ADD, "new target created '"+value[3]+"'")
 		return []string{
 			id,
 		}
@@ -93,6 +92,7 @@ func LoadTargetMenu(line string, module Module, s *Session) []string {
 			TargetId: trg2.GetId(),
 		})
 		s.Stream.Success("target '" + trg.GetId() + "' as linked to '" + trg2.GetId() + "'")
+		s.NewEvent(TARGET_LINK, "new target linked '"+trg.TargetId+"' => '"+trg2.TargetId+"'")
 		return nil
 	case "links":
 		value := strings.SplitN(strings.TrimSpace(line), " ", 3)
@@ -127,6 +127,7 @@ func LoadTargetMenu(line string, module Module, s *Session) []string {
 			}
 
 			s.Stream.Success("Tag '" + value[4] + "' as been add to target '" + trg.GetName() + "'")
+			s.NewEvent(TAG_ADD, "new tag created '"+value[4]+"'")
 			return nil
 		case "list":
 			if len(arguments) < 4 {
@@ -296,6 +297,59 @@ func LoadTargetMenu(line string, module Module, s *Session) []string {
 	return nil
 }
 
+func LoadResultMenu(line string, module Module, s *Session) []string {
+	arguments := strings.Split(strings.TrimSpace(line), " ")
+	switch arguments[1] {
+	case "view":
+		value := strings.SplitN(strings.TrimSpace(line), " ", 3)
+		if len(arguments) < 3 {
+			s.Stream.Error("Please use 'result view <resultId>'")
+			return nil
+		}
+		result, err := s.GetResult(value[2])
+		if err != nil {
+			s.Stream.Error(err.Error())
+			return nil
+		}
+
+		t := s.Stream.GenerateTable()
+		t.SetOutputMirror(os.Stdout)
+		t.SetAllowedColumnLengths([]int{40, 30, 30, 30})
+		separator := s.GetSeparator()
+		header := strings.Split(result.Header, separator)
+		res := strings.Split(result.Value, separator)
+		headerRow := table.Row{}
+		resRow := table.Row{}
+		for _, h := range header {
+			headerRow = append(headerRow, h)
+		}
+		headerRow = append(headerRow, "RESULT ID")
+		for _, r := range res {
+			resRow = append(resRow, r)
+		}
+		resRow = append(resRow, result.ResultId)
+		t.AppendHeader(headerRow)
+		t.AppendRow(resRow)
+		s.Stream.Render(t)
+		break
+	case "delete":
+		value := strings.SplitN(strings.TrimSpace(line), " ", 3)
+		if len(arguments) < 3 {
+			s.Stream.Error("Please use 'result delete <resultId>'")
+			return nil
+		}
+		_, err := s.GetResult(value[2])
+		if err != nil {
+			s.Stream.Error(err.Error())
+			return nil
+		}
+
+		s.DeleteResult(value[2])
+		break
+	}
+	return nil
+}
+
 func LoadFindCommandMenu(line string, module Module, s *Session) []string {
 	arguments := strings.Split(strings.TrimSpace(line), " ")
 	if len(arguments) < 3 {
@@ -428,8 +482,8 @@ func LoadModuleMenu(line string, module Module, s *Session) []string {
 					flt.Start(module)
 				}
 
-				if s.Config.PushDriver == "ONLY_SERVER" ||
-					s.Config.PushDriver == "SCREEN_AND_SERVER" {
+				if s.Config.PushDriver == ONLY_SERVER ||
+					s.Config.PushDriver == SCREEN_AND_SERVER {
 
 					targetId, err := module.GetParameter("TARGET")
 					if err != nil {
@@ -591,14 +645,39 @@ func LoadAnalyticsWebBased(line string, module Module, s *Session) []string {
 	arguments := strings.Split(strings.TrimSpace(line), " ")
 	switch strings.ToLower(arguments[1]) {
 	case "up":
-		a, al := s.GenerateAnalytics()
-		aJson, _ := json.Marshal(a)
-		alJson, _ := json.Marshal(al)
-
-		fmt.Println(string(aJson))
-		fmt.Println("====")
-		fmt.Println(string(alJson))
+		s.AnalyticsUp()
 		break
+	case "info":
+		t := s.Stream.GenerateTable()
+		t.SetOutputMirror(os.Stdout)
+		t.AppendRow(table.Row{
+			"URL",
+			s.Analytics.Link,
+		})
+		t.AppendRow(table.Row{
+			"TYPE",
+			s.Analytics.SessionType,
+		})
+		t.AppendRow(table.Row{
+			"PUBLIC",
+			s.Analytics.isPublic,
+		})
+		s.Stream.Render(t)
+		break
+	case "set":
+		if len(arguments) < 4 {
+			s.Stream.Error("Please use <module> <set> <argument> <value>")
+			return nil
+		}
+		expl := strings.SplitN(line, " ", 4)
+		setter := expl[2]
+		value := expl[3]
+		switch setter {
+		case "type":
+			s.Analytics.SessionType = value
+			s.Stream.Success("Session type as set to '" + value + "'")
+			break
+		}
 	}
 
 	return nil

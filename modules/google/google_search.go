@@ -42,7 +42,7 @@ func (module *GoogleSearchModule) Description() string {
 }
 
 func (module *GoogleSearchModule) GetType() string {
-	return "text"
+	return "search"
 }
 
 func (module *GoogleSearchModule) GetInformation() session.ModuleInformation {
@@ -98,9 +98,10 @@ func (module *GoogleSearchModule) Start() {
 
 	resultFound := 0
 	doc.Find(".g").Each(func(i int, s *goquery.Selection) {
+
 		line := s.Find("h3").Text()
 		name := strings.TrimSpace(line)
-		link := s.Find("cite").Text()
+		link, _ := s.Find("a[href]").First().Attr("href")
 		separator := target.GetSeparator()
 		t.AppendRow([]interface{}{name, link})
 		result := session.TargetResults{

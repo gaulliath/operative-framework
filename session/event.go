@@ -15,6 +15,15 @@ type Event struct {
 	Date    time.Time
 }
 
+const (
+	EXEC_COMMAND    = "EXEC_COMMAND"
+	MONITOR_MATCH   = "MONITOR_MATCH"
+	TARGET_ADD      = "TARGET_ADD"
+	TARGET_LINK     = "TARGET_LINK"
+	TAG_ADD         = "TAG_ADD"
+	ERROR_ANALYTICS = "ERROR_ANALYTICS"
+)
+
 func (s *Session) NewEvent(t string, value string) *Event {
 	event := &Event{
 		EventId: "E_" + ksuid.New().String(),

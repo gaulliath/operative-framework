@@ -128,7 +128,7 @@ func (m *Monitor) Checking() {
 								if !m.HasResult(result.ResultId) {
 									m.Result = append(m.Result, result)
 									m.UpdatedAt = time.Now()
-									m.Session.NewEvent("MONITOR_MATCH", "Monitor '"+m.MonitorId+"' as found new matching with result '"+result.ResultId+"'")
+									m.Session.NewEvent(MONITOR_MATCH, "Monitor '"+m.MonitorId+"' as found new matching with result '"+result.ResultId+"'")
 								}
 							}
 						}

@@ -236,3 +236,15 @@ func (s *Session) LoadModuleConfiguration(module string) (map[string]string, err
 
 	return s.Config.Modules[module], nil
 }
+
+func (s *Session) WithFilter(module Module) bool {
+	useFilter := false
+	filter, err := module.GetParameter("FILTER")
+	if err == nil {
+		_, err := s.SearchFilter(filter.Value)
+		if err == nil {
+			useFilter = true
+		}
+	}
+	return useFilter
+}

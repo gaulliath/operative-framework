@@ -42,7 +42,7 @@ func (module *GoogleTwitterModule) Description() string {
 }
 
 func (module *GoogleTwitterModule) GetType() string {
-	return "person"
+	return "search"
 }
 
 func (module *GoogleTwitterModule) GetInformation() session.ModuleInformation {
@@ -97,7 +97,7 @@ func (module *GoogleTwitterModule) Start() {
 	t.AppendHeader(table.Row{"Link", "Username"})
 	resultFound := 0
 	doc.Find(".g").Each(func(i int, s *goquery.Selection) {
-		link := s.Find("cite").Text()
+		link, _ := s.Find("a[href]").First().Attr("href")
 		if strings.Contains(link, "twitter") {
 			var username string
 			if strings.Contains(link, "://") {

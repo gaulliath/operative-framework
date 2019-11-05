@@ -249,6 +249,9 @@ func main() {
 	// Checking in background available monitor
 	go sess.WaitMonitor()
 
+	// Checking interval in background
+	go sess.WaitAnalytics()
+
 	// Run Operative Framework Menu
 	for {
 		line, err := l.Readline()
