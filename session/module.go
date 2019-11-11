@@ -73,6 +73,7 @@ type TargetResults struct {
 	Header     string `json:"key" gorm:"result_header"`
 	Value      string `json:"value" gorm:"result_value"`
 	Notes      []Note
+	Auxiliary  []string  `json:"-" sql:"-"`
 	CreatedAt  time.Time `json:"created_at"`
 }
 
@@ -147,6 +148,7 @@ func (module *SessionModule) WithProgram(name string) bool {
 func (module *SessionModule) ListArguments() {
 	t := table.NewWriter()
 	t.SetOutputMirror(os.Stdout)
+	t.SetAllowedColumnLengths([]int{40, 40})
 	t.AppendHeader(table.Row{"argument", "description", "value", "required", "type"})
 	if len(module.Parameters) > 0 {
 		for _, argument := range module.Parameters {

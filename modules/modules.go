@@ -78,6 +78,7 @@ func LoadModules(s *session.Session) {
 	s.Modules = append(s.Modules, twitter.PushTwitterFollowingModule(s))
 	s.Modules = append(s.Modules, twitter.PushTwitterInfoModule(s))
 	s.Modules = append(s.Modules, twitter.PushTwitterGeoTweetModule(s))
+	s.Modules = append(s.Modules, twitter.PushTwitterSearchModule(s))
 	s.Modules = append(s.Modules, tools_suggester.PushModuleToolsSuggester(s))
 	s.Modules = append(s.Modules, viewdns_search.PushWSearchModule(s))
 	s.Modules = append(s.Modules, whatsapp.PushWhatsappExtractorModule(s))

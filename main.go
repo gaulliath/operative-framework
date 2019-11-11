@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/akamensky/argparse"
 	"github.com/chzyer/readline"
@@ -9,6 +10,7 @@ import (
 	"github.com/graniet/operative-framework/compiler"
 	"github.com/graniet/operative-framework/cron"
 	"github.com/graniet/operative-framework/engine"
+	"github.com/graniet/operative-framework/export"
 	"github.com/graniet/operative-framework/session"
 	"github.com/graniet/operative-framework/supervisor"
 	"github.com/joho/godotenv"
@@ -116,6 +118,11 @@ func main() {
 		Help:     "List available modules",
 	})
 
+	jsonExport := parser.Flag("", "json", &argparse.Options{
+		Required: false,
+		Help:     "Print result with a JSON format",
+	})
+
 	err = parser.Parse(os.Args)
 	if err != nil {
 		fmt.Print(parser.Usage(err))
@@ -155,6 +162,16 @@ func main() {
 	if *help {
 		fmt.Print(parser.Usage(""))
 		return
+	}
+
+	if *verbose {
+		sess.Stream.Verbose = false
+	} else {
+		c := color.New(color.FgYellow)
+		_, _ = c.Println("OPERATIVE FRAMEWORK - DIGITAL INVESTIGATION FRAMEWORK")
+		sess.Stream.WithoutDate("Loading a configuration file '" + configFile + "'")
+		sess.Stream.WithoutDate("Loading a cron job configuration '" + sess.Config.Common.ConfigurationJobs + "'")
+		sess.Stream.WithoutDate("Loading '" + strconv.Itoa(len(sess.Config.Modules)) + "' module(s) configuration(s)")
 	}
 
 	if *execute != "" {
@@ -202,6 +219,15 @@ func main() {
 			}
 		}
 		module.Start()
+
+		if *jsonExport {
+			e := export.ExportNow(sess, module)
+			j, err := json.Marshal(e)
+			if err == nil {
+				print(string(j))
+			}
+			return
+		}
 		return
 	}
 
@@ -225,16 +251,6 @@ func main() {
 
 	if *quiet {
 		return
-	}
-
-	if *verbose {
-		sess.Stream.Verbose = false
-	} else {
-		c := color.New(color.FgYellow)
-		_, _ = c.Println("OPERATIVE FRAMEWORK - DIGITAL INVESTIGATION FRAMEWORK")
-		sess.Stream.WithoutDate("Loading a configuration file '" + configFile + "'")
-		sess.Stream.WithoutDate("Loading a cron job configuration '" + sess.Config.Common.ConfigurationJobs + "'")
-		sess.Stream.WithoutDate("Loading '" + strconv.Itoa(len(sess.Config.Modules)) + "' module(s) configuration(s)")
 	}
 
 	l, errP := readline.NewEx(sess.Prompt)
