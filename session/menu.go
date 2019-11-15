@@ -3,7 +3,6 @@ package session
 import (
 	"github.com/fatih/color"
 	"github.com/graniet/go-pretty/table"
-	"github.com/graniet/torindex/helper"
 	"os"
 	"os/exec"
 	"strings"
@@ -565,7 +564,7 @@ func LoadIntervalCommandMenu(line string, module Module, s *Session) []string {
 		}
 		switch strings.ToLower(commands[3]) {
 		case "delay":
-			interval.SetDelay(helper.StringToInt(commands[4]))
+			interval.SetDelay(s.StringToInteger(commands[4]))
 			break
 		case "command":
 			interval.SetCommand(commands[4])
