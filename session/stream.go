@@ -11,7 +11,7 @@ import (
 type Stream struct {
 	Sess    *Session          `json:"-"`
 	Verbose bool              `json:"verbose"`
-	JSON    bool              `json:"json"`
+	CSV  	bool 			  `json:"csv"`
 	History map[string]string `json:"history"`
 }
 
@@ -62,8 +62,13 @@ func (stream *Stream) GenerateTable() table.Writer {
 }
 
 func (stream *Stream) Render(t table.Writer) {
-	if stream.Verbose {
-		t.Render()
+	if !stream.Verbose {
+		return
 	}
+	if stream.CSV {
+		t.RenderCSV()
+		return
+	}
+	t.Render()
 	return
 }

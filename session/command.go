@@ -14,6 +14,9 @@ func (s *Session) ParseCommand(line string) []string {
 		if err != nil {
 			if moduleName == "help" {
 				module, err = s.SearchModule("session_help")
+			} else if moduleName == "webservices" {
+				s.ListWebServices()
+				return nil
 			}
 		}
 	}

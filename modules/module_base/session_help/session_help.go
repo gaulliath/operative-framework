@@ -60,6 +60,7 @@ func (module *HelpModule) Start() {
 		{"events", "View registered session events"},
 		{"help", "Print help information"},
 		{"clear", "Clear current screen"},
+		{"webservices", "Print loaded webservices"},
 		{"api <run/stop>", "(Run/Stop) restful API"},
 	})
 	module.sess.Stream.Render(t)

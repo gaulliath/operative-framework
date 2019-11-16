@@ -16,7 +16,7 @@ func PushSessionStreamModule(s *session.Session) *SessionStreamModule {
 		Stream: &s.Stream,
 	}
 	mod.CreateNewParam("VERBOSE", "Change Verbosity (true/false)", mod.sess.BooleanToString(mod.Stream.Verbose), false, session.BOOL)
-	mod.CreateNewParam("JSON", "Print a response with JSON format", mod.sess.BooleanToString(mod.Stream.JSON), false, session.BOOL)
+	mod.CreateNewParam("CSV", "Print a response with CSV format", mod.sess.BooleanToString(mod.Stream.CSV), false, session.BOOL)
 	return &mod
 }
 
@@ -53,7 +53,15 @@ func (module *SessionStreamModule) Start() {
 		module.Stream.Error(err.Error())
 		return
 	}
+
+	paramCSV, err := module.GetParameter("CSV")
+	if err != nil {
+		module.Stream.Error(err.Error())
+		return
+	}
+
 	module.Stream.Verbose = module.sess.StringToBoolean(paramVerbosity.Value)
+	module.Stream.CSV  = module.sess.StringToBoolean(paramCSV.Value)
 	return
 
 }

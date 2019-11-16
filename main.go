@@ -123,6 +123,11 @@ func main() {
 		Help:     "Print result with a JSON format",
 	})
 
+	sendTo := parser.String("", "to", &argparse.Options{
+		Required: false,
+		Help:     "Send response to webservice (require --json)",
+	})
+
 	err = parser.Parse(os.Args)
 	if err != nil {
 		fmt.Print(parser.Usage(err))
@@ -142,6 +147,7 @@ func main() {
 	sess.Config.Common.BaseDirectory = opfBaseDirectory
 	sess.Config.Common.ExportDirectory = opfExport
 	sess.ParseModuleConfig()
+	sess.ParseWebServiceConfig()
 	apiRest := api.PushARestFul(sess)
 
 	// Load supervised cron job.
@@ -224,6 +230,21 @@ func main() {
 			e := export.ExportNow(sess, module)
 			j, err := json.Marshal(e)
 			if err == nil {
+				if *sendTo != "" {
+					webservice, err := sess.GetWebService(*sendTo)
+					if err != nil {
+						sess.Stream.Error(err.Error())
+						return
+					}
+					opfClient := sess.Client
+					opfClient.Header.Add("Content-Type", "application/json")
+					opfClient.Data = j
+					_, err = opfClient.Perform("POST", webservice.URL)
+					if err != nil {
+						sess.Stream.Error(err.Error())
+						return
+					}
+				}
 				print(string(j))
 			}
 			return

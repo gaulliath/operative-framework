@@ -22,7 +22,7 @@ func CommandBase(line string, s *session.Session) bool {
 		ViewApiInformation(s)
 		return true
 	} else if line == "env" {
-		viewEnvironment(s)
+		ViewEnvironment(s)
 		return true
 	} else if line == "clear" {
 		s.ClearScreen()
@@ -35,7 +35,7 @@ func CommandBase(line string, s *session.Session) bool {
 }
 
 // View Environment File Argument
-func viewEnvironment(s *session.Session) {
+func ViewEnvironment(s *session.Session) {
 	t := s.Stream.GenerateTable()
 	t.SetOutputMirror(os.Stdout)
 	t.AppendHeader(table.Row{
