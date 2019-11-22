@@ -97,6 +97,10 @@ func main() {
 		Required: false,
 		Help:     "Load specific session id",
 	})
+	onlyModuleOutput := parser.Flag("", "only-module-output", &argparse.Options{
+		Required: false,
+		Help:     "Do not print a banner information",
+	})
 
 	help := parser.Flag("h", "help", &argparse.Options{
 		Required: false,
@@ -121,6 +125,11 @@ func main() {
 	jsonExport := parser.Flag("", "json", &argparse.Options{
 		Required: false,
 		Help:     "Print result with a JSON format",
+	})
+
+	csvExport := parser.Flag("", "csv", &argparse.Options{
+		Required: false,
+		Help:     "Print result with a CSV format",
 	})
 
 	sendTo := parser.String("", "to", &argparse.Options{
@@ -173,11 +182,13 @@ func main() {
 	if *verbose {
 		sess.Stream.Verbose = false
 	} else {
-		c := color.New(color.FgYellow)
-		_, _ = c.Println("OPERATIVE FRAMEWORK - DIGITAL INVESTIGATION FRAMEWORK")
-		sess.Stream.WithoutDate("Loading a configuration file '" + configFile + "'")
-		sess.Stream.WithoutDate("Loading a cron job configuration '" + sess.Config.Common.ConfigurationJobs + "'")
-		sess.Stream.WithoutDate("Loading '" + strconv.Itoa(len(sess.Config.Modules)) + "' module(s) configuration(s)")
+		if !*onlyModuleOutput {
+			c := color.New(color.FgYellow)
+			_, _ = c.Println("OPERATIVE FRAMEWORK - DIGITAL INVESTIGATION FRAMEWORK")
+			sess.Stream.WithoutDate("Loading a configuration file '" + configFile + "'")
+			sess.Stream.WithoutDate("Loading a cron job configuration '" + sess.Config.Common.ConfigurationJobs + "'")
+			sess.Stream.WithoutDate("Loading '" + strconv.Itoa(len(sess.Config.Modules)) + "' module(s) configuration(s)")
+		}
 	}
 
 	if *execute != "" {
@@ -223,6 +234,9 @@ func main() {
 					return
 				}
 			}
+		}
+		if *csvExport {
+			sess.Stream.CSV = true
 		}
 		module.Start()
 
