@@ -1,6 +1,7 @@
 package session
 
 import (
+	"encoding/base64"
 	"errors"
 	"os"
 	"strings"
@@ -43,7 +44,7 @@ func (s *Session) GetResult(id string) (*TargetResults, error) {
 func (s *Session) AddTarget(t string, name string) (string, error) {
 	subject := Target{
 		SessionId: s.GetId(),
-		TargetId:  ksuid.New().String(),
+		TargetId:  "T_" + ksuid.New().String(),
 		Name:      name,
 		Type:      t,
 		Results:   make(map[string][]*TargetResults),
@@ -131,11 +132,15 @@ func (s *Session) UpdateTarget(id string, value string) {
 
 func (s *Session) FindLinked(m string, res TargetResults) ([]string, error) {
 	var targets []string
-	for _, t := range s.Targets {
+	for kt, t := range s.Targets {
 		targetId := t.GetId()
-		for _, targetRes := range t.Results[m] {
+		if targetId == res.TargetId {
+			continue
+		}
+		for kr, targetRes := range t.Results[m] {
 			if res.Header == targetRes.Header && res.Value == targetRes.Value {
 				if len(targetRes.Value) > 5 {
+					s.Targets[kt].Results[m][kr].ResultId = res.ResultId
 					targets = append(targets, targetId)
 				}
 			} else {
@@ -144,10 +149,12 @@ func (s *Session) FindLinked(m string, res TargetResults) ([]string, error) {
 
 				if res.Header == targetRes.Header && strings.Contains(valueParsed, targetResParsed) {
 					if len(targetResParsed) > 5 && len(valueParsed) > 5 {
+						s.Targets[kt].Results[m][kr].ResultId = res.ResultId
 						targets = append(targets, targetId)
 					}
 				} else if res.Header == targetRes.Header && strings.Contains(targetResParsed, valueParsed) {
 					if len(targetResParsed) > 5 && len(valueParsed) > 5 {
+						s.Targets[kt].Results[m][kr].ResultId = res.ResultId
 						targets = append(targets, targetId)
 					}
 				}
@@ -186,4 +193,37 @@ func (s *Session) FindLinkedTargetByResult(t *Target) {
 			}
 		}
 	}
+}
+
+func (s *Session) CheckTypeExist(t string) bool {
+	for _, stype := range s.ListType() {
+		if stype == t {
+			return true
+		}
+	}
+	return false
+}
+
+func (s *Session) GetSeparator() string {
+	return base64.StdEncoding.EncodeToString([]byte(";operativeframework;"))[0:5]
+}
+
+func (s *Session) DeleteResult(id string) {
+	for _, target := range s.Targets {
+		if len(target.Results) > 0 {
+			for module, results := range target.Results {
+				if len(results) > 0 {
+					var newResults []*TargetResults
+					for _, result := range results {
+						if result.ResultId != id {
+							newResults = append(newResults, result)
+						}
+					}
+					target.Results[module] = newResults
+				}
+			}
+		}
+	}
+
+	s.Stream.Error("Result '" + id + "' as successfully deleted")
 }

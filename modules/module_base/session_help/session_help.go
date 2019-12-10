@@ -57,9 +57,34 @@ func (module *HelpModule) Start() {
 		{"info session", "Print current session information"},
 		{"info api", "Print api rest endpoints information"},
 		{"env", "Print environment variable"},
+		{"events", "View registered session events"},
 		{"help", "Print help information"},
 		{"clear", "Clear current screen"},
+		{"webservices", "Print loaded webservices"},
 		{"api <run/stop>", "(Run/Stop) restful API"},
+	})
+	module.sess.Stream.Render(t)
+	fmt.Println("INTERVAL:")
+	t = module.sess.Stream.GenerateTable()
+	t.SetOutputMirror(os.Stdout)
+	t.AppendHeader(table.Row{"command", "description"})
+	t.AppendRows([]table.Row{
+		{"interval generate <command>", "Add new interval to session"},
+		{"interval list", "Listing of interval(s) available in current session"},
+		{"interval set <intervalId> <DELAY> <TIME>", "Set interval delay to command e.g: 10 for 10 minutes"},
+		{"interval up <intervalId>", "Run interval command in background every <DELAY>"},
+		{"interval down <intervalId>", "Stop interval"},
+	})
+	module.sess.Stream.Render(t)
+	fmt.Println("MONITOR:")
+	t = module.sess.Stream.GenerateTable()
+	t.SetOutputMirror(os.Stdout)
+	t.AppendHeader(table.Row{"command", "description"})
+	t.AppendRows([]table.Row{
+		{"monitor generate <search term>", "Add new monitor to session"},
+		{"monitor list", "Listing of monitor(s) available in current session"},
+		{"monitor up <monitorId>", "Run monitor"},
+		{"monitor down <monitorId>", "Stop monitor"},
 	})
 	module.sess.Stream.Render(t)
 	fmt.Println("NOTES:")
@@ -99,24 +124,14 @@ func (module *HelpModule) Start() {
 	t.SetOutputMirror(os.Stdout)
 	t.AppendHeader(table.Row{"command", "description"})
 	t.AppendRows([]table.Row{
-		{"<module> target <target_id>", "Set a target argument"},
-		{"<module> filter <filter>", "Set a filter argument"},
-		{"<module> set <argument> <value>", "Set specific argument"},
-		{"<module> list", "List module arguments"},
-		{"<module> run", "Run selected module"},
+		{"modules", "List available modules"},
+		{"modules <target_type>", "List available modules for target type"},
+		{"<module_name> target <target_id>", "Set a target argument"},
+		{"<module_name> filter <filter>", "Set a filter argument"},
+		{"<module_name> set <argument> <value>", "Set specific argument"},
+		{"<module_name> list", "List module arguments"},
+		{"<module_name> run", "Run selected module"},
 	})
-	module.sess.Stream.Render(t)
-
-	t = module.sess.Stream.GenerateTable()
-	t.SetOutputMirror(os.Stdout)
-	t.AppendHeader(table.Row{"Module Name", "Module Description", "Target"})
-	for _, mod := range module.sess.Modules {
-		if mod.GetType() == "" {
-			t.AppendRow([]interface{}{mod.Name(), mod.Description(), "<blank>"})
-		} else {
-			t.AppendRow([]interface{}{mod.Name(), mod.Description(), mod.GetType()})
-		}
-	}
 	module.sess.Stream.Render(t)
 
 }

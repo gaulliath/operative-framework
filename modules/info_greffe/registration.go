@@ -75,6 +75,7 @@ func PushInfoGreffeRegistrationModule(s *session.Session) *InfoGreffeRegistratio
 	}
 
 	mod.CreateNewParam("TARGET", "keyword", "", true, session.STRING)
+	mod.CreateNewParam("YEAR", "year of registration e.g: 2016", "2016", true, session.STRING)
 	return &mod
 }
 
@@ -112,13 +113,19 @@ func (module *InfoGreffeRegistration) Start() {
 		return
 	}
 
+	year, err := module.GetParameter("YEAR")
+	if err != nil {
+		module.Stream.Error(err.Error())
+		return
+	}
+
 	keyword, err := module.sess.GetTarget(keywordTarget.Value)
 	if err != nil {
 		module.Stream.Error(err.Error())
 		return
 	}
 
-	url := "https://opendata.datainfogreffe.fr/api/records/1.0/search/?dataset=entreprises-immatriculees-2015&q=" + url2.QueryEscape(keyword.Name) + "&facet=libelle&facet=forme_juridique&facet=code_postal&facet=ville&facet=region&facet=greffe&facet=date"
+	url := "https://opendata.datainfogreffe.fr/api/records/1.0/search/?dataset=entreprises-immatriculees-" + year.Value + "&q=" + url2.QueryEscape(keyword.Name) + "&facet=libelle&facet=forme_juridique&facet=code_postal&facet=ville&facet=region&facet=greffe&facet=date"
 	client := http.Client{}
 	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36")

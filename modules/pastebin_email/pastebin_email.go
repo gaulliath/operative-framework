@@ -97,7 +97,7 @@ func (module *PasteBinEmail) Start() {
 
 	resultFound := 0
 	doc.Find(".g").Each(func(i int, s *goquery.Selection) {
-		link := strings.TrimSpace(s.Find("cite").Text())
+		link, _ := s.Find("a[href]").First().Attr("href")
 		t.AppendRow(table.Row{
 			link,
 		})

@@ -26,7 +26,7 @@ func New() *session.Session {
 
 	s := session.Session{
 		SessionName: "opf_" + timeText,
-		Version:     "1.00 (reborn)",
+		Version:     "1.10 (voyager)",
 		Information: session.Information{
 			ApiStatus:      false,
 			ModuleLaunched: 0,
@@ -39,9 +39,10 @@ func New() *session.Session {
 			ORM:        db,
 			Migrations: make(map[string]interface{}),
 		},
-		Client: session.GetOpfClient(),
-		Config: conf,
-		Alias:  make(map[string]string),
+		Client:    session.GetOpfClient(),
+		Config:    conf,
+		Alias:     make(map[string]string),
+		Analytics: &session.Analytics{},
 	}
 	s.Stream.Sess = &s
 	s.Connection.Migrate()
@@ -62,7 +63,7 @@ func Load(id int) *session.Session {
 		panic(err.Error())
 	}
 	s := session.Session{
-		Version: "1.00 (reborn)",
+		Version: "1.10 (voyager)",
 		Stream: session.Stream{
 			Verbose: true,
 		},
@@ -75,8 +76,9 @@ func Load(id int) *session.Session {
 			ORM:        db,
 			Migrations: make(map[string]interface{}),
 		},
-		Client: session.GetOpfClient(),
-		Config: conf,
+		Client:    session.GetOpfClient(),
+		Config:    conf,
+		Analytics: &session.Analytics{},
 	}
 	s.Connection.ORM.Where(&session.Session{
 		Id: id,

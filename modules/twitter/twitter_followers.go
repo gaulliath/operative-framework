@@ -121,20 +121,27 @@ func (module *TwitterFollower) Start() {
 	}
 
 	t := module.Sess.Stream.GenerateTable()
-	t.SetOutputMirror(os.Stdout)
-	t.AppendHeader(table.Row{
-		"Twitter ID",
-	})
+	if !module.Sess.WithFilter(module) {
+		t.SetOutputMirror(os.Stdout)
+		t.AppendHeader(table.Row{
+			"Twitter ID",
+		})
+	}
 	for _, ids := range followerIds {
 		module.Results = append(module.Results, strconv.Itoa(int(ids)))
-		t.AppendRow(table.Row{
-			ids,
-		})
-		result := session.TargetResults{
-			Header: "Twitter ID",
-			Value:  strconv.Itoa(int(ids)),
+		if !module.Sess.WithFilter(module) {
+			t.AppendRow(table.Row{
+				ids,
+			})
+			result := session.TargetResults{
+				Header: "Twitter ID",
+				Value:  strconv.Itoa(int(ids)),
+			}
+			target.Save(module, result)
 		}
-		target.Save(module, result)
 	}
-	module.Sess.Stream.Render(t)
+
+	if !module.Sess.WithFilter(module) {
+		module.Sess.Stream.Render(t)
+	}
 }

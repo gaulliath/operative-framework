@@ -1,11 +1,20 @@
 package config
 
 type Config struct {
-	Api       ApiConfig
-	Database  DataBase
-	Common    Common
-	Instagram Network
-	Twitter   Network
+	Api        ApiConfig
+	Database   DataBase
+	Common     Common
+	Instagram  Network
+	Twitter    Network
+	PushDriver string
+	Gate       ToGate
+	Modules    map[string]map[string]string
+}
+
+type ToGate struct {
+	GateUrl    string
+	GateMethod string
+	GateTor    string
 }
 
 type Network struct {

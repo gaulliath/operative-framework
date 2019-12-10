@@ -96,6 +96,7 @@ func (module *BingVirtualHostModule) Start() {
 
 	t := module.Stream.GenerateTable()
 	t.SetOutputMirror(os.Stdout)
+	t.SetAllowedColumnLengths([]int{0, 30})
 	t.AppendHeader(table.Row{"Link"})
 	doc.Find("cite").Each(func(i int, s *goquery.Selection) {
 		line := strings.TrimSpace(s.Text())

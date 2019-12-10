@@ -40,6 +40,18 @@ func (filter *FollowerScreenName) Start(mod session.Module) {
 	api := anaconda.NewTwitterApiWithCredentials(filter.Sess.Config.Twitter.Password, filter.Sess.Config.Twitter.Api.SKey, filter.Sess.Config.Twitter.Login, filter.Sess.Config.Twitter.Api.Key)
 	v := url.Values{}
 
+	trg, err := mod.GetParameter("TARGET")
+	if err != nil {
+		filter.Sess.Stream.Error(err.Error())
+		return
+	}
+
+	target, err := filter.Sess.GetTarget(trg.Value)
+	if err != nil {
+		filter.Sess.Stream.Error(err.Error())
+		return
+	}
+
 	t := filter.Sess.Stream.GenerateTable()
 	t.SetOutputMirror(os.Stdout)
 	t.AppendHeader(table.Row{
@@ -55,8 +67,15 @@ func (filter *FollowerScreenName) Start(mod session.Module) {
 					id,
 					user.ScreenName,
 				})
+
+				result := session.TargetResults{
+					Header: "Twitter" + target.GetSeparator() + "ID",
+					Value:  user.ScreenName + target.GetSeparator() + strconv.Itoa(int(user.Id)),
+				}
+				target.Save(mod, result)
 			}
 		}
 	}
+
 	filter.Sess.Stream.Render(t)
 }

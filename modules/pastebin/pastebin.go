@@ -99,9 +99,7 @@ func (module *PasteBin) Start() {
 	sel := doc.Find("div.g")
 	for i := range sel.Nodes {
 		item := sel.Eq(i)
-		linkTag := item.Find("a")
-		link, _ := linkTag.Attr("href")
-		link = strings.Trim(link, " ")
+		link, _ := item.Find("a[href]").First().Attr("href")
 		if link != "" && link != "#" {
 			t.AppendRow(table.Row{
 				link,

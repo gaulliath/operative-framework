@@ -1,7 +1,7 @@
 package session
 
 import (
-	"io"
+	"bytes"
 	"net/http"
 	"net/url"
 	"os"
@@ -12,7 +12,7 @@ import (
 type OpfClient struct {
 	Client  http.Client
 	Header  Headers
-	Data    interface{}
+	Data    []byte
 	WithTor bool
 }
 
@@ -29,7 +29,7 @@ func (header Headers) Add(key string, value string) {
 	header[key] = value
 }
 
-func (c *OpfClient) Perform(method string, uri string, body io.Reader) (*http.Response, error) {
+func (c *OpfClient) Perform(method string, uri string) (*http.Response, error) {
 
 	if method == "" {
 		method = "GET"
@@ -52,7 +52,13 @@ func (c *OpfClient) Perform(method string, uri string, body io.Reader) (*http.Re
 		return nil, err
 	}
 
-	req, _ := http.NewRequest(strings.ToUpper(method), uri, body)
+	req, _ := http.NewRequest(strings.ToUpper(method), uri, nil)
+
+	switch method {
+	case "POST":
+		req, _ = http.NewRequest(strings.ToUpper(method), uri, bytes.NewBuffer(c.Data))
+		break
+	}
 
 	for header, content := range c.Header {
 		req.Header.Set(header, content)

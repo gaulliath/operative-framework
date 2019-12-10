@@ -22,17 +22,20 @@ func CommandBase(line string, s *session.Session) bool {
 		ViewApiInformation(s)
 		return true
 	} else if line == "env" {
-		viewEnvironment(s)
+		ViewEnvironment(s)
 		return true
 	} else if line == "clear" {
 		s.ClearScreen()
+		return true
+	} else if line == "modules" {
+		s.ListModules()
 		return true
 	}
 	return false
 }
 
 // View Environment File Argument
-func viewEnvironment(s *session.Session) {
+func ViewEnvironment(s *session.Session) {
 	t := s.Stream.GenerateTable()
 	t.SetOutputMirror(os.Stdout)
 	t.AppendHeader(table.Row{
@@ -49,6 +52,7 @@ func viewEnvironment(s *session.Session) {
 		}
 	}
 	s.Stream.Render(t)
+	s.Stream.Standard("Environment loaded at '" + s.Config.Common.ConfigurationFile + "'")
 }
 
 // View Session Information

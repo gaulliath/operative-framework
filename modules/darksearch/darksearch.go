@@ -32,7 +32,7 @@ type DarkSearchResults struct {
 	} `json:"data"`
 }
 
-func PushMacVendorModule(s *session.Session) *DarkSearchModule {
+func PushDarkSearchModule(s *session.Session) *DarkSearchModule {
 	mod := DarkSearchModule{
 		Session: s,
 		Stream:  &s.Stream,

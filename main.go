@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/akamensky/argparse"
 	"github.com/chzyer/readline"
@@ -9,6 +10,7 @@ import (
 	"github.com/graniet/operative-framework/compiler"
 	"github.com/graniet/operative-framework/cron"
 	"github.com/graniet/operative-framework/engine"
+	"github.com/graniet/operative-framework/export"
 	"github.com/graniet/operative-framework/session"
 	"github.com/graniet/operative-framework/supervisor"
 	"github.com/joho/godotenv"
@@ -16,6 +18,7 @@ import (
 	"log"
 	"os"
 	"os/user"
+	"strconv"
 	"strings"
 )
 
@@ -78,9 +81,25 @@ func main() {
 		Required: false,
 		Help:     "Do not run framework cli",
 	})
+	execute := parser.String("e", "execute", &argparse.Options{
+		Required: false,
+		Help:     "Execute a single module",
+	})
+	target := parser.String("t", "target", &argparse.Options{
+		Required: false,
+		Help:     "Set target to '-e/--execute' argument",
+	})
+	parameters := parser.String("p", "parameters", &argparse.Options{
+		Required: false,
+		Help:     "Set parameters to '-e/--execute' argument",
+	})
 	loadSession := parser.Int("s", "session", &argparse.Options{
 		Required: false,
 		Help:     "Load specific session id",
+	})
+	onlyModuleOutput := parser.Flag("", "only-module-output", &argparse.Options{
+		Required: false,
+		Help:     "Do not print a banner information",
 	})
 
 	help := parser.Flag("h", "help", &argparse.Options{
@@ -96,6 +115,26 @@ func main() {
 	quiet := parser.Flag("q", "quiet", &argparse.Options{
 		Required: false,
 		Help:     "Don't prompt operative shell",
+	})
+
+	modules := parser.Flag("l", "list", &argparse.Options{
+		Required: false,
+		Help:     "List available modules",
+	})
+
+	jsonExport := parser.Flag("", "json", &argparse.Options{
+		Required: false,
+		Help:     "Print result with a JSON format",
+	})
+
+	csvExport := parser.Flag("", "csv", &argparse.Options{
+		Required: false,
+		Help:     "Print result with a CSV format",
+	})
+
+	sendTo := parser.String("", "to", &argparse.Options{
+		Required: false,
+		Help:     "Send response to webservice (require --json)",
 	})
 
 	err = parser.Parse(os.Args)
@@ -116,11 +155,18 @@ func main() {
 	sess.Config.Common.ConfigurationJobs = configJob
 	sess.Config.Common.BaseDirectory = opfBaseDirectory
 	sess.Config.Common.ExportDirectory = opfExport
+	sess.ParseModuleConfig()
+	sess.ParseWebServiceConfig()
 	apiRest := api.PushARestFul(sess)
 
 	// Load supervised cron job.
 	sp = supervisor.GetNewSupervisor(sess)
 	cron.Load(sp)
+
+	if *modules {
+		sess.ListModules()
+		return
+	}
 
 	if *rSupervisor {
 		// Reading loaded cron job
@@ -132,6 +178,94 @@ func main() {
 		fmt.Print(parser.Usage(""))
 		return
 	}
+
+	if *verbose {
+		sess.Stream.Verbose = false
+	} else {
+		if !*onlyModuleOutput {
+			c := color.New(color.FgYellow)
+			_, _ = c.Println("OPERATIVE FRAMEWORK - DIGITAL INVESTIGATION FRAMEWORK")
+			sess.Stream.WithoutDate("Loading a configuration file '" + configFile + "'")
+			sess.Stream.WithoutDate("Loading a cron job configuration '" + sess.Config.Common.ConfigurationJobs + "'")
+			sess.Stream.WithoutDate("Loading '" + strconv.Itoa(len(sess.Config.Modules)) + "' module(s) configuration(s)")
+		}
+	}
+
+	if *execute != "" {
+		if *target == "" {
+			sess.Stream.Error("'-e/--execute' argument need a target argument '-t/--target'")
+			return
+		}
+		module, err := sess.SearchModule(*execute)
+		if err != nil {
+			sess.Stream.Error(err.Error())
+			return
+		}
+
+		target, err := sess.AddTarget(module.GetType(), *target)
+		if err != nil {
+			sess.Stream.Error(err.Error())
+			return
+		}
+		_, _ = module.SetParameter("TARGET", target)
+
+		if *parameters != "" {
+
+			if !strings.Contains(*parameters, "=") {
+				sess.Stream.Error("Please use a correct format. example: limit=50;id=1")
+				return
+			}
+
+			if strings.Contains(*parameters, ";") {
+				lists := strings.Split(*parameters, ";")
+				for _, parameter := range lists {
+					template := strings.Split(parameter, "=")
+					_, err := module.SetParameter(template[0], template[1])
+					if err != nil {
+						sess.Stream.Error(err.Error())
+						return
+					}
+				}
+			} else {
+				template := strings.Split(*parameters, "=")
+				_, err := module.SetParameter(template[0], template[1])
+				if err != nil {
+					sess.Stream.Error(err.Error())
+					return
+				}
+			}
+		}
+		if *csvExport {
+			sess.Stream.CSV = true
+		}
+		module.Start()
+
+		if *jsonExport {
+			e := export.ExportNow(sess, module)
+			j, err := json.Marshal(e)
+			if err == nil {
+				if *sendTo != "" {
+					webservice, err := sess.GetWebService(*sendTo)
+					if err != nil {
+						sess.Stream.Error(err.Error())
+						return
+					}
+					opfClient := sess.Client
+					opfClient.Header.Add("Content-Type", "application/json")
+					opfClient.Data = j
+					_, err = opfClient.Perform("POST", webservice.URL)
+					if err != nil {
+						sess.Stream.Error(err.Error())
+						return
+					}
+				}
+				print(string(j))
+			}
+			return
+		}
+		return
+	}
+
 	if *rApi {
 		if *cli {
 			sess.Stream.Standard("running operative framework api...")
@@ -154,20 +288,20 @@ func main() {
 		return
 	}
 
-	if *verbose {
-		sess.Stream.Verbose = false
-	} else {
-		c := color.New(color.FgYellow)
-		_, _ = c.Println("OPERATIVE FRAMEWORK - DIGITAL INVESTIGATION FRAMEWORK")
-		sess.Stream.WithoutDate("Loading a configuration file '" + configFile + "'")
-		sess.Stream.WithoutDate("Loading a cron job configuration '" + sess.Config.Common.ConfigurationJobs + "'")
-	}
-
 	l, errP := readline.NewEx(sess.Prompt)
 	if errP != nil {
 		panic(errP)
 	}
 	defer l.Close()
+
+	// Checking in background available interval
+	go sess.WaitInterval()
+
+	// Checking in background available monitor
+	go sess.WaitMonitor()
+
+	// Checking interval in background
+	go sess.WaitAnalytics()
 
 	// Run Operative Framework Menu
 	for {

@@ -2,9 +2,12 @@ package session
 
 import (
 	"errors"
+	"github.com/joho/godotenv"
 	"os"
+	"os/user"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/graniet/go-pretty/table"
 )
@@ -70,13 +73,8 @@ type TargetResults struct {
 	Header     string `json:"key" gorm:"result_header"`
 	Value      string `json:"value" gorm:"result_value"`
 	Notes      []Note
-}
-
-func (result *TargetResults) AddNote(text string) {
-	result.Notes = append(result.Notes, Note{
-		Text: text,
-	})
-	return
+	Auxiliary  []string  `json:"-" sql:"-"`
+	CreatedAt  time.Time `json:"created_at"`
 }
 
 func (s *Session) SearchModule(name string) (Module, error) {
@@ -90,7 +88,7 @@ func (s *Session) SearchModule(name string) (Module, error) {
 
 func (module *SessionModule) GetParameter(name string) (Param, error) {
 	for _, param := range module.Parameters {
-		if param.Name == name {
+		if strings.ToUpper(param.Name) == strings.ToUpper(name) {
 			return param, nil
 		}
 	}
@@ -99,7 +97,7 @@ func (module *SessionModule) GetParameter(name string) (Param, error) {
 
 func (module *SessionModule) SetParameter(name string, value string) (bool, error) {
 	for k, param := range module.Parameters {
-		if param.Name == name {
+		if strings.ToUpper(param.Name) == strings.ToUpper(name) {
 			module.Parameters[k].Value = value
 			return true, nil
 		}
@@ -150,6 +148,7 @@ func (module *SessionModule) WithProgram(name string) bool {
 func (module *SessionModule) ListArguments() {
 	t := table.NewWriter()
 	t.SetOutputMirror(os.Stdout)
+	t.SetAllowedColumnLengths([]int{40, 40})
 	t.AppendHeader(table.Row{"argument", "description", "value", "required", "type"})
 	if len(module.Parameters) > 0 {
 		for _, argument := range module.Parameters {
@@ -199,4 +198,55 @@ func (module *SessionModule) GetResults() []string {
 
 func (module *SessionModule) GetExternal() []string {
 	return module.External
+}
+
+func (s *Session) ListModules() {
+	t := s.Stream.GenerateTable()
+	t.SetOutputMirror(os.Stdout)
+	t.AppendHeader(table.Row{
+		"NAME",
+		"DESCRIPTION",
+	})
+	for _, module := range s.Modules {
+		t.AppendRow(table.Row{
+			module.Name(),
+			module.Description(),
+		})
+	}
+	s.Stream.Render(t)
+}
+
+func (s *Session) ParseModuleConfig() {
+	u, _ := user.Current()
+	for _, module := range s.Modules {
+		fileName := u.HomeDir + "/.opf/external/modules/" + module.Name() + ".conf"
+		if _, err := os.Stat(fileName); os.IsNotExist(err) {
+			continue
+		}
+		configuration, err := godotenv.Read(fileName)
+		if err == nil {
+			s.Config.Modules[module.Name()] = configuration
+		}
+	}
+}
+
+func (s *Session) LoadModuleConfiguration(module string) (map[string]string, error) {
+
+	if _, ok := s.Config.Modules[module]; !ok {
+		return nil, errors.New("Configuration not found")
+	}
+
+	return s.Config.Modules[module], nil
+}
+
+func (s *Session) WithFilter(module Module) bool {
+	useFilter := false
+	filter, err := module.GetParameter("FILTER")
+	if err == nil {
+		_, err := s.SearchFilter(filter.Value)
+		if err == nil {
+			useFilter = true
+		}
+	}
+	return useFilter
 }

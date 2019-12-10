@@ -56,6 +56,7 @@ func (module *TwitterFollowing) GetInformation() session.ModuleInformation {
 func (module *TwitterFollowing) Start() {
 
 	var followingIds []int64
+	module.Results = []string{}
 
 	trg, err := module.GetParameter("TARGET")
 	if err != nil {
@@ -76,6 +77,7 @@ func (module *TwitterFollowing) Start() {
 		module.Sess.Stream.Error(err.Error())
 		return
 	}
+
 	followers, err := api.GetFriendsUser(user[0].Id, v)
 	if err != nil {
 		module.Sess.Stream.Error(err.Error())

@@ -1,6 +1,8 @@
 package config
 
 import (
+	"fmt"
+	"gopkg.in/src-d/go-git.v4"
 	"os"
 	"os/user"
 
@@ -22,6 +24,8 @@ func ParseConfig() (Config, error) {
 		}
 	}
 
+	conf.Modules = make(map[string]map[string]string)
+
 	conf.Instagram.Login = os.Getenv("INSTAGRAM_LOGIN")
 	conf.Instagram.Password = os.Getenv("INSTAGRAM_PASSWORD")
 
@@ -41,6 +45,21 @@ func ParseConfig() (Config, error) {
 	conf.Database.Host = os.Getenv("DB_HOST")
 	conf.Database.User = os.Getenv("DB_USER")
 	conf.Database.Pass = os.Getenv("DB_PASS")
+	conf.PushDriver = os.Getenv("PUSH_DRIVER")
+	conf.Gate.GateUrl = os.Getenv("GATE_URL")
+	conf.Gate.GateMethod = os.Getenv("GATE_METHOD")
+	conf.Gate.GateTor = os.Getenv("GATE_TOR")
+
+	if _, err := os.Stat(u.HomeDir + "/.opf/external/"); os.IsNotExist(err) {
+		_, err := git.PlainClone(u.HomeDir+"/.opf/external/", false, &git.CloneOptions{
+			URL: "https://github.com/graniet/operative-framework-default",
+		})
+
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+
+	}
 
 	return conf, nil
 }
