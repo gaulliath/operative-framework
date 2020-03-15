@@ -6,6 +6,10 @@
 
 https://github.com/graniet/operative-framework/releases
 
+#### DOCUMENTATION
+
+Documentation as been updated [here](http://docs.operative-framework.com/) (*docs.operative-framework.com*)
+
 #### USE CASE
 [OSINT : des numéros de politiques françaises interceptés via Whatsapp](https://www.zataz.com/osint-des-numeros-de-politiques-francaises-interceptes-via-whatsapp/)
 
