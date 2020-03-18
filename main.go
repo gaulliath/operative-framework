@@ -45,6 +45,11 @@ func main() {
 			if _, err := os.Stat(u.HomeDir + "/.opf/"); os.IsNotExist(err) {
 				_ = os.Mkdir(u.HomeDir+"/.opf/", os.ModePerm)
 			}
+
+			if _, err := os.Stat(u.HomeDir + "/.opf/webhooks"); os.IsNotExist(err) {
+				_ = os.Mkdir(u.HomeDir+"/.opf/webhooks", os.ModePerm)
+			}
+
 			log.Println("Generating default .env on '" + u.HomeDir + "' directory...")
 			path, errGeneration := engine.GenerateEnv(u.HomeDir + "/.opf/.env")
 			if errGeneration != nil {
@@ -97,7 +102,7 @@ func main() {
 		Required: false,
 		Help:     "Load specific session id",
 	})
-	onlyModuleOutput := parser.Flag("", "only-module-output", &argparse.Options{
+	onlyModuleOutput := parser.Flag("", "no-banner", &argparse.Options{
 		Required: false,
 		Help:     "Do not print a banner information",
 	})
@@ -107,9 +112,24 @@ func main() {
 		Help:     "Print help",
 	})
 
-	scripts := parser.String("f", "opf", &argparse.Options{
+	scripts := parser.String("", "opf", &argparse.Options{
 		Required: false,
 		Help:     "Run script before prompt starting",
+	})
+
+	file := parser.String("f", "file", &argparse.Options{
+		Required: false,
+		Help:     "Source file",
+	})
+
+	mode := parser.String("m", "mode", &argparse.Options{
+		Required: false,
+		Help:     "Start in specific mode: (perception, tracking, api, console): default (console)",
+	})
+
+	wh := parser.String("", "webhook", &argparse.Options{
+		Required: false,
+		Help:     "Autostart webHook by name",
 	})
 
 	quiet := parser.Flag("q", "quiet", &argparse.Options{
@@ -241,7 +261,7 @@ func main() {
 		module.Start()
 
 		if *jsonExport {
-			e := export.ExportNow(sess, module)
+			e := export.JSON(sess, module)
 			j, err := json.Marshal(e)
 			if err == nil {
 				if *sendTo != "" {
@@ -282,6 +302,45 @@ func main() {
 
 	if *scripts != "" {
 		compiler.Run(sess, *scripts)
+	}
+
+	// Checking if source file exists in argv
+	if *file != "" {
+		sess.SetSourceFile(*file)
+	}
+
+	// Load Webhooks configuration
+	sess.LoadWebHook()
+
+	if *wh != "" {
+		webHook, err := sess.GetWebHookByName(*wh)
+		if err != nil {
+			sess.Stream.Error(err.Error())
+			return
+		}
+		webHook.SetStatus(true)
+	}
+
+	if *mode != "" {
+		switch strings.ToLower(*mode) {
+		case "perception":
+			if *file == "" {
+				sess.Stream.Error("Please select a source file (-f) with interval commands.")
+				return
+			}
+
+			err := sess.LoadIntervalFromSourceFile()
+			if err != nil {
+				sess.Stream.Error(err.Error())
+				return
+			}
+			break
+		case "console":
+			break
+		default:
+			sess.Stream.Warning("Mode '" + *mode + "' as unknown, running 'console' mode...")
+			break
+		}
 	}
 
 	if *quiet {

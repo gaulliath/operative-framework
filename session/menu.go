@@ -481,25 +481,23 @@ func LoadModuleMenu(line string, module Module, s *Session) []string {
 					flt.Start(module)
 				}
 
-				if s.Config.PushDriver == ONLY_SERVER ||
-					s.Config.PushDriver == SCREEN_AND_SERVER {
-
-					targetId, err := module.GetParameter("TARGET")
-					if err != nil {
-						s.Stream.Error("error with a push to webserver: " + err.Error())
-						return nil
-					}
-
-					target, err := s.GetTarget(targetId.Value)
-					if err != nil {
-						s.Stream.Error("error with a push to webserver: " + err.Error())
-						return nil
-					}
-
-					if _, ok := target.Results[module.Name()]; ok {
-						s.PushResultsToGate(target.Results[module.Name()], startedAt)
-					}
+				targetId, err := module.GetParameter("TARGET")
+				if err != nil {
+					s.Stream.Error("error with a push to webserver: " + err.Error())
+					return nil
 				}
+
+				target, err := s.GetTarget(targetId.Value)
+				if err != nil {
+					s.Stream.Error("error with a push to webserver: " + err.Error())
+					return nil
+				}
+
+				s.NewEvent(RESULTS_ADD, ModuleEvent{
+					ModuleName: module.Name(),
+					Results:    s.GetResultsAfter(target.Results[module.Name()], startedAt),
+				})
+
 				return r
 			}
 		} else {
@@ -589,7 +587,7 @@ func LoadIntervalCommandMenu(line string, module Module, s *Session) []string {
 			return nil
 		}
 		interval.Up()
-		s.Stream.Success("interval '" + interval.Id + "' as started at '" + time.Now().Format("2006-01-02 15:04:05") + "'")
+		s.Stream.Success("'" + interval.Id + "' next execution at '" + interval.NextRun.Format("2006-01-02 15:04:05") + "'")
 		break
 	case "down":
 		if len(arguments) < 3 {
@@ -790,6 +788,49 @@ func LoadMonitorCommandMenu(line string, module Module, s *Session) []string {
 		monitor.ViewResults()
 		break
 
+	}
+
+	return nil
+}
+
+func LoadWebHookMenu(line string, module Module, s *Session) []string {
+	arguments := strings.Split(strings.TrimSpace(line), " ")
+	if len(arguments) < 2 {
+		s.Stream.Error("Please use : webhook <command> <webhookId>")
+		return nil
+	}
+	switch arguments[1] {
+	case "list":
+		s.ListWebHooks()
+		break
+	case "up":
+		if len(arguments) < 3 {
+			s.Stream.Error("Please use : webhook up <webhookId>")
+			return nil
+		}
+		options := strings.SplitN(line, " ", 3)
+		webhook, err := s.GetWebHook(options[2])
+		if err != nil {
+			s.Stream.Error(err.Error())
+			return nil
+		}
+		webhook.Up()
+		s.Stream.Success("Webhook '" + webhook.GetId() + "' as been started '" + time.Now().Format("2006-01-02 15:04:05") + "'")
+		break
+	case "down":
+		if len(arguments) < 3 {
+			s.Stream.Error("Please use : webhook down <webhookId>")
+			return nil
+		}
+		options := strings.SplitN(line, " ", 3)
+		webhook, err := s.GetWebHook(options[2])
+		if err != nil {
+			s.Stream.Error(err.Error())
+			return nil
+		}
+		webhook.Down()
+		s.Stream.Success("Webhook '" + webhook.GetId() + "' as stopped at '" + time.Now().Format("2006-01-02 15:04:05") + "'")
+		break
 	}
 
 	return nil

@@ -107,6 +107,16 @@ func (s *Session) ReadLineAutoCompleteListAlias() func(string) []string {
 	}
 }
 
+func (s *Session) ReadLineAutoCompleteListWebHooks() func(string) []string {
+	return func(line string) []string {
+		var returnResult []string
+		for _, wh := range s.WebHooks {
+			returnResult = append(returnResult, wh.GetId())
+		}
+		return returnResult
+	}
+}
+
 func (s *Session) ReadLineAutoCompleteResults() func(string) []string {
 	return func(line string) []string {
 		value := strings.Split(line, " ")
@@ -144,6 +154,12 @@ func (s *Session) ReadLineAutoCompleteResults() func(string) []string {
 func (s *Session) PushPrompt() {
 	var completer = readline.NewPrefixCompleter(
 		readline.PcItem("modules"),
+		readline.PcItem("webhooks"),
+		readline.PcItem("webhook",
+			readline.PcItem("up",
+				readline.PcItemDynamic(s.ReadLineAutoCompleteListWebHooks())),
+			readline.PcItem("down",
+				readline.PcItemDynamic(s.ReadLineAutoCompleteListWebHooks()))),
 		readline.PcItem("result",
 			readline.PcItem("delete",
 				readline.PcItemDynamic(s.ReadLineAutoCompleteResults()))),

@@ -15,6 +15,7 @@ type Session struct {
 	Connection         Connection  `json:"-" sql:"-"`
 	Client             OpfClient
 	Events             Events            `json:"events"`
+	SourceFile         string            `json:"source_file"`
 	Config             config.Config     `json:"config" sql:"-"`
 	Version            string            `json:"version" sql:"-"`
 	Targets            []*Target         `json:"subjects" sql:"-"`
@@ -28,10 +29,11 @@ type Session struct {
 	Services           []Listener        `json:"services"`
 	Alias              map[string]string `json:"-" sql:"-"`
 	Interval           []*Interval       `json:"-"`
-	WebServices		   []WebService 	 `json:"web_services"`
+	WebServices        []WebService      `json:"web_services"`
 	Analytics          *Analytics        `json:"analytics"`
 	LastAnalyticsModel string            `json:"analytics_model"`
 	LastAnalyticsLinks string            `json:"last_analytics_links"`
+	WebHooks           []*WebHook        `json:"web_hooks"`
 }
 
 type SessionExport struct {
@@ -126,4 +128,8 @@ func (s *Session) ExportNow() SessionExport {
 		Services:      s.Services,
 	}
 	return export
+}
+
+func (s *Session) SetSourceFile(file string) {
+	s.SourceFile = file
 }

@@ -39,6 +39,11 @@ type Module interface {
 	CreateNewParam(name string, description string, value string, isRequired bool, paramType int)
 }
 
+type ModuleEvent struct {
+	ModuleName string
+	Results    interface{}
+}
+
 type Param struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`

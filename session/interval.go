@@ -3,6 +3,9 @@ package session
 import (
 	"github.com/pkg/errors"
 	"github.com/segmentio/ksuid"
+	"gopkg.in/yaml.v2"
+	"io/ioutil"
+	"os"
 	"strings"
 	"time"
 )
@@ -17,6 +20,29 @@ type Interval struct {
 	LastRun          time.Time     `json:"last_run"`
 	NextRun          time.Time     `json:"next_run"`
 	Activated        bool          `json:"activated"`
+}
+
+func (s *Session) LoadIntervalFromSourceFile() error {
+
+	var interval Interval
+	file, err := os.Open(s.SourceFile)
+	if err != nil {
+		return errors.New(err.Error())
+	}
+
+	fileReader, err := ioutil.ReadAll(file)
+	if err != nil {
+		return errors.New(err.Error())
+	}
+
+	_ = yaml.Unmarshal([]byte(fileReader), &interval)
+	interval.SetId()
+	interval.SetSession(s)
+	interval.SetTimeType("minute")
+	s.Interval = append(s.Interval, &interval)
+	interval.Up()
+
+	return nil
 }
 
 func (s *Session) NewInterval(command string) *Interval {
@@ -72,6 +98,50 @@ func (i *Interval) SetDelay(delay int) *Interval {
 
 func (i *Interval) GetDelay() int {
 	return i.Delay
+}
+
+func (i *Interval) SetId() *Interval {
+	i.Id = "i_" + ksuid.New().String()
+	return i
+}
+
+func (i *Interval) getId() string {
+	return i.Id
+}
+
+func (i *Interval) SetSession(s *Session) *Interval {
+	i.S = s
+	return i
+}
+
+func (i *Interval) getSession() *Session {
+	return i.S
+}
+
+func (i *Interval) SetTimeType(s string) *Interval {
+	switch strings.ToLower(s) {
+	case "minute":
+		i.Time = time.Minute
+		break
+	case "hour":
+		i.Time = time.Hour
+		break
+	case "second":
+		i.Time = time.Second
+		break
+	case "day":
+		i.Time = time.Hour * 24
+		break
+	default:
+		i.Time = time.Minute
+		break
+	}
+
+	return i
+}
+
+func (i *Interval) getTimeType() time.Duration {
+	return i.Time
 }
 
 func (i *Interval) Up() bool {

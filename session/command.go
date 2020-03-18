@@ -57,8 +57,12 @@ func (s *Session) ParseCommand(line string) []string {
 	if line == "events" {
 		LoadEventsMenu(line, module, s)
 		return nil
-	}
-	if moduleName == "help" {
+	} else if strings.ToLower(line) == "webhooks" {
+		s.ListWebHooks()
+		return nil
+	} else if strings.Contains(line, "webhook") {
+		LoadWebHookMenu(line, module, s)
+	} else if moduleName == "help" {
 		module.Start()
 		filter, err := module.GetParameter("FILTER")
 		if err == nil && filter.Value != "" {

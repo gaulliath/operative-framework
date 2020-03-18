@@ -228,3 +228,25 @@ func (target *Target) GetLastResults(module string) {
 		fmt.Println(results)
 	}
 }
+
+func (s *Session) GetResultsAfter(results []*TargetResults, afterTime time.Time) []*TargetResults {
+	var scopes []*TargetResults
+	for _, result := range results {
+		if result.CreatedAt.After(afterTime) {
+			scopes = append(scopes, result)
+		}
+	}
+
+	return scopes
+}
+
+func (s *Session) GetResultsBefore(results []*TargetResults, beforeTime time.Time) []*TargetResults {
+	var scopes []*TargetResults
+	for _, result := range results {
+		if result.CreatedAt.Before(beforeTime) {
+			scopes = append(scopes, result)
+		}
+	}
+
+	return scopes
+}

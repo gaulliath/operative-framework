@@ -13,7 +13,7 @@ type Export struct {
 	Count      int    `json:"count"`
 }
 
-func ExportNow(s *session.Session, module session.Module) Export {
+func JSON(s *session.Session, module session.Module) Export {
 
 	export := Export{
 		ModuleName: module.Name(),
