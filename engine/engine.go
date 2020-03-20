@@ -10,6 +10,8 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
+const VERSION = "1.20 (perception)"
+
 // Generate New Session
 func New() *session.Session {
 	conf, err := config.ParseConfig()
@@ -26,7 +28,7 @@ func New() *session.Session {
 
 	s := session.Session{
 		SessionName: "opf_" + timeText,
-		Version:     "1.10 (voyager)",
+		Version:     VERSION,
 		Information: session.Information{
 			ApiStatus:      false,
 			ModuleLaunched: 0,
@@ -63,7 +65,7 @@ func Load(id int) *session.Session {
 		panic(err.Error())
 	}
 	s := session.Session{
-		Version: "1.10 (voyager)",
+		Version: VERSION,
 		Stream: session.Stream{
 			Verbose: true,
 		},

@@ -152,9 +152,9 @@ func main() {
 		Help:     "Print result with a CSV format",
 	})
 
-	sendTo := parser.String("", "to", &argparse.Options{
+	autoloadWH := parser.Flag("", "autoload-webhooks", &argparse.Options{
 		Required: false,
-		Help:     "Send response to webservice (require --json)",
+		Help:     "Set active all 'web hooks' loaded in session",
 	})
 
 	err = parser.Parse(os.Args)
@@ -176,7 +176,6 @@ func main() {
 	sess.Config.Common.BaseDirectory = opfBaseDirectory
 	sess.Config.Common.ExportDirectory = opfExport
 	sess.ParseModuleConfig()
-	sess.ParseWebServiceConfig()
 	apiRest := api.PushARestFul(sess)
 
 	// Load supervised cron job.
@@ -197,18 +196,6 @@ func main() {
 	if *help {
 		fmt.Print(parser.Usage(""))
 		return
-	}
-
-	if *verbose {
-		sess.Stream.Verbose = false
-	} else {
-		if !*onlyModuleOutput {
-			c := color.New(color.FgYellow)
-			_, _ = c.Println("OPERATIVE FRAMEWORK - DIGITAL INVESTIGATION FRAMEWORK")
-			sess.Stream.WithoutDate("Loading a configuration file '" + configFile + "'")
-			sess.Stream.WithoutDate("Loading a cron job configuration '" + sess.Config.Common.ConfigurationJobs + "'")
-			sess.Stream.WithoutDate("Loading '" + strconv.Itoa(len(sess.Config.Modules)) + "' module(s) configuration(s)")
-		}
 	}
 
 	if *execute != "" {
@@ -264,21 +251,6 @@ func main() {
 			e := export.JSON(sess, module)
 			j, err := json.Marshal(e)
 			if err == nil {
-				if *sendTo != "" {
-					webservice, err := sess.GetWebService(*sendTo)
-					if err != nil {
-						sess.Stream.Error(err.Error())
-						return
-					}
-					opfClient := sess.Client
-					opfClient.Header.Add("Content-Type", "application/json")
-					opfClient.Data = j
-					_, err = opfClient.Perform("POST", webservice.URL)
-					if err != nil {
-						sess.Stream.Error(err.Error())
-						return
-					}
-				}
 				print(string(j))
 			}
 			return
@@ -321,6 +293,13 @@ func main() {
 		webHook.SetStatus(true)
 	}
 
+	if *autoloadWH {
+		for _, wh := range sess.WebHooks {
+			sess.Stream.Standard("Starting '" + wh.GetName() + "' web hooks")
+			wh.Up()
+		}
+	}
+
 	if *mode != "" {
 		switch strings.ToLower(*mode) {
 		case "perception":
@@ -329,13 +308,21 @@ func main() {
 				return
 			}
 
-			err := sess.LoadIntervalFromSourceFile()
+			err := sess.FromSourceFile()
 			if err != nil {
 				sess.Stream.Error(err.Error())
 				return
 			}
+			sess.Stream.Standard("Mode '" + strings.ToLower(*mode) + "' as started now...")
+			select {}
 			break
 		case "console":
+			break
+		case "api":
+			sess.Stream.Standard("running operative framework api...")
+			sess.Stream.Standard("available at : " + apiRest.Server.Addr)
+			sess.Information.SetApi(true)
+			apiRest.Start()
 			break
 		default:
 			sess.Stream.Warning("Mode '" + *mode + "' as unknown, running 'console' mode...")
@@ -345,6 +332,18 @@ func main() {
 
 	if *quiet {
 		return
+	}
+
+	if *verbose {
+		sess.Stream.Verbose = false
+	} else {
+		if !*onlyModuleOutput {
+			c := color.New(color.FgYellow)
+			_, _ = c.Println("OPERATIVE FRAMEWORK - DIGITAL INVESTIGATION FRAMEWORK")
+			sess.Stream.WithoutDate("Loading a configuration file '" + configFile + "'")
+			sess.Stream.WithoutDate("Loading a cron job configuration '" + sess.Config.Common.ConfigurationJobs + "'")
+			sess.Stream.WithoutDate("Loading '" + strconv.Itoa(len(sess.Config.Modules)) + "' module(s) configuration(s)")
+		}
 	}
 
 	l, errP := readline.NewEx(sess.Prompt)

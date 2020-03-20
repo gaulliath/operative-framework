@@ -12,11 +12,8 @@ func (s *Session) ParseCommand(line string) []string {
 		alias, err := s.GetAlias(moduleName)
 		module, err = s.SearchModule(alias)
 		if err != nil {
-			if moduleName == "help" {
+			if moduleName == "help" || moduleName == "?" {
 				module, err = s.SearchModule("session_help")
-			} else if moduleName == "webservices" {
-				s.ListWebServices()
-				return nil
 			}
 		}
 	}

@@ -165,7 +165,9 @@ func (target *Target) ResultExist(result TargetResults) bool {
 }
 
 func (target *Target) Save(module Module, result TargetResults) bool {
+
 	result.ResultId = "R_" + ksuid.New().String()
+	result.ToJSON = result.JSON()
 	result.TargetId = target.GetId()
 	result.SessionId = target.Sess.GetId()
 	result.ModuleName = module.Name()
@@ -227,26 +229,4 @@ func (target *Target) GetLastResults(module string) {
 	if results, ok := target.Results[module]; ok {
 		fmt.Println(results)
 	}
-}
-
-func (s *Session) GetResultsAfter(results []*TargetResults, afterTime time.Time) []*TargetResults {
-	var scopes []*TargetResults
-	for _, result := range results {
-		if result.CreatedAt.After(afterTime) {
-			scopes = append(scopes, result)
-		}
-	}
-
-	return scopes
-}
-
-func (s *Session) GetResultsBefore(results []*TargetResults, beforeTime time.Time) []*TargetResults {
-	var scopes []*TargetResults
-	for _, result := range results {
-		if result.CreatedAt.Before(beforeTime) {
-			scopes = append(scopes, result)
-		}
-	}
-
-	return scopes
 }

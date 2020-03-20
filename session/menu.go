@@ -493,10 +493,13 @@ func LoadModuleMenu(line string, module Module, s *Session) []string {
 					return nil
 				}
 
-				s.NewEvent(RESULTS_ADD, ModuleEvent{
-					ModuleName: module.Name(),
-					Results:    s.GetResultsAfter(target.Results[module.Name()], startedAt),
-				})
+				res := s.GetResultsAfter(target.Results[module.Name()], startedAt)
+				if len(res) > 0 {
+					s.NewEvent(RESULTS_ADD, ModuleEvent{
+						ModuleName: module.Name(),
+						Results:    res,
+					})
+				}
 
 				return r
 			}

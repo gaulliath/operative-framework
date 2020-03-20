@@ -29,7 +29,6 @@ type Session struct {
 	Services           []Listener        `json:"services"`
 	Alias              map[string]string `json:"-" sql:"-"`
 	Interval           []*Interval       `json:"-"`
-	WebServices        []WebService      `json:"web_services"`
 	Analytics          *Analytics        `json:"analytics"`
 	LastAnalyticsModel string            `json:"analytics_model"`
 	LastAnalyticsLinks string            `json:"last_analytics_links"`

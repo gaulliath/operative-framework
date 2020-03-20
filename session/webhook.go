@@ -135,6 +135,8 @@ func (s *Session) LoadWebHook() {
 
 			if strings.Contains(configuration["EVENTS"], ",") {
 				events = strings.Split(configuration["EVENTS"], ",")
+			} else if strings.Contains(configuration["EVENTS"], ";") {
+				events = strings.Split(configuration["EVENTS"], ";")
 			} else {
 				events = append(events, configuration["EVENTS"])
 			}

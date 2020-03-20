@@ -12,16 +12,30 @@ import (
 type Monitors []*Monitor
 
 type Monitor struct {
-	Session   *Session
-	MonitorId string
-	Search    string
-	Status    bool
-	Result    []*TargetResults
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	Session   *Session         `json:"-"`
+	MonitorId string           `json:"monitor_id"`
+	Search    []string         `json:"search"`
+	Strict    bool             `json:"strict"`
+	Status    bool             `json:"status"`
+	Result    []*TargetResults `json:"-"`
+	CreatedAt time.Time        `json:"created_at"`
+	UpdatedAt time.Time        `json:"updated_at"`
 }
 
-func (s *Session) NewMonitor(search string) *Monitor {
+type MonitorMatch struct {
+	Monitor *Monitor       `json:"monitor"`
+	Result  *TargetResults `json:"result"`
+}
+
+func (s *Session) NewMonitor(scope string) *Monitor {
+
+	var search []string
+
+	if strings.Contains(scope, ";") {
+		search = strings.Split(scope, ";")
+	} else {
+		search = append(search, scope)
+	}
 
 	newMonitor := Monitor{
 		MonitorId: "M_" + ksuid.New().String(),
@@ -68,6 +82,19 @@ func (s *Session) WaitMonitor() {
 			}
 		}
 	}
+}
+
+func (m *Monitor) SetSession(s *Session) {
+	m.Session = s
+}
+
+func (m *Monitor) SetId() *Monitor {
+	m.MonitorId = "M_" + ksuid.New().String()
+	return m
+}
+
+func (m *Monitor) getId() string {
+	return m.MonitorId
 }
 
 func (m *Monitor) Up() {
@@ -124,11 +151,19 @@ func (m *Monitor) Checking() {
 				if len(results) > 0 {
 					for _, result := range results {
 						if result.CreatedAt.After(m.CreatedAt) {
-							if strings.Contains(strings.ToLower(result.Value), strings.ToLower(m.Search)) {
-								if !m.HasResult(result.ResultId) {
-									m.Result = append(m.Result, result)
-									m.UpdatedAt = time.Now()
-									m.Session.NewEvent(MONITOR_MATCH, "Monitor '"+m.MonitorId+"' as found new matching with result '"+result.ResultId+"'")
+							for _, scope := range m.Search {
+								if strings.Contains(strings.ToLower(result.Value), strings.ToLower(scope)) {
+									if !m.HasResult(result.ResultId) {
+										m.Result = append(m.Result, result)
+										m.UpdatedAt = time.Now()
+
+										match := MonitorMatch{
+											Monitor: m,
+											Result:  result,
+										}
+
+										m.Session.NewEvent(MONITOR_MATCH, match)
+									}
 								}
 							}
 						}

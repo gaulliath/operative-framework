@@ -13,7 +13,7 @@ import (
 type Interval struct {
 	Id               string        `json:"id"`
 	S                *Session      `json:"-"`
-	Commands         string        `json:"commands"`
+	Commands         []string      `json:"commands"`
 	Delay            int           `json:"delay"`
 	Time             time.Duration `json:"time"`
 	ExecutionNumbers int           `json:"execution_numbers"`
@@ -47,7 +47,7 @@ func (s *Session) LoadIntervalFromSourceFile() error {
 
 func (s *Session) NewInterval(command string) *Interval {
 	newInterval := &Interval{
-		Id:               "i_" + ksuid.New().String(),
+		Id:               "I_" + ksuid.New().String(),
 		S:                s,
 		ExecutionNumbers: 0,
 		Time:             time.Minute,
@@ -81,13 +81,19 @@ func (s *Session) GetInterval(id string) (*Interval, error) {
 }
 
 func (i *Interval) SetCommand(command string) *Interval {
+	var commands []string
 	command = strings.TrimLeft(command, `"`)
 	command = strings.TrimRight(command, `"`)
-	i.Commands = command
+	if strings.Contains(command, ";") {
+		commands = strings.Split(command, ";")
+	} else {
+		commands = append(commands, command)
+	}
+	i.Commands = commands
 	return i
 }
 
-func (i *Interval) GetCommand() string {
+func (i *Interval) GetCommands() []string {
 	return i.Commands
 }
 
@@ -101,7 +107,7 @@ func (i *Interval) GetDelay() int {
 }
 
 func (i *Interval) SetId() *Interval {
-	i.Id = "i_" + ksuid.New().String()
+	i.Id = "I_" + ksuid.New().String()
 	return i
 }
 
@@ -152,12 +158,8 @@ func (i *Interval) Up() bool {
 	} else {
 		if timeNow.Equal(i.NextRun) || timeNow.After(i.NextRun) {
 			i.S.Stream.Verbose = false
-			if strings.Contains(i.GetCommand(), ";") {
-				for _, command := range strings.Split(i.GetCommand(), ";") {
-					i.S.ParseCommand(strings.TrimSpace(command))
-				}
-			} else {
-				i.S.ParseCommand(strings.TrimSpace(i.GetCommand()))
+			for _, command := range i.GetCommands() {
+				i.S.ParseCommand(strings.TrimSpace(command))
 			}
 			i.S.Stream.Verbose = true
 			i.LastRun = timeNow
