@@ -63,17 +63,20 @@ func (w *WebHook) Down() {
 func (s *Session) ListWebHooks() {
 	t := s.Stream.GenerateTable()
 	t.SetOutputMirror(os.Stdout)
+	t.SetAllowedColumnLengths([]int{30, 20, 20, 30, 30, 30})
 	t.AppendHeader(table.Row{
 		"ID",
 		"NAME",
-		"METHOD",
+		"URL",
 		"EVENTS",
+		"METHOD",
 		"STATUS",
 	})
 	for _, webhook := range s.WebHooks {
 		t.AppendRow(table.Row{
 			webhook.GetId(),
 			webhook.GetName(),
+			webhook.GetURL(),
 			webhook.GetEvents(),
 			webhook.GetMethod(),
 			webhook.GetStatus(),

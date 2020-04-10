@@ -483,7 +483,7 @@ func LoadModuleMenu(line string, module Module, s *Session) []string {
 
 				targetId, err := module.GetParameter("TARGET")
 				if err != nil {
-					s.Stream.Error("error with a push to webserver: " + err.Error())
+					s.Stream.Error("error with a target: " + err.Error())
 					return nil
 				}
 

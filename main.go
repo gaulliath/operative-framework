@@ -157,6 +157,11 @@ func main() {
 		Help:     "Set active all 'web hooks' loaded in session",
 	})
 
+	eval := parser.String("", "eval", &argparse.Options{
+		Required: false,
+		Help:     "Execute commands while framework boot",
+	})
+
 	err = parser.Parse(os.Args)
 	if err != nil {
 		fmt.Print(parser.Usage(err))
@@ -279,6 +284,7 @@ func main() {
 	// Checking if source file exists in argv
 	if *file != "" {
 		sess.SetSourceFile(*file)
+		_ = sess.FromSourceFile()
 	}
 
 	// Load Webhooks configuration
@@ -308,14 +314,8 @@ func main() {
 				return
 			}
 
-			err := sess.FromSourceFile()
-			if err != nil {
-				sess.Stream.Error(err.Error())
-				return
-			}
 			sess.Stream.Standard("Mode '" + strings.ToLower(*mode) + "' as started now...")
 			select {}
-			break
 		case "console":
 			break
 		case "api":
@@ -360,6 +360,10 @@ func main() {
 
 	// Checking interval in background
 	go sess.WaitAnalytics()
+
+	if *eval != "" {
+		sess.ParseCommands(*eval)
+	}
 
 	// Run Operative Framework Menu
 	for {

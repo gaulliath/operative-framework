@@ -45,6 +45,8 @@ func (api *ARestFul) LoadRouter() *mux.Router {
 	r.HandleFunc("/api/targets/{target_id}", api.Target).Methods("GET")
 	r.HandleFunc("/api/targets/{target_id}/results", api.Results).Methods("GET")
 	r.HandleFunc("/api/targets/{target_id}/results/{result_id}", api.Result).Methods("GET")
+
+	r.HandleFunc("/api/intervals", api.Intervals).Methods("GET")
 	return r
 }
 

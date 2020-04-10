@@ -60,11 +60,13 @@ func (module *HelpModule) Start() {
 		{"events", "View registered session events"},
 		{"help", "Print help information"},
 		{"clear", "Clear current screen"},
-		{"webservices", "Print loaded webservices"},
+		{"webhooks", "Print loaded webhooks"},
 		{"api <run/stop>", "(Run/Stop) restful API"},
 	})
 	module.sess.Stream.Render(t)
+	fmt.Println("")
 	fmt.Println("INTERVAL:")
+	fmt.Println("The operative framework engine natively allows you to perform actions repeatedly via a module called interval")
 	t = module.sess.Stream.GenerateTable()
 	t.SetOutputMirror(os.Stdout)
 	t.AppendHeader(table.Row{"command", "description"})
@@ -76,7 +78,9 @@ func (module *HelpModule) Start() {
 		{"interval down <intervalId>", "Stop interval"},
 	})
 	module.sess.Stream.Render(t)
+	fmt.Println("")
 	fmt.Println("MONITOR:")
+	fmt.Println("You have the possibility of monitoring certain keywords in order to be informed of their presence in the results")
 	t = module.sess.Stream.GenerateTable()
 	t.SetOutputMirror(os.Stdout)
 	t.AppendHeader(table.Row{"command", "description"})
@@ -87,6 +91,7 @@ func (module *HelpModule) Start() {
 		{"monitor down <monitorId>", "Stop monitor"},
 	})
 	module.sess.Stream.Render(t)
+	fmt.Println("")
 	fmt.Println("NOTES:")
 	t = module.sess.Stream.GenerateTable()
 	t.SetOutputMirror(os.Stdout)
@@ -96,7 +101,9 @@ func (module *HelpModule) Start() {
 		{"note view <id target/result>", "View note linked to target or result "},
 	})
 	module.sess.Stream.Render(t)
+	fmt.Println("")
 	fmt.Println("TARGETS:")
+	fmt.Println("Targets are the subjects of your investigations.")
 	t = module.sess.Stream.GenerateTable()
 	t.SetOutputMirror(os.Stdout)
 	t.AppendHeader(table.Row{"command", "description"})
@@ -111,7 +118,9 @@ func (module *HelpModule) Start() {
 		{"target modules <target_id>", "List modules available with selected target"},
 	})
 	module.sess.Stream.Render(t)
+	fmt.Println("")
 	fmt.Println("FILTERS:")
+	fmt.Println("Filters allow you to perform actions at the end of module execution")
 	t = module.sess.Stream.GenerateTable()
 	t.SetOutputMirror(os.Stdout)
 	t.AppendHeader(table.Row{"Filter Name", "Filter Description"})
@@ -119,6 +128,7 @@ func (module *HelpModule) Start() {
 		t.AppendRow([]interface{}{mod.Name(), mod.Description()})
 	}
 	module.sess.Stream.Render(t)
+	fmt.Println("")
 	fmt.Println("MODULES:")
 	t = module.sess.Stream.GenerateTable()
 	t.SetOutputMirror(os.Stdout)

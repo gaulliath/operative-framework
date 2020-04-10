@@ -4,6 +4,21 @@ import (
 	"strings"
 )
 
+func (s *Session) ParseCommands(str string) {
+	var lines []string
+	if strings.Contains(str, ";") {
+		lines = strings.Split(str, ";")
+	} else {
+		lines = append(lines, str)
+	}
+
+	for _, line := range lines {
+		s.Stream.Verbose = false
+		s.ParseCommand(line)
+		s.Stream.Verbose = true
+	}
+}
+
 func (s *Session) ParseCommand(line string) []string {
 	moduleName := strings.Split(line, " ")[0]
 	module, errModule := s.SearchModule(moduleName)
@@ -59,7 +74,11 @@ func (s *Session) ParseCommand(line string) []string {
 		return nil
 	} else if strings.Contains(line, "webhook") {
 		LoadWebHookMenu(line, module, s)
-	} else if moduleName == "help" {
+		return nil
+	} else if strings.ToLower(line) == "ls" {
+		s.ListModules()
+		return nil
+	} else if moduleName == "help" || moduleName == "?" {
 		module.Start()
 		filter, err := module.GetParameter("FILTER")
 		if err == nil && filter.Value != "" {
