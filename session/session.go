@@ -14,6 +14,7 @@ type Session struct {
 	Information        Information `json:"information"`
 	Connection         Connection  `json:"-" sql:"-"`
 	Client             OpfClient
+	Tracker            []*Tracking       `json:"tracker"`
 	Events             Events            `json:"events"`
 	SourceFile         string            `json:"source_file"`
 	Config             config.Config     `json:"config" sql:"-"`

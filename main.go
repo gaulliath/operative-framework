@@ -316,6 +316,8 @@ func main() {
 
 			sess.Stream.Standard("Mode '" + strings.ToLower(*mode) + "' as started now...")
 			select {}
+		case "tracking":
+			break;
 		case "console":
 			break
 		case "api":
