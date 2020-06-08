@@ -50,6 +50,7 @@ func (api *ARestFul) LoadRouter() *mux.Router {
 
 	r.HandleFunc("/api/trackers", api.Trackers).Methods("GET")
 	r.HandleFunc("/api/trackers", api.PutTracker).Methods("POST")
+	r.HandleFunc("/api/tracker/{identifier}", api.Tracker).Methods("GET")
 	return r
 }
 

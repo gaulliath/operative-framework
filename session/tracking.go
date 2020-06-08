@@ -1,11 +1,13 @@
 package session
 
 import (
+	"github.com/segmentio/ksuid"
 	"sort"
 	"time"
 )
 
 type Tracking struct {
+	Id          string             `json:"id"`
 	Session     *Session           `json:"-"`
 	Position    TrackingPosition   `json:"position"`
 	Identifier  string             `json:"identifier"`
@@ -22,6 +24,7 @@ type TrackingPosition struct {
 }
 
 func (s *Session) AddTracker(tracker Tracking) Tracking {
+	tracker.Id = ksuid.New().String()
 	tracker.Session = s
 	tracker.Memories = []TrackingPosition{}
 	tracker.Position.Time = time.Now()
