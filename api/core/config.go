@@ -7,9 +7,9 @@ type Core struct {
 }
 
 type ReturnMessage struct {
-	Message string
-	Data    interface{}
-	Error   bool
+	Message string      `json:"message"`
+	Data    interface{} `json:"data"`
+	Error   bool        `json:"error"`
 }
 
 func (c *Core) PrintData(mess string, e bool, data interface{}) ReturnMessage {

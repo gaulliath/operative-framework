@@ -796,6 +796,66 @@ func LoadMonitorCommandMenu(line string, module Module, s *Session) []string {
 	return nil
 }
 
+func LoadTrackerCommandMenu(line string, module Module, s *Session) []string {
+	arguments := strings.Split(strings.TrimSpace(line), " ")
+	switch arguments[1] {
+	case "list":
+		t := s.Stream.GenerateTable()
+		t.SetOutputMirror(os.Stdout)
+		t.SetAllowedColumnLengths([]int{30, 30, 30})
+		t.AppendHeader(table.Row{
+			"OPF ID",
+			"IDENTIFIER",
+			"DESCRIPTION",
+			"MEMORIES",
+		})
+
+		for _, track := range s.Tracker.Tracked {
+			t.AppendRow(table.Row{
+				track.Id,
+				track.Identifier,
+				track.Description,
+				len(track.Memories),
+			})
+		}
+
+		s.Stream.Render(t)
+		break
+	case "select":
+		if len(arguments) < 3 {
+			s.Stream.Error("Please use : tracker select <identifier>")
+			return nil
+		}
+		options := strings.SplitN(line, " ", 3)
+		tracker, err := s.GetTracker(options[2])
+		if err != nil {
+			s.Stream.Error(err.Error())
+			return nil
+		}
+
+		s.Tracker.Selected = tracker
+		s.Stream.Success("Tracker '" + tracker.Identifier + "' as selected at '" + time.Now().Format("2006-01-02 15:04:05") + "'")
+		break
+	case "positions":
+		if len(arguments) < 3 {
+			s.Stream.Error("Please use : tracker position <identifier>")
+			return nil
+		}
+		options := strings.SplitN(line, " ", 3)
+		tracker, err := s.GetTracker(options[2])
+		if err != nil {
+			s.Stream.Error(err.Error())
+			return nil
+		}
+
+		tracker.ViewPositions()
+		break
+
+	}
+
+	return nil
+}
+
 func LoadWebHookMenu(line string, module Module, s *Session) []string {
 	arguments := strings.Split(strings.TrimSpace(line), " ")
 	if len(arguments) < 2 {

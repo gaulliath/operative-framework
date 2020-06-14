@@ -2,6 +2,7 @@ package config
 
 type Config struct {
 	Api        ApiConfig
+	Tracker    TrackerConfig
 	Database   DataBase
 	Common     Common
 	Instagram  Network
@@ -46,4 +47,9 @@ type ApiConfig struct {
 	Key     string
 	SKey    string
 	Verbose string
+}
+
+type TrackerConfig struct {
+	Host string
+	Port string
 }

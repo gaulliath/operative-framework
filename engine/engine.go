@@ -1,6 +1,8 @@
 package engine
 
 import (
+	"net/http"
+	"os"
 	"time"
 
 	"github.com/graniet/operative-framework/config"
@@ -45,6 +47,10 @@ func New() *session.Session {
 		Config:    conf,
 		Alias:     make(map[string]string),
 		Analytics: &session.Analytics{},
+	}
+	s.Tracker.Server = &http.Server{
+		Addr:    os.Getenv("TRACKING_HOST") + ":" + os.Getenv("TRACKING_PORT"),
+		Handler: s.GetTrackerRouter(),
 	}
 	s.Stream.Sess = &s
 	s.Connection.Migrate()

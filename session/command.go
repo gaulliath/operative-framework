@@ -58,6 +58,8 @@ func (s *Session) ParseCommand(line string) []string {
 			LoadAnalyticsWebBased(line, module, s)
 		} else if strings.HasPrefix(line, "monitor ") {
 			LoadMonitorCommandMenu(line, module, s)
+		} else if strings.HasPrefix(line, "tracker ") {
+			LoadTrackerCommandMenu(line, module, s)
 		} else if strings.HasPrefix(line, "result ") {
 			LoadResultMenu(line, module, s)
 		} else {

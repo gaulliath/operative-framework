@@ -317,7 +317,12 @@ func main() {
 			sess.Stream.Standard("Mode '" + strings.ToLower(*mode) + "' as started now...")
 			select {}
 		case "tracking":
-			break;
+			sess.Stream.Standard("running operative framework api...")
+			sess.Stream.Standard("[API] available : " + apiRest.Server.Addr)
+			go apiRest.Start()
+			sess.Stream.Standard("[GUI] Tracking : " + sess.GetTrackingUrlWithParam())
+			sess.ServeTrackerGUI()
+			break
 		case "console":
 			break
 		case "api":
@@ -391,6 +396,13 @@ func main() {
 		} else if line == "api stop" {
 			_ = apiRest.Server.Close()
 			sess.Information.SetApi(false)
+		} else if line == "tracker run" {
+			sess.Stream.Success("[GUI] Tracking : " + sess.GetTrackingUrlWithParam())
+			go sess.ServeTrackerGUI()
+			sess.Information.SetTracker(true)
+		} else if line == "tracker stop" {
+			_ = sess.Tracker.Server.Close()
+			sess.Information.SetTracker(false)
 		} else {
 			if !engine.CommandBase(line, sess) {
 				sess.ParseCommand(line)

@@ -68,6 +68,11 @@ func ViewInformation(s *session.Session) {
 		apiStatus = color.Green("online")
 	}
 
+	trackerStatus := color.Red("offline")
+	if s.Information.TrackerStatus {
+		trackerStatus = color.Green("online")
+	}
+
 	t.AppendRow(table.Row{
 		"OPF",
 		s.Config.Common.BaseDirectory,
@@ -87,6 +92,10 @@ func ViewInformation(s *session.Session) {
 	t.AppendRow(table.Row{
 		"API",
 		apiStatus,
+	})
+	t.AppendRow(table.Row{
+		"TRACKER",
+		trackerStatus,
 	})
 	t.AppendRow(table.Row{
 		"EVENT(S)",

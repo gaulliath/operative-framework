@@ -38,6 +38,9 @@ func ParseConfig() (Config, error) {
 	conf.Api.Port = os.Getenv("API_PORT")
 	conf.Api.Verbose = os.Getenv("API_VERBOSE")
 
+	conf.Tracker.Host = os.Getenv("TRACKING_HOST")
+	conf.Tracker.Port = os.Getenv("TRACKING_PORT")
+
 	conf.Common.HistoryFile = os.Getenv("OPERATIVE_HISTORY")
 
 	conf.Database.Driver = os.Getenv("DB_DRIVER")

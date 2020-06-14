@@ -1,6 +1,7 @@
 package session
 
 import (
+	"net/http"
 	"time"
 
 	"github.com/chzyer/readline"
@@ -9,12 +10,17 @@ import (
 )
 
 type Session struct {
-	Id                 int         `json:"-" gorm:"primary_key:yes;column:id;AUTO_INCREMENT"`
-	SessionName        string      `json:"session_name"`
-	Information        Information `json:"information"`
-	Connection         Connection  `json:"-" sql:"-"`
-	Client             OpfClient
-	Tracker            []*Tracking       `json:"tracker"`
+	Id          int         `json:"-" gorm:"primary_key:yes;column:id;AUTO_INCREMENT"`
+	SessionName string      `json:"session_name"`
+	Information Information `json:"information"`
+	Connection  Connection  `json:"-" sql:"-"`
+	Client      OpfClient
+	Tracker     struct {
+		Position []Position   `json:"position"`
+		Selected *Tracking    `json:"selected"`
+		Tracked  []*Tracking  `json:"tracked"`
+		Server   *http.Server `json:"-"`
+	} `json:"tracker"`
 	Events             Events            `json:"events"`
 	SourceFile         string            `json:"source_file"`
 	Config             config.Config     `json:"config" sql:"-"`
@@ -53,6 +59,7 @@ type SessionExport struct {
 
 type Information struct {
 	ApiStatus      bool `json:"api_status"`
+	TrackerStatus  bool `json:"tracker_status"`
 	ModuleLaunched int  `json:"module_launched"`
 	Event          int  `json:"event"`
 }
@@ -84,6 +91,11 @@ func (i *Information) AddModule() {
 
 func (i *Information) SetApi(s bool) {
 	i.ApiStatus = s
+	return
+}
+
+func (i *Information) SetTracker(s bool) {
+	i.TrackerStatus = s
 	return
 }
 
