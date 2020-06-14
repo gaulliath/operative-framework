@@ -16,3 +16,5 @@ Documentation as been updated [here](http://docs.operative-framework.com/) (*doc
 [WhatsApp : comment un hack permet de trouver les contacts de personnalités publiques](https://www.numerama.com/tech/535622-whatsapp-comment-un-hack-permet-de-trouver-les-contacts-de-personnalites-publiques.html)
 
 [Les numéros de personnalités politiques « aspirés » sur WhatsApp](https://www.lepoint.fr/high-tech-internet/les-numeros-de-personnalites-politiques-aspires-sur-whatsapp-24-07-2019-2326637_47.php)
+
+[Nouvelle version d’Operative framework, un outil d’investigation numérique](https://www.zataz.com/operative-framework/)
