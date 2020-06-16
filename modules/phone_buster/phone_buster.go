@@ -93,7 +93,7 @@ func (module *PhoneBuster) Start() {
 	if argumentFilePath.Value != "" {
 		file, errPath = os.OpenFile(strings.TrimSpace(argumentFilePath.Value), os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
 	} else {
-		file, errPath = os.OpenFile("/Users/graniet/Desktop/VCARD/MRROBOT_1.vcf", os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
+		file, errPath = os.OpenFile("", os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
 	}
 	if errPath != nil {
 		fmt.Println(errPath.Error())
