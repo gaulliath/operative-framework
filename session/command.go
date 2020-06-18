@@ -27,7 +27,7 @@ func (s *Session) ParseCommand(line string) []string {
 		alias, err := s.GetAlias(moduleName)
 		module, err = s.SearchModule(alias)
 		if err != nil {
-			if moduleName == "help" || moduleName == "?" {
+			if moduleName == "help" || moduleName == "?" || moduleName == "h" {
 				module, err = s.SearchModule("session_help")
 			}
 		}
@@ -80,7 +80,7 @@ func (s *Session) ParseCommand(line string) []string {
 	} else if strings.ToLower(line) == "ls" {
 		s.ListModules()
 		return nil
-	} else if moduleName == "help" || moduleName == "?" {
+	} else if moduleName == "help" || moduleName == "?" || moduleName == "h" {
 		module.Start()
 		filter, err := module.GetParameter("FILTER")
 		if err == nil && filter.Value != "" {

@@ -212,6 +212,7 @@ func (s *Session) PushPrompt() {
 			readline.PcItem("update",
 				readline.PcItemDynamic(s.ReadLineAutoCompleteTargets())),
 			readline.PcItem("list"),
+			readline.PcItem("type"),
 			readline.PcItem("link",
 				readline.PcItemDynamic(s.ReadLineAutoCompleteTargets(),
 					readline.PcItemDynamic(s.ReadLineAutoCompleteTargets()))),

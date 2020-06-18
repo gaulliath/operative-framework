@@ -67,6 +67,20 @@ func LoadTargetMenu(line string, module Module, s *Session) []string {
 		}
 	case "list":
 		s.ListTargets()
+	case "type":
+		t := s.Stream.GenerateTable()
+		t.SetOutputMirror(os.Stdout)
+		t.SetAllowedColumnLengths([]int{40, 30, 30, 30})
+		t.AppendHeader(table.Row{
+			"TYPE",
+		})
+		for _, tp := range s.ListType() {
+			t.AppendRow(table.Row{
+				tp,
+			})
+		}
+		s.Stream.Render(t)
+		return nil
 	case "link":
 		value := strings.SplitN(strings.TrimSpace(line), " ", 4)
 		if len(arguments) < 4 {
