@@ -21,6 +21,8 @@ type Session struct {
 		Tracked  []*Tracking  `json:"tracked"`
 		Server   *http.Server `json:"-"`
 	} `json:"tracker"`
+	Instances          []*Instance       `json:"instances"`
+	CurrentInstance    *Instance         `json:"current_instance"`
 	Events             Events            `json:"events"`
 	SourceFile         string            `json:"source_file"`
 	Config             config.Config     `json:"config" sql:"-"`
@@ -36,7 +38,6 @@ type Session struct {
 	Services           []Listener        `json:"services"`
 	Alias              map[string]string `json:"-" sql:"-"`
 	Interval           []*Interval       `json:"-"`
-	Analytics          *Analytics        `json:"analytics"`
 	LastAnalyticsModel string            `json:"analytics_model"`
 	LastAnalyticsLinks string            `json:"last_analytics_links"`
 	WebHooks           []*WebHook        `json:"web_hooks"`

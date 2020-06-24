@@ -38,8 +38,10 @@ func (module *HeaderRetrievalModule) Description() string {
 	return "Get headers from selected URL"
 }
 
-func (module *HeaderRetrievalModule) GetType() string {
-	return "url"
+func (module *HeaderRetrievalModule) GetType() []string {
+	return []string{
+		session.T_TARGET_URL,
+	}
 }
 
 func (module *HeaderRetrievalModule) GetInformation() session.ModuleInformation {
@@ -61,15 +63,10 @@ func (module *HeaderRetrievalModule) Start() {
 		return
 	}
 
-	if target.GetType() != module.GetType() {
-		module.Stream.Error("Target with type '" + target.GetType() + "' isn't valid module need '" + module.GetType() + "' type.")
-		return
-	}
-
 	_, err = url.ParseRequestURI(target.GetName())
 	if err != nil {
 		module.Stream.Error("Argument 'TARGET' isn't valid.")
-		module.SetParameter("TARGET", "")
+		_, _ = module.SetParameter("TARGET", "")
 		return
 	}
 
@@ -93,15 +90,12 @@ func (module *HeaderRetrievalModule) Start() {
 	t.AppendHeader(table.Row{"KEY", "VALUE"})
 	for index, header := range r.Response().Header {
 		t.AppendRow([]interface{}{index, header})
-		separator := target.GetSeparator()
 		if len(header) > 0 {
+			result := target.NewResult()
 			for _, l := range header {
-				result := session.TargetResults{
-					Header: "Index" + separator + "Header",
-					Value:  index + separator + l,
-				}
-				target.Save(module, result)
+				result.Set(index, l)
 			}
+			result.Save(module, target)
 		}
 	}
 	module.Stream.Render(t)

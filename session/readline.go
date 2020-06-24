@@ -136,7 +136,7 @@ func (s *Session) ReadLineAutoCompleteResults() func(string) []string {
 				for _, target := range s.Targets {
 					for _, module := range target.Results {
 						for _, result := range module {
-							if result.Value != "" {
+							if len(result.Values) > 0 {
 								returnResult = append(returnResult, result.ResultId)
 							}
 						}
@@ -152,7 +152,7 @@ func (s *Session) ReadLineAutoCompleteResults() func(string) []string {
 		}
 		for _, module := range target.Results {
 			for _, result := range module {
-				if result.Value != "" {
+				if len(result.Values) > 0 {
 					returnResult = append(returnResult, result.ResultId)
 				}
 			}
@@ -240,7 +240,8 @@ func (s *Session) PushPrompt() {
 			readline.PcItem("filter",
 				readline.PcItemDynamic(s.ReadLineAutoCompleteFilters())),
 			readline.PcItem("set",
-				readline.PcItem("TARGET")),
+				readline.PcItem("TARGET"),
+				readline.PcItem("DISABLE_OUTPUT")),
 			readline.PcItem("run"),
 		),
 		readline.PcItemDynamic(s.ReadLineAutoCompleteListModules(),
@@ -250,7 +251,8 @@ func (s *Session) PushPrompt() {
 			readline.PcItem("filter",
 				readline.PcItemDynamic(s.ReadLineAutoCompleteFilters())),
 			readline.PcItem("set",
-				readline.PcItem("TARGET")),
+				readline.PcItem("TARGET"),
+				readline.PcItem("DISABLE_OUTPUT")),
 			readline.PcItem("run"),
 		),
 		readline.PcItem("help"),

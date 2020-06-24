@@ -33,8 +33,10 @@ func (module *ReportJSON) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *ReportJSON) GetType() string {
-	return ""
+func (module *ReportJSON) GetType() []string {
+	return []string{
+		session.T_TARGET_BLANK,
+	}
 }
 
 func (module *ReportJSON) GetInformation() session.ModuleInformation {

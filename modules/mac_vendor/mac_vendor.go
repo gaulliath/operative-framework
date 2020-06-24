@@ -37,8 +37,10 @@ func (module *MacVendorModule) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *MacVendorModule) GetType() string {
-	return "mac"
+func (module *MacVendorModule) GetType() []string {
+	return []string{
+		session.T_TARGET_MAC,
+	}
 }
 
 func (module *MacVendorModule) GetInformation() session.ModuleInformation {
@@ -93,11 +95,10 @@ func (module *MacVendorModule) Start() {
 		})
 		module.Stream.Render(t)
 
-		results := session.TargetResults{
-			Header: "MAC" + mac.GetSeparator() + "VENDOR",
-			Value:  mac.GetName() + mac.GetSeparator() + string(macString),
-		}
-		mac.Save(module, results)
+		result := mac.NewResult()
+		result.Set("MAC", mac.GetName())
+		result.Set("VENDOR", string(macString))
+		result.Save(module, mac)
 		return
 	}
 

@@ -36,8 +36,10 @@ func (module *ReportPDF) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *ReportPDF) GetType() string {
-	return ""
+func (module *ReportPDF) GetType() []string {
+	return []string{
+		session.T_TARGET_BLANK,
+	}
 }
 
 func (module *ReportPDF) GetInformation() session.ModuleInformation {
@@ -139,7 +141,7 @@ func (module *ReportPDF) Start() {
 		for _, mod := range module.Sess.Modules {
 			pdf.CellFormat(50, 6, mod.Name(), "1", 0, "", false, 0, "")
 			pdf.CellFormat(120, 6, mod.Description(), "1", 0, "", false, 0, "")
-			pdf.CellFormat(25, 6, mod.GetType(), "1", 0, "", false, 0, "")
+			pdf.CellFormat(25, 6, strings.Join(mod.GetType(), ","), "1", 0, "", false, 0, "")
 			pdf.Ln(-1)
 		}
 	}
@@ -172,8 +174,8 @@ func (module *ReportPDF) Start() {
 			SubTitle("results listed bellow:")
 			if len(result) > 0 {
 				for _, res := range result {
-					headers := strings.Split(result[0].Header, target.GetSeparator())
-					values := strings.Split(res.Value, target.GetSeparator())
+					headers := strings.Split(result[0].GetCompactKeys(), target.GetSeparator())
+					values := strings.Split(res.GetCompactValues(), target.GetSeparator())
 					for k, h := range headers {
 						pdf.CellFormat(80, 7, h, "1", 0, "", false, 0, "")
 						pdf.CellFormat(110, 7, values[k], "1", 0, "", false, 0, "")

@@ -91,8 +91,10 @@ func (module *InfoGreffeRegistration) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *InfoGreffeRegistration) GetType() string {
-	return "text"
+func (module *InfoGreffeRegistration) GetType() []string {
+	return []string{
+		session.T_TARGET_TEXT,
+	}
 }
 
 func (module *InfoGreffeRegistration) GetInformation() session.ModuleInformation {
@@ -141,8 +143,6 @@ func (module *InfoGreffeRegistration) Start() {
 		module.Stream.Error(err.Error())
 		return
 	}
-
-	separator := keyword.GetSeparator()
 
 	for _, record := range results.Records {
 		t := module.Stream.GenerateTable()
@@ -194,11 +194,11 @@ func (module *InfoGreffeRegistration) Start() {
 
 		module.Stream.Render(t)
 
-		result := session.TargetResults{
-			Header: "NAME" + separator + "SIREN" + separator + "ADDRESS" + separator + "CITY",
-			Value:  record.Fields.Denomination + separator + record.Fields.Siren + separator + record.Fields.Adresse + separator + record.Fields.Ville,
-		}
-		keyword.Save(module, result)
+		result := keyword.NewResult()
+		result.Set("NAME", record.Fields.Denomination)
+		result.Set("SIREN", record.Fields.Siren)
+		result.Set("CITY", record.Fields.Ville)
+		result.Save(module, keyword)
 	}
 
 	module.Stream.Success(strconv.Itoa(len(results.Records)) + " records found.")

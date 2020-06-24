@@ -74,8 +74,10 @@ func (module *ToolsSuggesterModule) Description() string {
 	return "Search possible tools for exploit target"
 }
 
-func (module *ToolsSuggesterModule) GetType() string {
-	return "website"
+func (module *ToolsSuggesterModule) GetType() []string {
+	return []string{
+		session.T_TARGET_WEBSITE,
+	}
 }
 
 func (module *ToolsSuggesterModule) GetInformation() session.ModuleInformation {
@@ -147,11 +149,13 @@ func (module *ToolsSuggesterModule) Start() {
 							Tools:      obj.Tools,
 							Type:       obj.Name,
 						})
-						trgRest := session.TargetResults{
-							Header: "URL" + target.GetSeparator() + "RESPONSE" + target.GetSeparator() + "TOOLS" + target.GetSeparator() + "CMS",
-							Value:  url + target.GetSeparator() + strconv.Itoa(res.StatusCode) + target.GetSeparator() + obj.Tools + target.GetSeparator() + obj.Name,
-						}
-						target.Save(module, trgRest)
+						trgRest := target.NewResult()
+						trgRest.Set("URL", url)
+						trgRest.Set("RESPONSE", strconv.Itoa(res.StatusCode))
+						trgRest.Set("TOOLS", obj.Tools)
+						trgRest.Set("CMS", obj.Name)
+						trgRest.Save(module, target)
+
 						module.Results = append(module.Results, obj.Tools)
 					}
 				} else {
@@ -161,11 +165,13 @@ func (module *ToolsSuggesterModule) Start() {
 						Tools:      obj.Tools,
 						Type:       obj.Name,
 					})
-					trgRest := session.TargetResults{
-						Header: "URL" + target.GetSeparator() + "RESPONSE" + target.GetSeparator() + "TOOLS" + target.GetSeparator() + "CMS",
-						Value:  url + target.GetSeparator() + strconv.Itoa(res.StatusCode) + target.GetSeparator() + obj.Tools + target.GetSeparator() + obj.Name,
-					}
-					target.Save(module, trgRest)
+
+					result := target.NewResult()
+					result.Set("URL", url)
+					result.Set("RESPONSE", strconv.Itoa(res.StatusCode))
+					result.Set("TOOL", obj.Tools)
+					result.Set("CMS", obj.Name)
+					result.Save(module, target)
 					module.Results = append(module.Results, obj.Tools)
 					continue
 				}

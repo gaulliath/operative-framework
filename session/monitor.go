@@ -12,19 +12,19 @@ import (
 type Monitors []*Monitor
 
 type Monitor struct {
-	Session   *Session         `json:"-"`
-	MonitorId string           `json:"monitor_id"`
-	Search    []string         `json:"search"`
-	Strict    bool             `json:"strict"`
-	Status    bool             `json:"status"`
-	Result    []*TargetResults `json:"-"`
-	CreatedAt time.Time        `json:"created_at"`
-	UpdatedAt time.Time        `json:"updated_at"`
+	Session   *Session      `json:"-"`
+	MonitorId string        `json:"monitor_id"`
+	Search    []string      `json:"search"`
+	Strict    bool          `json:"strict"`
+	Status    bool          `json:"status"`
+	Result    []*OpfResults `json:"-"`
+	CreatedAt time.Time     `json:"created_at"`
+	UpdatedAt time.Time     `json:"updated_at"`
 }
 
 type MonitorMatch struct {
-	Monitor *Monitor       `json:"monitor"`
-	Result  *TargetResults `json:"result"`
+	Monitor *Monitor    `json:"monitor"`
+	Result  *OpfResults `json:"result"`
 }
 
 func (s *Session) NewMonitor(scope string) *Monitor {
@@ -112,21 +112,18 @@ func (m *Monitor) ViewResults() {
 	t.SetOutputMirror(os.Stdout)
 	t.SetAllowedColumnLengths([]int{40, 30, 30, 30})
 	headerRow := table.Row{}
+
 	for _, result := range m.Result {
 		resRow := table.Row{}
-		separator := m.Session.GetSeparator()
-		header := strings.Split(result.Header, separator)
-		res := strings.Split(result.Value, separator)
-		if len(headerRow) < 1 {
-			for _, h := range header {
-				headerRow = append(headerRow, h)
-			}
-			headerRow = append(headerRow, "result_id")
-			headerRow = append(headerRow, "target_id")
-			t.AppendHeader(headerRow)
+		for _, key := range result.GetKeys() {
+			headerRow = append(headerRow, key)
 		}
-		for _, r := range res {
-			resRow = append(resRow, r)
+		headerRow = append(headerRow, "result_id")
+		headerRow = append(headerRow, "target_id")
+		t.AppendHeader(headerRow)
+
+		for _, value := range result.Values {
+			resRow = append(resRow, value.Value)
 		}
 		resRow = append(resRow, result.ResultId)
 		resRow = append(resRow, result.TargetId)
@@ -152,17 +149,19 @@ func (m *Monitor) Checking() {
 					for _, result := range results {
 						if result.CreatedAt.After(m.CreatedAt) {
 							for _, scope := range m.Search {
-								if strings.Contains(strings.ToLower(result.Value), strings.ToLower(scope)) {
-									if !m.HasResult(result.ResultId) {
-										m.Result = append(m.Result, result)
-										m.UpdatedAt = time.Now()
+								for _, value := range result.Values {
+									if strings.Contains(strings.ToLower(value.Value), strings.ToLower(scope)) {
+										if !m.HasResult(result.ResultId) {
+											m.Result = append(m.Result, result)
+											m.UpdatedAt = time.Now()
 
-										match := MonitorMatch{
-											Monitor: m,
-											Result:  result,
+											match := MonitorMatch{
+												Monitor: m,
+												Result:  result,
+											}
+
+											m.Session.NewEvent(MONITOR_MATCH, match)
 										}
-
-										m.Session.NewEvent(MONITOR_MATCH, match)
 									}
 								}
 							}

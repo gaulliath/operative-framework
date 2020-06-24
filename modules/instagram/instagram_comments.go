@@ -36,8 +36,10 @@ func (module *InstagramComments) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *InstagramComments) GetType() string {
-	return "instagram"
+func (module *InstagramComments) GetType() []string {
+	return []string{
+		session.T_TARGET_INSTAGRAM,
+	}
 }
 
 func (module *InstagramComments) GetInformation() session.ModuleInformation {
@@ -79,7 +81,6 @@ func (module *InstagramComments) Start() {
 	}
 
 	t := module.Sess.Stream.GenerateTable()
-	separator := target.GetSeparator()
 	t.SetOutputMirror(os.Stdout)
 	t.SetAllowedColumnLengths([]int{30, 30, 30, 30, 30})
 	t.AppendHeader(table.Row{
@@ -100,12 +101,11 @@ func (module *InstagramComments) Start() {
 							c.Text,
 						})
 
-						result := session.TargetResults{
-							Header: "ITEM ID" + separator + "USERNAME" + separator + "COMMENT",
-							Value:  item.ID + separator + c.User.Username + separator + c.Text,
-						}
-
-						target.Save(module, result)
+						result := target.NewResult()
+						result.Set("ITEM ID", item.ID)
+						result.Set("USERNAME", c.User.Username)
+						result.Set("COMMENT", c.Text)
+						result.Save(module, target)
 					}
 				}
 			}

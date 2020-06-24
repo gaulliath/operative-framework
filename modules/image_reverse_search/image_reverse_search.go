@@ -168,8 +168,10 @@ func (module *ImageReverseModule) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *ImageReverseModule) GetType() string {
-	return "file"
+func (module *ImageReverseModule) GetType() []string {
+	return []string{
+		session.T_TARGET_FILE,
+	}
 }
 
 func (module *ImageReverseModule) GetInformation() session.ModuleInformation {
@@ -206,12 +208,10 @@ func (module *ImageReverseModule) Start() {
 			t.AppendRow(table.Row{
 				url,
 			})
-			res := session.TargetResults{
-				Header: "URL" + target.GetSeparator(),
-				Value:  url + target.GetSeparator(),
-			}
+			result := target.NewResult()
+			result.Set("URL", url)
+			result.Save(module, target)
 			module.Results = append(module.Results, url)
-			target.Save(module, res)
 		}
 		module.sess.Stream.Render(t)
 	} else {

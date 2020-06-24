@@ -39,8 +39,10 @@ func (module *TwitterRetweet) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *TwitterRetweet) GetType() string {
-	return "twitter"
+func (module *TwitterRetweet) GetType() []string {
+	return []string{
+		session.T_TARGET_TWITTER,
+	}
 }
 
 func (module *TwitterRetweet) GetInformation() session.ModuleInformation {
@@ -153,11 +155,14 @@ func (module *TwitterRetweet) Start() {
 			tweet.CreatedAt,
 		})
 
-		result := session.TargetResults{
-			Header: "tweet" + target.GetSeparator() + "user" + target.GetSeparator() + "date" + target.GetSeparator() + "type" + target.GetSeparator() + "latitude" + target.GetSeparator() + "longitude",
-			Value:  text + target.GetSeparator() + user + target.GetSeparator() + tweet.CreatedAt + target.GetSeparator() + tweetType + target.GetSeparator() + latitude + target.GetSeparator() + longitude,
-		}
-		target.Save(module, result)
+		result := target.NewResult()
+		result.Set("tweet", text)
+		result.Set("user", user)
+		result.Set("date", tweet.CreatedAt)
+		result.Set("type", tweetType)
+		result.Set("latitude", latitude)
+		result.Set("longitude", longitude)
+		result.Save(module, target)
 	}
 	module.Sess.Stream.Render(t)
 

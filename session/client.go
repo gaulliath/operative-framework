@@ -3,6 +3,8 @@ package session
 import (
 	"bytes"
 	"encoding/gob"
+	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
@@ -81,4 +83,8 @@ func (c *OpfClient) Perform(method string, uri string) (*http.Response, error) {
 		req.Header.Set(header, content)
 	}
 	return c.Client.Do(req)
+}
+
+func (c *OpfClient) Read(r io.ReadCloser) ([]byte, error) {
+	return ioutil.ReadAll(r)
 }

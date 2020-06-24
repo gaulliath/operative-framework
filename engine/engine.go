@@ -43,10 +43,9 @@ func New() *session.Session {
 			ORM:        db,
 			Migrations: make(map[string]interface{}),
 		},
-		Client:    session.GetOpfClient(),
-		Config:    conf,
-		Alias:     make(map[string]string),
-		Analytics: &session.Analytics{},
+		Client: session.GetOpfClient(),
+		Config: conf,
+		Alias:  make(map[string]string),
 	}
 	s.Tracker.Server = &http.Server{
 		Addr:    os.Getenv("TRACKING_HOST") + ":" + os.Getenv("TRACKING_PORT"),
@@ -84,9 +83,8 @@ func Load(id int) *session.Session {
 			ORM:        db,
 			Migrations: make(map[string]interface{}),
 		},
-		Client:    session.GetOpfClient(),
-		Config:    conf,
-		Analytics: &session.Analytics{},
+		Client: session.GetOpfClient(),
+		Config: conf,
 	}
 	s.Connection.ORM.Where(&session.Session{
 		Id: id,
@@ -105,13 +103,13 @@ func Load(id int) *session.Session {
 	if len(s.Targets) > 0 {
 		for k, target := range s.Targets {
 			var linked []session.Linking
-			target.Results = make(map[string][]*session.TargetResults)
+			target.Results = make(map[string][]*session.OpfResults)
 			s.Connection.ORM.Where("session_id = ?", id).Where("target_base = ?", target.GetId()).Find(&linked)
 			s.Targets[k].TargetLinked = linked
 			s.Targets[k].Sess = &s
 			if len(s.Modules) > 0 {
 				for _, module := range s.Modules {
-					var results []*session.TargetResults
+					var results []*session.OpfResults
 					s.Connection.ORM.Where("session_id = ?", id).Where("module_name = ?", module.Name()).Where("target_id = ?", target.GetId()).Find(&results)
 					if len(results) > 0 {
 						target.Results[module.Name()] = results

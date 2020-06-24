@@ -31,8 +31,10 @@ func (module *SampleModule) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *SampleModule) GetType() string {
-	return "twitter"
+func (module *SampleModule) GetType() []string {
+	return []string{
+		session.T_TARGET_TWITTER,
+	}
 }
 
 func (module *SampleModule) GetInformation() session.ModuleInformation {

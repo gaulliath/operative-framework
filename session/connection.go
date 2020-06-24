@@ -30,7 +30,7 @@ func (c *Connection) LoadMigration() {
 	c.Migrations["sessions"] = Session{}
 	c.Migrations["targets"] = Target{}
 	c.Migrations["target_links"] = Linking{}
-	c.Migrations["target_results"] = TargetResults{}
+	c.Migrations["target_results"] = OpfResults{}
 }
 
 func (c *Connection) Migrate() bool {

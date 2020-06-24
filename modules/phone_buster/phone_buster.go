@@ -40,8 +40,10 @@ func (module *PhoneBuster) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *PhoneBuster) GetType() string {
-	return "phone"
+func (module *PhoneBuster) GetType() []string {
+	return []string{
+		session.T_TARGET_PHONE,
+	}
 }
 
 func (module *PhoneBuster) GetInformation() session.ModuleInformation {

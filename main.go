@@ -7,7 +7,6 @@ import (
 	"github.com/chzyer/readline"
 	"github.com/fatih/color"
 	"github.com/graniet/operative-framework/api"
-	"github.com/graniet/operative-framework/compiler"
 	"github.com/graniet/operative-framework/cron"
 	"github.com/graniet/operative-framework/engine"
 	"github.com/graniet/operative-framework/export"
@@ -112,11 +111,6 @@ func main() {
 		Help:     "Print help",
 	})
 
-	scripts := parser.String("", "opf", &argparse.Options{
-		Required: false,
-		Help:     "Run script before prompt starting",
-	})
-
 	file := parser.String("f", "file", &argparse.Options{
 		Required: false,
 		Help:     "Source file",
@@ -203,6 +197,10 @@ func main() {
 		return
 	}
 
+	if *verbose {
+		sess.Stream.Verbose = false
+	}
+
 	if *execute != "" {
 		if *target == "" {
 			sess.Stream.Error("'-e/--execute' argument need a target argument '-t/--target'")
@@ -214,7 +212,7 @@ func main() {
 			return
 		}
 
-		target, err := sess.AddTarget(module.GetType(), *target)
+		target, err := sess.AddTarget(module.GetType()[0], *target)
 		if err != nil {
 			sess.Stream.Error(err.Error())
 			return
@@ -250,10 +248,11 @@ func main() {
 		if *csvExport {
 			sess.Stream.CSV = true
 		}
+		sess.NewInstance(module.Name())
 		module.Start()
 
 		if *jsonExport {
-			e := export.JSON(sess, module)
+			e := export.JSON(sess)
 			j, err := json.Marshal(e)
 			if err == nil {
 				print(string(j))
@@ -275,10 +274,6 @@ func main() {
 			sess.Stream.Standard("available at : " + apiRest.Server.Addr)
 			sess.Information.SetApi(true)
 		}
-	}
-
-	if *scripts != "" {
-		compiler.Run(sess, *scripts)
 	}
 
 	// Checking if source file exists in argv
@@ -341,16 +336,12 @@ func main() {
 		return
 	}
 
-	if *verbose {
-		sess.Stream.Verbose = false
-	} else {
-		if !*onlyModuleOutput {
-			c := color.New(color.FgYellow)
-			_, _ = c.Println("OPERATIVE FRAMEWORK - DIGITAL INVESTIGATION FRAMEWORK")
-			sess.Stream.WithoutDate("Loading a configuration file '" + configFile + "'")
-			sess.Stream.WithoutDate("Loading a cron job configuration '" + sess.Config.Common.ConfigurationJobs + "'")
-			sess.Stream.WithoutDate("Loading '" + strconv.Itoa(len(sess.Config.Modules)) + "' module(s) configuration(s)")
-		}
+	if !*onlyModuleOutput && sess.Stream.Verbose {
+		c := color.New(color.FgYellow)
+		_, _ = c.Println("OPERATIVE FRAMEWORK - DIGITAL INVESTIGATION FRAMEWORK")
+		sess.Stream.WithoutDate("Loading a configuration file '" + configFile + "'")
+		sess.Stream.WithoutDate("Loading a cron job configuration '" + sess.Config.Common.ConfigurationJobs + "'")
+		sess.Stream.WithoutDate("Loading '" + strconv.Itoa(len(sess.Config.Modules)) + "' module(s) configuration(s)")
 	}
 
 	l, errP := readline.NewEx(sess.Prompt)
@@ -364,9 +355,6 @@ func main() {
 
 	// Checking in background available monitor
 	go sess.WaitMonitor()
-
-	// Checking interval in background
-	go sess.WaitAnalytics()
 
 	if *eval != "" {
 		sess.ParseCommands(*eval)

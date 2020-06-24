@@ -33,8 +33,10 @@ func (module *HelpModule) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *HelpModule) GetType() string {
-	return "session"
+func (module *HelpModule) GetType() []string {
+	return []string{
+		session.T_TARGET_SESSION,
+	}
 }
 
 func (module *HelpModule) GetInformation() session.ModuleInformation {

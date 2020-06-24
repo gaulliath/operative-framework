@@ -22,10 +22,10 @@ type Module interface {
 	Name() string
 	Author() string
 	Description() string
-	GetType() string
+	GetType() []string
 	ListArguments()
-	GetExport() []TargetResults
-	SetExport(result TargetResults)
+	GetExport() []OpfResults
+	SetExport(result OpfResults)
 	GetResults() []string
 	GetInformation() ModuleInformation
 	CheckRequired() bool
@@ -52,7 +52,7 @@ type Param struct {
 
 type SessionModule struct {
 	Module
-	Export     []TargetResults
+	Export     []OpfResults
 	Parameters []Param  `json:"parameters"`
 	History    []string `json:"history"`
 	External   []string `json:"external"`
@@ -60,11 +60,11 @@ type SessionModule struct {
 }
 
 type ModuleInformation struct {
-	Name        string  `json:"name"`
-	Description string  `json:"description"`
-	Author      string  `json:"author"`
-	Type        string  `json:"type"`
-	Parameters  []Param `json:"parameters"`
+	Name        string   `json:"name"`
+	Description string   `json:"description"`
+	Author      string   `json:"author"`
+	Type        []string `json:"type"`
+	Parameters  []Param  `json:"parameters"`
 }
 
 func (s *Session) SearchModule(name string) (Module, error) {
@@ -170,11 +170,11 @@ func (module *SessionModule) ListArguments() {
 	t.Render()
 }
 
-func (module *SessionModule) SetExport(result TargetResults) {
+func (module *SessionModule) SetExport(result OpfResults) {
 	module.Export = append(module.Export, result)
 }
 
-func (module *SessionModule) GetExport() []TargetResults {
+func (module *SessionModule) GetExport() []OpfResults {
 	return module.Export
 }
 
@@ -196,11 +196,13 @@ func (s *Session) ListModules() {
 	t.AppendHeader(table.Row{
 		"NAME",
 		"DESCRIPTION",
+		"TYPE",
 	})
 	for _, module := range s.Modules {
 		t.AppendRow(table.Row{
 			module.Name(),
 			module.Description(),
+			strings.Join(module.GetType(), ","),
 		})
 	}
 	s.Stream.Render(t)

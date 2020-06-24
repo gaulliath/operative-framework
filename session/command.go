@@ -54,8 +54,6 @@ func (s *Session) ParseCommand(line string) []string {
 		} else if strings.HasPrefix(line, "modules ") {
 			LoadModuleByTypeMenu(line, module, s)
 
-		} else if strings.HasPrefix(line, "analytics ") {
-			LoadAnalyticsWebBased(line, module, s)
 		} else if strings.HasPrefix(line, "monitor ") {
 			LoadMonitorCommandMenu(line, module, s)
 		} else if strings.HasPrefix(line, "tracker ") {
@@ -81,6 +79,7 @@ func (s *Session) ParseCommand(line string) []string {
 		s.ListModules()
 		return nil
 	} else if moduleName == "help" || moduleName == "?" || moduleName == "h" {
+		s.NewInstance(module.Name())
 		module.Start()
 		filter, err := module.GetParameter("FILTER")
 		if err == nil && filter.Value != "" {
