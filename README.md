@@ -11,6 +11,9 @@ https://github.com/graniet/operative-framework/releases
 Documentation as been updated [here](http://docs.operative-framework.com/) (*docs.operative-framework.com*)
 
 #### USE CASE
+
+[En détournant l’app Happn, un hacker peut tracer votre chemin en temps réel](https://cyberguerre.numerama.com/5827-en-detournant-lapp-happn-un-hacker-peut-tracer-votre-chemin-en-temps-reel.html)
+
 [OSINT : des numéros de politiques françaises interceptés via Whatsapp](https://www.zataz.com/osint-des-numeros-de-politiques-francaises-interceptes-via-whatsapp/)
 
 [WhatsApp : comment un hack permet de trouver les contacts de personnalités publiques](https://www.numerama.com/tech/535622-whatsapp-comment-un-hack-permet-de-trouver-les-contacts-de-personnalites-publiques.html)
