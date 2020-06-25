@@ -2,14 +2,12 @@ package session
 
 import (
 	"errors"
+	"github.com/graniet/go-pretty/table"
 	"github.com/joho/godotenv"
 	"os"
 	"os/user"
 	"strconv"
 	"strings"
-	"time"
-
-	"github.com/graniet/go-pretty/table"
 )
 
 const (
@@ -24,10 +22,10 @@ type Module interface {
 	Name() string
 	Author() string
 	Description() string
-	GetType() string
+	GetType() []string
 	ListArguments()
-	GetExport() []TargetResults
-	SetExport(result TargetResults)
+	GetExport() []OpfResults
+	SetExport(result OpfResults)
 	GetResults() []string
 	GetInformation() ModuleInformation
 	CheckRequired() bool
@@ -37,6 +35,11 @@ type Module interface {
 	WithProgram(name string) bool
 	GetExternal() []string
 	CreateNewParam(name string, description string, value string, isRequired bool, paramType int)
+}
+
+type ModuleEvent struct {
+	ModuleName string
+	Results    interface{}
 }
 
 type Param struct {
@@ -49,7 +52,7 @@ type Param struct {
 
 type SessionModule struct {
 	Module
-	Export     []TargetResults
+	Export     []OpfResults
 	Parameters []Param  `json:"parameters"`
 	History    []string `json:"history"`
 	External   []string `json:"external"`
@@ -57,24 +60,11 @@ type SessionModule struct {
 }
 
 type ModuleInformation struct {
-	Name        string  `json:"name"`
-	Description string  `json:"description"`
-	Author      string  `json:"author"`
-	Type        string  `json:"type"`
-	Parameters  []Param `json:"parameters"`
-}
-
-type TargetResults struct {
-	Id         int    `json:"-" gorm:"primary_key:yes;column:id;AUTO_INCREMENT"`
-	SessionId  int    `json:"-" gorm:"session_id"`
-	ModuleName string `json:"module_name"`
-	ResultId   string `json:"result_id" gorm:"primary_key:yes;column:result_id"`
-	TargetId   string `json:"target_id" gorm:"target_id"`
-	Header     string `json:"key" gorm:"result_header"`
-	Value      string `json:"value" gorm:"result_value"`
-	Notes      []Note
-	Auxiliary  []string  `json:"-" sql:"-"`
-	CreatedAt  time.Time `json:"created_at"`
+	Name        string   `json:"name"`
+	Description string   `json:"description"`
+	Author      string   `json:"author"`
+	Type        []string `json:"type"`
+	Parameters  []Param  `json:"parameters"`
 }
 
 func (s *Session) SearchModule(name string) (Module, error) {
@@ -180,11 +170,11 @@ func (module *SessionModule) ListArguments() {
 	t.Render()
 }
 
-func (module *SessionModule) SetExport(result TargetResults) {
+func (module *SessionModule) SetExport(result OpfResults) {
 	module.Export = append(module.Export, result)
 }
 
-func (module *SessionModule) GetExport() []TargetResults {
+func (module *SessionModule) GetExport() []OpfResults {
 	return module.Export
 }
 
@@ -206,11 +196,13 @@ func (s *Session) ListModules() {
 	t.AppendHeader(table.Row{
 		"NAME",
 		"DESCRIPTION",
+		"TYPE",
 	})
 	for _, module := range s.Modules {
 		t.AppendRow(table.Row{
 			module.Name(),
 			module.Description(),
+			strings.Join(module.GetType(), ","),
 		})
 	}
 	s.Stream.Render(t)

@@ -54,8 +54,10 @@ func (module *SearchSploitModule) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *SearchSploitModule) GetType() string {
-	return "software"
+func (module *SearchSploitModule) GetType() []string {
+	return []string{
+		session.T_TARGET_SOFTWARE,
+	}
 }
 
 func (module *SearchSploitModule) GetInformation() session.ModuleInformation {
@@ -114,11 +116,10 @@ func (module *SearchSploitModule) Start() {
 			exploit.URL,
 		})
 
-		result := session.TargetResults{
-			Header: "TITLE" + target.GetSeparator() + "URL",
-			Value:  exploit.Title + target.GetSeparator() + exploit.URL,
-		}
-		target.Save(module, result)
+		result := target.NewResult()
+		result.Set("TITLE", exploit.Title)
+		result.Set("URL", exploit.URL)
+		result.Save(module, target)
 
 		module.Results = append(module.Results, exploit.Title)
 	}

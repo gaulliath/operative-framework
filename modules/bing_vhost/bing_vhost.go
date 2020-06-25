@@ -38,8 +38,10 @@ func (module *BingVirtualHostModule) Description() string {
 	return "Checking possible virtual host with target IP"
 }
 
-func (module *BingVirtualHostModule) GetType() string {
-	return "ip_address"
+func (module *BingVirtualHostModule) GetType() []string {
+	return []string{
+		session.T_TARGET_IP_ADDRESS,
+	}
 }
 
 func (module *BingVirtualHostModule) GetInformation() session.ModuleInformation {
@@ -63,11 +65,6 @@ func (module *BingVirtualHostModule) Start() {
 	target, err := module.sess.GetTarget(ipAddress.Value)
 	if err != nil {
 		module.sess.Stream.Error(err.Error())
-		return
-	}
-
-	if target.GetType() != module.GetType() {
-		module.Stream.Error("Target with type '" + target.GetType() + "' isn't valid module need '" + module.GetType() + "' type.")
 		return
 	}
 
@@ -101,11 +98,11 @@ func (module *BingVirtualHostModule) Start() {
 	doc.Find("cite").Each(func(i int, s *goquery.Selection) {
 		line := strings.TrimSpace(s.Text())
 		t.AppendRow(table.Row{line})
-		result := session.TargetResults{
-			Header: "Link",
-			Value:  line,
-		}
-		target.Save(module, result)
+
+		result := target.NewResult()
+		result.Set("Link", line)
+		result.Save(module, target)
+
 		module.Results = append(module.Results, line)
 	})
 	module.Stream.Render(t)

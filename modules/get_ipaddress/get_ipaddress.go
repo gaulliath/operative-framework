@@ -37,8 +37,10 @@ func (module *GetIpAddressModule) Description() string {
 	return "Get internet protocol address from specific target"
 }
 
-func (module *GetIpAddressModule) GetType() string {
-	return "website"
+func (module *GetIpAddressModule) GetType() []string {
+	return []string{
+		session.T_TARGET_WEBSITE,
+	}
 }
 
 func (module *GetIpAddressModule) GetInformation() session.ModuleInformation {
@@ -97,11 +99,10 @@ func (module *GetIpAddressModule) Start() {
 			t.AppendRow(table.Row{
 				ip.String(),
 			})
-			result := session.TargetResults{
-				Header: "IP" + target.GetSeparator(),
-				Value:  ip.String() + target.GetSeparator(),
-			}
-			target.Save(module, result)
+
+			result := target.NewResult()
+			result.Set("IP", ip.String())
+			result.Save(module, target)
 			module.Results = append(module.Results, ip.String())
 		}
 		module.sess.Stream.Render(t)

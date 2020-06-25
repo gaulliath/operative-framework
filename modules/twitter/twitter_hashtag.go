@@ -41,8 +41,10 @@ func (module *TwitterSearch) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *TwitterSearch) GetType() string {
-	return "twitter"
+func (module *TwitterSearch) GetType() []string {
+	return []string{
+		session.T_TARGET_TWITTER,
+	}
 }
 
 func (module *TwitterSearch) GetInformation() session.ModuleInformation {
@@ -56,13 +58,13 @@ func (module *TwitterSearch) GetInformation() session.ModuleInformation {
 	return information
 }
 
-func (module *TwitterSearch) ReplaceOrAdd(target *session.Target, newResult session.TargetResults) {
+func (module *TwitterSearch) ReplaceOrAdd(target *session.Target, newResult session.OpfResults) {
 	for moduleName, results := range target.Results {
 		if moduleName == module.Name() {
 			if len(results) > 0 {
 				for k, result := range results {
-					screenNameNew := strings.Split(newResult.Value, target.GetSeparator())[0]
-					screenName := strings.Split(result.Value, target.GetSeparator())[0]
+					screenNameNew := strings.Split(newResult.GetCompactValues(), target.GetSeparator())[0]
+					screenName := strings.Split(result.GetCompactValues(), target.GetSeparator())[0]
 					if screenName == screenNameNew {
 						target.Results[moduleName][k] = &newResult
 						return
@@ -150,12 +152,11 @@ func (module *TwitterSearch) Start() {
 			username,
 			value,
 		})
-		result := session.TargetResults{
-			Header:    "screeName" + target.GetSeparator() + "count",
-			Value:     username + target.GetSeparator() + strconv.Itoa(value),
-			Auxiliary: tweets[username],
-		}
-		module.ReplaceOrAdd(target, result)
+
+		result := target.NewResult()
+		result.Set("screeName", username)
+		result.Set("count", strconv.Itoa(value))
+		module.ReplaceOrAdd(target, *result)
 	}
 
 	module.Sess.Stream.Render(t)

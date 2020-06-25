@@ -54,8 +54,10 @@ func (module *DarkSearchModule) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *DarkSearchModule) GetType() string {
-	return "text"
+func (module *DarkSearchModule) GetType() []string {
+	return []string{
+		session.T_TARGET_TEXT,
+	}
 }
 
 func (module *DarkSearchModule) GetInformation() session.ModuleInformation {
@@ -125,11 +127,11 @@ func (module *DarkSearchModule) Start() {
 			element.Link,
 		})
 
-		results := session.TargetResults{
-			Header: "title" + text.GetSeparator() + "Resume" + text.GetSeparator() + "Link",
-			Value:  element.Title + text.GetSeparator() + element.Description + text.GetSeparator() + element.Link,
-		}
-		text.Save(module, results)
+		result := text.NewResult()
+		result.Set("title", element.Title)
+		result.Set("Resume", element.Description)
+		result.Set("Link", element.Link)
+		result.Save(module, text)
 	}
 
 	module.Stream.Render(t)

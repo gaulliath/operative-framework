@@ -38,8 +38,10 @@ func (module *VDNSearch) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *VDNSearch) GetType() string {
-	return "email"
+func (module *VDNSearch) GetType() []string {
+	return []string{
+		session.T_TARGET_EMAIL,
+	}
 }
 
 func (module *VDNSearch) GetInformation() session.ModuleInformation {
@@ -63,10 +65,6 @@ func (module *VDNSearch) Start() {
 	target, err := module.sess.GetTarget(targetId.Value)
 	if err != nil {
 		module.Stream.Error(err.Error())
-		return
-	}
-	if target.GetType() != module.GetType() {
-		module.Stream.Error("Target with type '" + target.GetType() + "' isn't valid module need '" + module.GetType() + "' type.")
 		return
 	}
 
@@ -116,11 +114,9 @@ func (module *VDNSearch) Start() {
 					}
 				})
 				if valueReturn != "" {
-					result := session.TargetResults{
-						Header: headerReturn,
-						Value:  valueReturn,
-					}
-					target.Save(module, result)
+					result := target.NewResult()
+					result.Set(headerReturn, valueReturn)
+					result.Save(module, target)
 					t.AppendRow(resRow)
 					resultFound = resultFound + 1
 				}

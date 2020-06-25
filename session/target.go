@@ -4,36 +4,58 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"os"
-	"strings"
-	"time"
-
 	"github.com/graniet/go-pretty/table"
 	"github.com/segmentio/ksuid"
+	"os"
+	"strings"
+)
+
+const (
+	T_TARGET_IP_ADDRESS = "ip_address"
+	T_TARGET_USERNAME   = "username"
+	T_TARGET_COMMAND    = "command"
+	T_TARGET_TEXT       = "text"
+	T_TARGET_WEBSITE    = "website"
+	T_TARGET_URL        = "url"
+	T_TARGET_HEADER     = "header"
+	T_TARGET_SEARCH     = "search"
+	T_TARGET_BLANK      = ""
+	T_TARGET_INSTAGRAM  = "instagram"
+	T_TARGET_FILE       = "file"
+	T_TARGET_ENTERPRISE = "enterprise"
+	T_TARGET_MAC        = "mac"
+	T_TARGET_EMAIL      = "email"
+	T_TARGET_PHONE      = "phone"
+	T_TARGET_COUNTRY    = "country"
+	T_TARGET_TWITTER    = "twitter"
+	T_TARGET_SESSION    = "session"
+	T_TARGET_PERSON     = "person"
+	T_TARGET_SOFTWARE   = "software"
+	T_TARGET_WHATSAPP   = "whatsapp"
 )
 
 type Target struct {
-	Id           int                         `json:"-" gorm:"primary_key:yes;column:id;AUTO_INCREMENT"`
-	SessionId    int                         `json:"-" gorm:"column:session_id"`
-	TargetId     string                      `json:"id" gorm:"column:target_id"`
-	Sess         *Session                    `json:"-" gorm:"-"`
-	Name         string                      `json:"name" gorm:"column:target_name"`
-	Type         string                      `json:"type" gorm:"column:target_type"`
-	Results      map[string][]*TargetResults `sql:"-" json:"results"`
-	TargetLinked []Linking                   `json:"target_linked" sql:"-"`
-	Notes        []Note                      `json:"notes" sql:"-"`
-	Tags         []Tags                      `json:"tags"  sql:"-"`
+	Id           int                      `json:"-" gorm:"primary_key:yes;column:id;AUTO_INCREMENT"`
+	SessionId    int                      `json:"-" gorm:"column:session_id"`
+	TargetId     string                   `json:"id" gorm:"column:target_id"`
+	Sess         *Session                 `json:"-" gorm:"-"`
+	Name         string                   `json:"name" gorm:"column:target_name"`
+	Type         string                   `json:"type" gorm:"column:target_type"`
+	Results      map[string][]*OpfResults `sql:"-" json:"results"`
+	TargetLinked []Linking                `json:"target_linked" sql:"-"`
+	Notes        []Note                   `json:"notes" sql:"-"`
+	Tags         []Tags                   `json:"tags"  sql:"-"`
 }
 
 type Linking struct {
-	LinkingId       int    `json:"-" gorm:"primary_key:yes;column:id;AUTO_INCREMENT"`
-	SessionId       int    `json:"session_id" gorm:"column:session_id"`
-	TargetBase      string `json:"target_base" gorm:"column:target_base"`
-	TargetId        string `json:"target_id" gorm:"column:target_id"`
-	TargetName      string `json:"target_name" gorm:"column:target_name"`
-	TargetType      string `json:"target_type" gorm:"column:target_type"`
-	TargetResultId  string `json:"target_result_id" gorm:"column:target_result_id"`
-	TargetResultsTo string `json:"target_results_to"`
+	LinkingId      int    `json:"-" gorm:"primary_key:yes;column:id;AUTO_INCREMENT"`
+	SessionId      int    `json:"session_id" gorm:"column:session_id"`
+	TargetBase     string `json:"target_base" gorm:"column:target_base"`
+	TargetId       string `json:"target_id" gorm:"column:target_id"`
+	TargetName     string `json:"target_name" gorm:"column:target_name"`
+	TargetType     string `json:"target_type" gorm:"column:target_type"`
+	TargetResultId string `json:"target_result_id" gorm:"column:target_result_id"`
+	OpfResultsTo   string `json:"target_results_to"`
 }
 
 func (Linking) TableName() string {
@@ -52,7 +74,7 @@ func (target *Target) GetType() string {
 	return target.Type
 }
 
-func (target *Target) GetResults() map[string][]*TargetResults {
+func (target *Target) GetResults() map[string][]*OpfResults {
 	return target.Results
 }
 
@@ -62,6 +84,13 @@ func (target *Target) GetLinked() []Linking {
 
 func (target *Target) PushLinked(t Linking) {
 	target.TargetLinked = append(target.TargetLinked, t)
+}
+
+func (target *Target) Is(t string) bool {
+	if strings.ToLower(target.GetType()) == strings.ToLower(t) {
+		return true
+	}
+	return false
 }
 
 func (target *Target) CheckType() bool {
@@ -114,7 +143,7 @@ func (target *Target) Link(target2 Linking) {
 	})
 }
 
-func (target *Target) GetResult(id string) (*TargetResults, error) {
+func (target *Target) GetResult(id string) (*OpfResults, error) {
 	for _, module := range target.Results {
 		for _, result := range module {
 			if result.ResultId == id {
@@ -122,7 +151,7 @@ func (target *Target) GetResult(id string) (*TargetResults, error) {
 			}
 		}
 	}
-	return &TargetResults{}, errors.New("Result as been not found.")
+	return &OpfResults{}, errors.New("Result as been not found.")
 }
 
 func (target *Target) Linked() {
@@ -149,12 +178,12 @@ func (target *Target) GetSeparator() string {
 	return base64.StdEncoding.EncodeToString([]byte(";operativeframework;"))[0:5]
 }
 
-func (target *Target) ResultExist(result TargetResults) bool {
+func (target *Target) ResultExist(result OpfResults) bool {
 	for module, results := range target.Results {
 		if module == result.ModuleName {
 			for _, r := range results {
-				if r.Header == result.Header {
-					if r.Value == result.Value {
+				if r.GetCompactKeys() == result.GetCompactKeys() {
+					if r.GetCompactValues() == result.GetCompactValues() {
 						return true
 					}
 				}
@@ -164,16 +193,10 @@ func (target *Target) ResultExist(result TargetResults) bool {
 	return false
 }
 
-func (target *Target) Save(module Module, result TargetResults) bool {
-	result.ResultId = "R_" + ksuid.New().String()
-	result.TargetId = target.GetId()
-	result.SessionId = target.Sess.GetId()
-	result.ModuleName = module.Name()
-	result.CreatedAt = time.Now()
+func (target *Target) Save(module Module, result OpfResults) bool {
 
 	if !target.ResultExist(result) {
 		target.Results[module.Name()] = append(target.Results[module.Name()], &result)
-		target.Sess.Connection.ORM.Create(&result).Table("target_results")
 		targets, err := target.Sess.FindLinked(module.Name(), result)
 		if err == nil {
 			for _, id := range targets {
@@ -188,14 +211,14 @@ func (target *Target) Save(module Module, result TargetResults) bool {
 	return true
 }
 
-func (target *Target) GetModuleResults(name string) ([]*TargetResults, error) {
+func (target *Target) GetModuleResults(name string) ([]*OpfResults, error) {
 
 	for moduleName, results := range target.Results {
 		if moduleName == name {
 			return results, nil
 		}
 	}
-	return []*TargetResults{}, errors.New("result not found for this module")
+	return []*OpfResults{}, errors.New("result not found for this module")
 }
 
 func (target *Target) GetFormatedResults(module string) ([]map[string]string, error) {
@@ -208,8 +231,8 @@ func (target *Target) GetFormatedResults(module string) ([]map[string]string, er
 	for _, result := range results {
 		resultMap := make(map[string]string)
 		separator := target.GetSeparator()
-		header := strings.Split(result.Header, separator)
-		res := strings.Split(result.Value, separator)
+		header := strings.Split(result.GetCompactKeys(), separator)
+		res := strings.Split(result.GetCompactValues(), separator)
 		for k, r := range res {
 			resultKey := strings.Replace(strings.ToLower(header[k]), " ", "_", -1)
 			if len(header) < len(res) && k > len(header) {

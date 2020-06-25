@@ -28,7 +28,7 @@ func (s *Session) GetTargetByName(name string) (*Target, error) {
 	return nil, errors.New("can't find selected target")
 }
 
-func (s *Session) GetResult(id string) (*TargetResults, error) {
+func (s *Session) GetResult(id string) (*OpfResults, error) {
 	for _, target := range s.Targets {
 		for _, module := range target.Results {
 			for _, result := range module {
@@ -38,7 +38,7 @@ func (s *Session) GetResult(id string) (*TargetResults, error) {
 			}
 		}
 	}
-	return &TargetResults{}, errors.New("this result as been not found")
+	return &OpfResults{}, errors.New("this result as been not found")
 }
 
 func (s *Session) AddTarget(t string, name string) (string, error) {
@@ -47,7 +47,7 @@ func (s *Session) AddTarget(t string, name string) (string, error) {
 		TargetId:  "T_" + ksuid.New().String(),
 		Name:      name,
 		Type:      t,
-		Results:   make(map[string][]*TargetResults),
+		Results:   make(map[string][]*OpfResults),
 		Sess:      s,
 	}
 	if !subject.CheckType() {
@@ -130,7 +130,7 @@ func (s *Session) UpdateTarget(id string, value string) {
 	}
 }
 
-func (s *Session) FindLinked(m string, res TargetResults) ([]string, error) {
+func (s *Session) FindLinked(m string, res OpfResults) ([]string, error) {
 	var targets []string
 	for kt, t := range s.Targets {
 		targetId := t.GetId()
@@ -138,21 +138,21 @@ func (s *Session) FindLinked(m string, res TargetResults) ([]string, error) {
 			continue
 		}
 		for kr, targetRes := range t.Results[m] {
-			if res.Header == targetRes.Header && res.Value == targetRes.Value {
-				if len(targetRes.Value) > 5 {
+			if res.GetCompactKeys() == targetRes.GetCompactKeys() && res.GetCompactValues() == targetRes.GetCompactValues() {
+				if len(targetRes.GetCompactValues()) > 5 {
 					s.Targets[kt].Results[m][kr].ResultId = res.ResultId
 					targets = append(targets, targetId)
 				}
 			} else {
-				valueParsed := strings.Replace(res.Value, t.GetSeparator(), "", -1)
-				targetResParsed := strings.Replace(targetRes.Value, t.GetSeparator(), "", -1)
+				valueParsed := strings.Replace(res.GetCompactValues(), t.GetSeparator(), "", -1)
+				targetResParsed := strings.Replace(targetRes.GetCompactValues(), t.GetSeparator(), "", -1)
 
-				if res.Header == targetRes.Header && strings.Contains(valueParsed, targetResParsed) {
+				if res.GetCompactKeys() == targetRes.GetCompactKeys() && strings.Contains(valueParsed, targetResParsed) {
 					if len(targetResParsed) > 5 && len(valueParsed) > 5 {
 						s.Targets[kt].Results[m][kr].ResultId = res.ResultId
 						targets = append(targets, targetId)
 					}
-				} else if res.Header == targetRes.Header && strings.Contains(targetResParsed, valueParsed) {
+				} else if res.GetCompactKeys() == targetRes.GetCompactKeys() && strings.Contains(targetResParsed, valueParsed) {
 					if len(targetResParsed) > 5 && len(valueParsed) > 5 {
 						s.Targets[kt].Results[m][kr].ResultId = res.ResultId
 						targets = append(targets, targetId)
@@ -173,7 +173,7 @@ func (s *Session) FindLinkedTargetByResult(t *Target) {
 	for _, target := range s.Targets {
 		for _, module := range target.Results {
 			for _, res := range module {
-				result := strings.Split(res.Value, target.GetSeparator())
+				result := strings.Split(res.GetCompactValues(), target.GetSeparator())
 				for _, r := range result {
 					if strings.TrimSpace(strings.ToLower(r)) == strings.TrimSpace(strings.ToLower(t.Name)) {
 						targets[target.TargetId] = res.ResultId
@@ -213,7 +213,7 @@ func (s *Session) DeleteResult(id string) {
 		if len(target.Results) > 0 {
 			for module, results := range target.Results {
 				if len(results) > 0 {
-					var newResults []*TargetResults
+					var newResults []*OpfResults
 					for _, result := range results {
 						if result.ResultId != id {
 							newResults = append(newResults, result)

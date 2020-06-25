@@ -38,8 +38,10 @@ func (module *InstagramFeed) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *InstagramFeed) GetType() string {
-	return "instagram"
+func (module *InstagramFeed) GetType() []string {
+	return []string{
+		session.T_TARGET_INSTAGRAM,
+	}
 }
 
 func (module *InstagramFeed) GetInformation() session.ModuleInformation {
@@ -89,7 +91,6 @@ func (module *InstagramFeed) Start() {
 	}
 
 	t := module.Sess.Stream.GenerateTable()
-	separator := target.GetSeparator()
 	t.SetOutputMirror(os.Stdout)
 	t.SetAllowedColumnLengths([]int{30, 30, 30, 30, 30})
 	t.AppendHeader(table.Row{
@@ -112,11 +113,13 @@ func (module *InstagramFeed) Start() {
 					item.Likes,
 					item.CommentCount,
 				})
-				result := session.TargetResults{
-					Header: "ID" + separator + "MEDIA" + separator + "CAPTION" + separator + "LIKES" + separator + "COMMENTS",
-					Value:  item.ID + separator + item.Images.GetBest() + separator + item.Caption.Text + separator + strconv.Itoa(item.Likes) + separator + strconv.Itoa(item.CommentCount),
-				}
-				target.Save(module, result)
+				result := target.NewResult()
+				result.Set("ID", item.ID)
+				result.Set("MEDIA", item.Images.GetBest())
+				result.Set("CAPTION", item.Caption.Text)
+				result.Set("LIKES", strconv.Itoa(item.Likes))
+				result.Set("COMMENTS", strconv.Itoa(item.CommentCount))
+				result.Save(module, target)
 
 				if hasDownload {
 					_, _, err = item.Download(exportPath+target.Name, "")

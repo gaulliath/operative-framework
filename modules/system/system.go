@@ -35,8 +35,10 @@ func (module *SystemModule) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *SystemModule) GetType() string {
-	return "command"
+func (module *SystemModule) GetType() []string {
+	return []string{
+		session.T_TARGET_COMMAND,
+	}
 }
 
 func (module *SystemModule) GetInformation() session.ModuleInformation {

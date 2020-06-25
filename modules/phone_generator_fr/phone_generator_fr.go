@@ -47,8 +47,10 @@ func (module *PhoneGeneratorFr) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *PhoneGeneratorFr) GetType() string {
-	return "country"
+func (module *PhoneGeneratorFr) GetType() []string {
+	return []string{
+		session.T_TARGET_COUNTRY,
+	}
 }
 
 func (module *PhoneGeneratorFr) GetInformation() session.ModuleInformation {

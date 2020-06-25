@@ -60,8 +60,10 @@ func (module *PictureExifModule) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *PictureExifModule) GetType() string {
-	return "file"
+func (module *PictureExifModule) GetType() []string {
+	return []string{
+		session.T_TARGET_FILE,
+	}
 }
 
 func (module *PictureExifModule) GetInformation() session.ModuleInformation {
@@ -84,7 +86,6 @@ func (module *PictureExifModule) Start() {
 	}
 
 	fname := target.GetName()
-	separator := target.GetSeparator()
 
 	f, err := os.Open(fname)
 	if err != nil {
@@ -182,11 +183,11 @@ func (module *PictureExifModule) Start() {
 		e.BitsPerSample,
 	})
 
-	result := session.TargetResults{
-		Header: "Date Time" + separator + "Exif Version" + separator + "Software",
-		Value:  e.DateTime + separator + e.ExifVersion + separator + e.Software,
-	}
-	target.Save(module, result)
+	result := target.NewResult()
+	result.Set("Date Time", e.DateTime)
+	result.Set("Exif Version", e.ExifVersion)
+	result.Set("Software", e.Software)
+	result.Save(module, target)
 
 	module.sess.Stream.Render(t)
 }

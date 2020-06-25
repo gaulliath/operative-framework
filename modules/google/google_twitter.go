@@ -41,8 +41,10 @@ func (module *GoogleTwitterModule) Description() string {
 	return "Find result from google search engine"
 }
 
-func (module *GoogleTwitterModule) GetType() string {
-	return "search"
+func (module *GoogleTwitterModule) GetType() []string {
+	return []string{
+		session.T_TARGET_SEARCH,
+	}
 }
 
 func (module *GoogleTwitterModule) GetInformation() session.ModuleInformation {
@@ -61,11 +63,6 @@ func (module *GoogleTwitterModule) Start() {
 	target, err := module.sess.GetTarget(paramEnterprise.Value)
 	if err != nil {
 		module.sess.Stream.Error(err.Error())
-		return
-	}
-
-	if target.GetType() != module.GetType() {
-		module.Stream.Error("Target with type '" + target.GetType() + "' isn't valid module need '" + module.GetType() + "' type.")
 		return
 	}
 
@@ -119,13 +116,11 @@ func (module *GoogleTwitterModule) Start() {
 				}
 			}
 
-			separator := target.GetSeparator()
 			t.AppendRow([]interface{}{link, username})
-			result := session.TargetResults{
-				Header: "LINK" + separator + "USERNAME",
-				Value:  link + separator + username,
-			}
-			target.Save(module, result)
+			result := target.NewResult()
+			result.Set("LINK", link)
+			result.Set("USERNAME", username)
+			result.Save(module, target)
 			resultFound = resultFound + 1
 			module.Results = append(module.Results, link)
 		}

@@ -37,8 +37,10 @@ func (module *MetaTagModule) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *MetaTagModule) GetType() string {
-	return "url"
+func (module *MetaTagModule) GetType() []string {
+	return []string{
+		session.T_TARGET_URL,
+	}
 }
 
 func (module *MetaTagModule) GetInformation() session.ModuleInformation {
@@ -62,11 +64,6 @@ func (module *MetaTagModule) Start() {
 	target, err := module.sess.GetTarget(targetUrl.Value)
 	if err != nil {
 		module.sess.Stream.Error(err.Error())
-		return
-	}
-
-	if target.GetType() != module.GetType() {
-		module.Stream.Error("Target with type '" + target.GetType() + "' isn't valid module need '" + module.GetType() + "' type.")
 		return
 	}
 
@@ -94,15 +91,13 @@ func (module *MetaTagModule) Start() {
 	doc.Find("meta").Each(func(i int, s *goquery.Selection) {
 		tagContent, _ := s.Attr("content")
 		tagName, _ := s.Attr("name")
-		separator := target.GetSeparator()
 		if _, ok := tagFound[tagName]; !ok {
 			if tagName != "" {
 				tagFound[tagName] = tagContent
-				result := session.TargetResults{
-					Header: "KEY" + separator + "VALUE",
-					Value:  tagName + separator + tagContent,
-				}
-				target.Save(module, result)
+				result := target.NewResult()
+				result.Set("KEY", tagName)
+				result.Set("VALUE", tagContent)
+				result.Save(module, target)
 			}
 		}
 	})

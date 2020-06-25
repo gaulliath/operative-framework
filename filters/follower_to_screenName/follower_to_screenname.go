@@ -68,11 +68,10 @@ func (filter *FollowerScreenName) Start(mod session.Module) {
 					user.ScreenName,
 				})
 
-				result := session.TargetResults{
-					Header: "Twitter" + target.GetSeparator() + "ID",
-					Value:  user.ScreenName + target.GetSeparator() + strconv.Itoa(int(user.Id)),
-				}
-				target.Save(mod, result)
+				result := target.NewResult()
+				result.Set("Twitter", user.ScreenName)
+				result.Set("ID", strconv.Itoa(int(user.Id)))
+				result.Save(mod, target)
 			}
 		}
 	}

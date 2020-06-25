@@ -15,7 +15,7 @@ func (target *Target) AddNote(text string) {
 	return
 }
 
-func (result *TargetResults) AddNoteToResult(text string) {
+func (result *OpfResults) AddNoteToResult(text string) {
 	result.Notes = append(result.Notes, Note{
 		Id:   "N_" + ksuid.New().String(),
 		Text: text,

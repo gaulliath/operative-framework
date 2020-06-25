@@ -33,8 +33,10 @@ func (module *GoogleDorkModule) Description() string {
 	return "Lists available google dork"
 }
 
-func (module *GoogleDorkModule) GetType() string {
-	return ""
+func (module *GoogleDorkModule) GetType() []string {
+	return []string{
+		session.T_TARGET_BLANK,
+	}
 }
 
 func (module *GoogleDorkModule) GetInformation() session.ModuleInformation {
