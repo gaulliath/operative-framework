@@ -12,6 +12,8 @@ Documentation as been updated [here](http://docs.operative-framework.com/) (*doc
 
 #### USE CASE
 
+[Comment un hacker peut utiliser une appli de rencontres pour suivre vos déplacements](https://www.bfmtv.com/tech/comment-un-hacker-peut-utiliser-une-appli-de-rencontres-pour-suivre-vos-deplacements_AN-202006270018.html)
+
 [En détournant l’app Happn, un hacker peut tracer votre chemin en temps réel](https://cyberguerre.numerama.com/5827-en-detournant-lapp-happn-un-hacker-peut-tracer-votre-chemin-en-temps-reel.html)
 
 [OSINT : des numéros de politiques françaises interceptés via Whatsapp](https://www.zataz.com/osint-des-numeros-de-politiques-francaises-interceptes-via-whatsapp/)
