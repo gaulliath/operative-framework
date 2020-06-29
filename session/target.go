@@ -121,11 +121,9 @@ func (target *Target) Link(target2 Linking) {
 	target2.TargetType = t2.GetType()
 	target2.TargetName = t2.GetName()
 	target2.TargetBase = target.GetId()
-	target2.SessionId = target.Sess.GetId()
 	target.PushLinked(target2)
 
 	t2.PushLinked(Linking{
-		SessionId:      target.Sess.GetId(),
 		TargetBase:     t2.GetId(),
 		TargetName:     target.GetName(),
 		TargetId:       target.GetId(),
@@ -134,7 +132,6 @@ func (target *Target) Link(target2 Linking) {
 	})
 	target.Sess.Connection.ORM.Create(&target2)
 	target.Sess.Connection.ORM.Create(&Linking{
-		SessionId:      target.Sess.GetId(),
 		TargetBase:     t2.GetId(),
 		TargetName:     target.GetName(),
 		TargetId:       target.GetId(),

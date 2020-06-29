@@ -37,7 +37,7 @@ func main() {
 		// Generate Default .env File
 		u, errU := user.Current()
 		if errU != nil {
-			fmt.Println("Please create a .env file on root path.")
+			fmt.Println("Please create a '.env' file on root path.")
 			return
 		}
 		if _, err := os.Stat(u.HomeDir + "/.opf/.env"); os.IsNotExist(err) {

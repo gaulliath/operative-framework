@@ -92,7 +92,6 @@ func (target *Target) NewResult() *OpfResults {
 	result.ResultId = "R_" + ksuid.New().String()
 	result.ToJSON = result.JSON()
 	result.TargetId = target.GetId()
-	result.SessionId = target.Sess.GetId()
 	result.CreatedAt = time.Now()
 
 	return &result

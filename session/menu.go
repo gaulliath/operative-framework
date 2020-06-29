@@ -457,6 +457,7 @@ func LoadModuleMenu(line string, module Module, s *Session) []string {
 					}
 				}
 			}
+			s.NewInstance(module.Name())
 			s.Information.ModuleLaunched = s.Information.ModuleLaunched + 1
 			background, errBack := module.GetParameter("BACKGROUND")
 			if errBack == nil && strings.ToLower(background.Value) == "true" {

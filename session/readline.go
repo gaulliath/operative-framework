@@ -4,6 +4,7 @@ import (
 	"github.com/chzyer/readline"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"runtime"
 	"strings"
 )
@@ -114,6 +115,17 @@ func (s *Session) ReadLineAutoCompleteListAlias() func(string) []string {
 			returnResult = append(returnResult, name)
 		}
 		return returnResult
+	}
+}
+
+func (s *Session) ReadLineAutoCompleteCacheName() func(string) []string {
+	return func(line string) []string {
+		var cacheName []string
+		file, _ := filepath.Glob(s.Config.Common.BaseDirectory + "cache/*")
+		for _, name := range file {
+			cacheName = append(cacheName, name)
+		}
+		return cacheName
 	}
 }
 
@@ -257,6 +269,9 @@ func (s *Session) PushPrompt() {
 		),
 		readline.PcItem("help"),
 		readline.PcItem("env"),
+		readline.PcItem("save"),
+		readline.PcItem("load",
+			readline.PcItemDynamic(s.ReadLineAutoCompleteCacheName())),
 		readline.PcItem("info",
 			readline.PcItem("session"),
 			readline.PcItem("api")),

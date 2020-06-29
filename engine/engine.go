@@ -86,9 +86,6 @@ func Load(id int) *session.Session {
 		Client: session.GetOpfClient(),
 		Config: conf,
 	}
-	s.Connection.ORM.Where(&session.Session{
-		Id: id,
-	}).First(&s)
 	s.Stream.Sess = &s
 	s.Connection.Migrate()
 	modules.LoadModules(&s)

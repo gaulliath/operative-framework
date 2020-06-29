@@ -36,6 +36,19 @@ func (s *Session) ParseCommand(line string) []string {
 		if strings.HasPrefix(line, "sh ") {
 			LoadShCommandMenu(line, module, s)
 
+		} else if strings.HasPrefix(line, "load ") {
+			var value string
+			arguments := strings.Split(strings.TrimSpace(line), " ")
+			if len(arguments) < 2 {
+				s.Stream.Error("Please use a correct format: load <cacheFileName>")
+				return nil
+			}
+
+			parsing := strings.SplitN(strings.TrimSpace(line), " ", 2)
+			value = parsing[1]
+
+			s.LoadCache(value)
+			return nil
 		} else if strings.HasPrefix(line, "find ") || strings.HasPrefix(line, "regex ") {
 			LoadFindCommandMenu(line, module, s)
 
@@ -68,6 +81,16 @@ func (s *Session) ParseCommand(line string) []string {
 	}
 	if line == "events" {
 		LoadEventsMenu(line, module, s)
+		return nil
+	} else if strings.ToLower(line) == "save" {
+		value := s.GetName()
+		arguments := strings.Split(strings.TrimSpace(line), " ")
+		if len(arguments) > 1 {
+			parsing := strings.SplitN(strings.TrimSpace(line), " ", 2)
+			value = parsing[1]
+		}
+
+		s.ToCache(value)
 		return nil
 	} else if strings.ToLower(line) == "webhooks" {
 		s.ListWebHooks()
