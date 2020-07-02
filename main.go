@@ -12,6 +12,7 @@ import (
 	"github.com/graniet/operative-framework/export"
 	"github.com/graniet/operative-framework/session"
 	"github.com/graniet/operative-framework/supervisor"
+	"github.com/segmentio/ksuid"
 	"io"
 	"log"
 	"os"
@@ -305,6 +306,16 @@ func main() {
 		sess.Stream.WithoutDate("Loading a configuration file '" + files.Config + "'")
 		sess.Stream.WithoutDate("Loading a cron job configuration '" + sess.Config.Common.ConfigurationJobs + "'")
 		sess.Stream.WithoutDate("Loading '" + strconv.Itoa(len(sess.Config.Modules)) + "' module(s) configuration(s)")
+	}
+
+	admin, err := sess.GetUser("admin")
+	if admin == nil {
+		password := ksuid.New().String()
+		_, err := sess.NewUser("admin", password)
+		if err != nil {
+			sess.Stream.Error(err.Error())
+			return
+		}
 	}
 
 	l, errP := readline.NewEx(sess.Prompt)

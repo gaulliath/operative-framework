@@ -335,16 +335,19 @@ func (s *Session) LoadCache(name string) {
 
 	// Load targets
 	for _, target := range backup.Targets {
+		target.Sess = s
 		s.Targets = append(s.Targets, target)
 	}
 
 	// Load monitor
 	for _, monitor := range backup.Monitors {
+		monitor.Session = s
 		s.Monitors = append(s.Monitors, monitor)
 	}
 
 	// Load interval
 	for _, interval := range backup.Interval {
+		interval.S = s
 		s.Interval = append(s.Interval, interval)
 	}
 

@@ -17,9 +17,9 @@ func PushModuleImport(s *session.Session) *ImportModule {
 	}
 	mod.CreateNewParam("TARGET", "Source file path (csv)", "", true, session.STRING)
 	mod.CreateNewParam("DELIMITER", "CSV file separator", ";", true, session.STRING)
-	mod.CreateNewParam("PRIMARY", "Set a key of primary element", "0", true, session.INT)
+	mod.CreateNewParam("PRIMARY", "Set a key of primary element", "0", true, session.STRING)
 	mod.CreateNewParam("LINKING", "Key of linked value. e.g: 0,5,3", "0", true, session.STRING)
-	mod.CreateNewParam("VERBOSE", "Display imported line output", "false", true, session.BOOL)
+	mod.CreateNewParam("VERBOSE", "Display imported line output", "false", true, session.STRING)
 	return &mod
 }
 

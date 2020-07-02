@@ -61,7 +61,6 @@ func LoadTargetMenu(line string, module Module, s *Session) []string {
 			return nil
 		}
 		s.Stream.Success("target '" + value[3] + "' as successfully added with id '" + id + "'")
-		s.NewEvent(TARGET_ADD, "new target created '"+value[3]+"'")
 		return []string{
 			id,
 		}

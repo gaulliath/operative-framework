@@ -72,6 +72,7 @@ func (s *Session) AddTarget(t string, name string) (string, error) {
 	s.Targets = append(s.Targets, &subject)
 	s.Connection.ORM.Create(&subject)
 	s.FindLinkedTargetByResult(&subject)
+	s.NewEvent(TARGET_ADD, "new target created '"+subject.GetId()+"'")
 	return subject.GetId(), nil
 }
 

@@ -36,6 +36,7 @@ type Session struct {
 	ServiceFolder   string            `json:"home_folder"`
 	Services        []Listener        `json:"services"`
 	Alias           map[string]string `json:"-" sql:"-"`
+	Users           []*User           `json:"users"`
 	Interval        []*Interval       `json:"interval"`
 	WebHooks        []*WebHook        `json:"web_hooks"`
 	Notifications   []*Notification   `json:"notifications"`
