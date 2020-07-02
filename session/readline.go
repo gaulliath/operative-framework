@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
 )
 
@@ -87,6 +88,16 @@ func (s *Session) ReadLineAutoCompleteMonitor() func(string) []string {
 			monitors = append(monitors, monitor.MonitorId)
 		}
 		return monitors
+	}
+}
+
+func (s *Session) ReadLineAutoCompleteNotification() func(string) []string {
+	return func(line string) []string {
+		var notifications []string
+		for _, notification := range s.Notifications {
+			notifications = append(notifications, notification.Id)
+		}
+		return notifications
 	}
 }
 
@@ -269,6 +280,11 @@ func (s *Session) PushPrompt() {
 		),
 		readline.PcItem("help"),
 		readline.PcItem("env"),
+		readline.PcItem("notification",
+			readline.PcItem("list"),
+			readline.PcItem("set"),
+			readline.PcItem("read",
+				readline.PcItemDynamic(s.ReadLineAutoCompleteNotification()))),
 		readline.PcItem("save"),
 		readline.PcItem("load",
 			readline.PcItemDynamic(s.ReadLineAutoCompleteCacheName())),
@@ -296,4 +312,15 @@ func (s *Session) PushPrompt() {
 		EOFPrompt:         "exit",
 		HistorySearchFold: true,
 	}
+}
+
+// Update a prompt
+func (s *Session) UpdatePrompt() {
+	notificationCount := s.CountUnReadNotifications()
+	if notificationCount > 0 {
+		s.Prompt.Prompt = "\033[90m[OPF v" + s.Version + "] (\033[0;31m" + strconv.Itoa(notificationCount) + "\033[0m\033[90m):\033[0m "
+	} else {
+		s.Prompt.Prompt = "\033[90m[OPF v" + s.Version + "] (0):\033[0m "
+	}
+	return
 }

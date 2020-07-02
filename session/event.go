@@ -8,7 +8,10 @@ import (
 	"time"
 )
 
-type Events []*Event
+type Events struct {
+	Watcher []string `json:"notifier"`
+	Lists   []*Event `json:"lists"`
+}
 
 type Event struct {
 	EventId string      `json:"event_id"`
@@ -24,7 +27,6 @@ const (
 	TARGET_ADD       = "TARGET_ADD"
 	TARGET_LINK      = "TARGET_LINK"
 	TAG_ADD          = "TAG_ADD"
-	ERROR_ANALYTICS  = "ERROR_ANALYTICS"
 	ERROR_GENERIC    = "ERROR_GENERIC"
 	ERROR_MODULE     = "ERROR_MODULE"
 	RESULTS_ADD      = "RESULTS_ADD"
@@ -46,7 +48,11 @@ func (s *Session) NewEvent(t string, value interface{}) *Event {
 		JSON:    string(jsonify),
 		Date:    time.Now(),
 	}
-	s.Events = append(s.Events, event)
+
+	if s.HasWatcher(t) {
+		s.NewNotification("New event '" + strings.ToLower(t) + "' monitored ")
+	}
+	s.Events.Lists = append(s.Events.Lists, event)
 
 	for _, wh := range s.WebHooks {
 		if wh.GetStatus() {
@@ -67,8 +73,18 @@ func (s *Session) NewEvent(t string, value interface{}) *Event {
 	return event
 }
 
+// Checking if watcher as been set in session
+func (s *Session) HasWatcher(t string) bool {
+	for _, watcher := range s.Events.Watcher {
+		if strings.ToLower(watcher) == strings.ToLower(t) {
+			return true
+		}
+	}
+	return false
+}
+
 func (s *Session) GetEvent(id string) (*Event, error) {
-	for _, event := range s.Events {
+	for _, event := range s.Events.Lists {
 		if event.EventId == id {
 			return event, nil
 		}
@@ -82,9 +98,9 @@ func (s *Session) GetEvents() Events {
 
 func (s *Session) DeleteEvent(id string) {
 	newEvents := Events{}
-	for _, event := range s.Events {
+	for _, event := range s.Events.Lists {
 		if event.EventId != id {
-			newEvents = append(newEvents, event)
+			newEvents.Lists = append(newEvents.Lists, event)
 		}
 	}
 	s.Events = newEvents

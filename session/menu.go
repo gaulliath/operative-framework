@@ -630,6 +630,91 @@ func LoadIntervalCommandMenu(line string, module Module, s *Session) []string {
 	return nil
 }
 
+func LoadNotificationCommandMenu(line string, module Module, s *Session) []string {
+	arguments := strings.Split(strings.TrimSpace(line), " ")
+
+	switch arguments[1] {
+	case "read":
+		if len(arguments) < 3 {
+			s.Stream.Error("Please use notification read <notificationId>")
+			return nil
+		}
+		command := strings.SplitN(line, " ", 3)
+		notification, err := s.GetNotification(command[2])
+		if err != nil {
+			s.Stream.Error(err.Error())
+			break
+		}
+
+		t := s.Stream.GenerateTable()
+		t.SetOutputMirror(os.Stdout)
+		t.SetAllowedColumnLengths([]int{30, 30})
+		t.AppendHeader(table.Row{
+			"ID",
+			"TEXT",
+		})
+
+		t.AppendRow(table.Row{
+			notification.Id,
+			notification.Text,
+		})
+
+		notification.Read()
+		s.Stream.Render(t)
+		break
+	case "set":
+		if len(arguments) < 3 {
+			s.Stream.Error("Please use notification set 'event type' eg: notification set MONITOR_MATCH")
+			return nil
+		}
+		command := strings.SplitN(line, " ", 3)
+		event := command[2]
+		exist := false
+		for _, watcher := range s.Events.Watcher {
+			if strings.ToLower(watcher) == strings.ToLower(event) {
+				exist = true
+				break
+			}
+		}
+
+		if !exist {
+			s.Events.Watcher = append(s.Events.Watcher, strings.ToLower(event))
+		}
+		s.Stream.Success("Notification watcher as setup.")
+		s.Stream.Standard("Available watchers : [" + strings.Join(s.Events.Watcher, ",") + "]")
+		break
+
+	case "list":
+		t := s.Stream.GenerateTable()
+		t.SetOutputMirror(os.Stdout)
+		t.SetAllowedColumnLengths([]int{30, 30, 30})
+		t.AppendHeader(table.Row{
+			"ID",
+			"TEXT",
+			"READ ?",
+			"CREATED_AT",
+		})
+
+		for _, notification := range s.Notifications {
+			status := "OLD"
+			if !notification.IsRead {
+				status = color.GreenString("NEW")
+			}
+			t.AppendRow(table.Row{
+				notification.Id,
+				notification.Text,
+				status,
+				notification.CreatedAt.String(),
+			})
+		}
+		s.Stream.Render(t)
+		break
+
+	}
+
+	return nil
+}
+
 func LoadModuleByTypeMenu(line string, module Module, s *Session) []string {
 	arguments := strings.Split(strings.TrimSpace(line), " ")
 	if len(arguments) < 2 {
@@ -675,7 +760,7 @@ func LoadEventsMenu(line string, module Module, s *Session) []string {
 		"DATE",
 	})
 
-	for _, event := range s.Events {
+	for _, event := range s.Events.Lists {
 		t.AppendRow(table.Row{
 			event.EventId,
 			event.Type,

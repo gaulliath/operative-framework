@@ -20,26 +20,25 @@ type Session struct {
 		Tracked  []*Tracking  `json:"tracked"`
 		Server   *http.Server `json:"-"`
 	} `json:"tracker"`
-	Instances          []*Instance       `json:"instances"`
-	CurrentInstance    *Instance         `json:"current_instance"`
-	Events             Events            `json:"events"`
-	SourceFile         string            `json:"source_file"`
-	Config             config.Config     `json:"config" sql:"-"`
-	Version            string            `json:"version" sql:"-"`
-	Targets            []*Target         `json:"targets" sql:"-"`
-	Modules            []Module          `json:"modules" sql:"-"`
-	Monitors           Monitors          `json:"monitors"`
-	Filters            []ModuleFilter    `json:"filters" sql:"-"`
-	Prompt             *readline.Config  `json:"-" sql:"-"`
-	Stream             Stream            `json:"-" sql:"-"`
-	TypeLists          []string          `json:"type_lists" sql:"-"`
-	ServiceFolder      string            `json:"home_folder"`
-	Services           []Listener        `json:"services"`
-	Alias              map[string]string `json:"-" sql:"-"`
-	Interval           []*Interval       `json:"interval"`
-	LastAnalyticsModel string            `json:"analytics_model"`
-	LastAnalyticsLinks string            `json:"last_analytics_links"`
-	WebHooks           []*WebHook        `json:"web_hooks"`
+	Instances       []*Instance       `json:"instances"`
+	CurrentInstance *Instance         `json:"current_instance"`
+	Events          Events            `json:"events"`
+	SourceFile      string            `json:"source_file"`
+	Config          config.Config     `json:"config" sql:"-"`
+	Version         string            `json:"version" sql:"-"`
+	Targets         []*Target         `json:"targets" sql:"-"`
+	Modules         []Module          `json:"modules" sql:"-"`
+	Monitors        Monitors          `json:"monitors"`
+	Filters         []ModuleFilter    `json:"filters" sql:"-"`
+	Prompt          *readline.Config  `json:"-" sql:"-"`
+	Stream          Stream            `json:"-" sql:"-"`
+	TypeLists       []string          `json:"type_lists" sql:"-"`
+	ServiceFolder   string            `json:"home_folder"`
+	Services        []Listener        `json:"services"`
+	Alias           map[string]string `json:"-" sql:"-"`
+	Interval        []*Interval       `json:"interval"`
+	WebHooks        []*WebHook        `json:"web_hooks"`
+	Notifications   []*Notification   `json:"notifications"`
 }
 
 type SessionExport struct {
@@ -70,10 +69,6 @@ type CronJob interface {
 	HasConfiguration() bool
 	GetConfiguration() map[string]string
 	GetRequired() []string
-}
-
-func (Session) TableName() string {
-	return "sessions"
 }
 
 func (s *Session) GetName() string {

@@ -12,11 +12,9 @@ import (
 	"github.com/graniet/operative-framework/export"
 	"github.com/graniet/operative-framework/session"
 	"github.com/graniet/operative-framework/supervisor"
-	"github.com/joho/godotenv"
 	"io"
 	"log"
 	"os"
-	"os/user"
 	"strconv"
 	"strings"
 )
@@ -24,47 +22,12 @@ import (
 func main() {
 	var sess *session.Session
 	var sp *supervisor.Supervisor
-	var configJob string
-	var opfBaseDirectory string
-	var opfExport string
+	var files engine.Files
 
-	// Load Configuration File
-	configFile := ".env"
-	err := godotenv.Load(".env")
-
+	files, err := engine.Preload()
 	if err != nil {
-
-		// Generate Default .env File
-		u, errU := user.Current()
-		if errU != nil {
-			fmt.Println("Please create a '.env' file on root path.")
-			return
-		}
-		if _, err := os.Stat(u.HomeDir + "/.opf/.env"); os.IsNotExist(err) {
-			if _, err := os.Stat(u.HomeDir + "/.opf/"); os.IsNotExist(err) {
-				_ = os.Mkdir(u.HomeDir+"/.opf/", os.ModePerm)
-			}
-
-			if _, err := os.Stat(u.HomeDir + "/.opf/webhooks"); os.IsNotExist(err) {
-				_ = os.Mkdir(u.HomeDir+"/.opf/webhooks", os.ModePerm)
-			}
-
-			log.Println("Generating default .env on '" + u.HomeDir + "' directory...")
-			path, errGeneration := engine.GenerateEnv(u.HomeDir + "/.opf/.env")
-			if errGeneration != nil {
-				log.Println(errGeneration.Error())
-				return
-			}
-			err := godotenv.Load(path)
-			if err != nil {
-				log.Println(err.Error())
-				return
-			}
-		}
-		configFile = u.HomeDir + "/.opf/.env"
-		configJob = u.HomeDir + "/.opf/cron/"
-		opfBaseDirectory = u.HomeDir + "/.opf/"
-		opfExport = opfBaseDirectory + "export/"
+		log.Println(err)
+		return
 	}
 
 	// Argument parser
@@ -97,9 +60,9 @@ func main() {
 		Required: false,
 		Help:     "Set parameters to '-e/--execute' argument",
 	})
-	loadSession := parser.Int("s", "session", &argparse.Options{
+	loadSession := parser.Int("", "session-file", &argparse.Options{
 		Required: false,
-		Help:     "Load specific session id",
+		Help:     "Load session cache file",
 	})
 	onlyModuleOutput := parser.Flag("", "no-banner", &argparse.Options{
 		Required: false,
@@ -170,10 +133,10 @@ func main() {
 	}
 
 	sess.PushPrompt()
-	sess.Config.Common.ConfigurationFile = configFile
-	sess.Config.Common.ConfigurationJobs = configJob
-	sess.Config.Common.BaseDirectory = opfBaseDirectory
-	sess.Config.Common.ExportDirectory = opfExport
+	sess.Config.Common.ConfigurationFile = files.Config
+	sess.Config.Common.ConfigurationJobs = files.Job
+	sess.Config.Common.BaseDirectory = files.Base
+	sess.Config.Common.ExportDirectory = files.Export
 	sess.ParseModuleConfig()
 	apiRest := api.PushARestFul(sess)
 
@@ -339,7 +302,7 @@ func main() {
 	if !*onlyModuleOutput && sess.Stream.Verbose {
 		c := color.New(color.FgYellow)
 		_, _ = c.Println("OPERATIVE FRAMEWORK - DIGITAL INVESTIGATION FRAMEWORK")
-		sess.Stream.WithoutDate("Loading a configuration file '" + configFile + "'")
+		sess.Stream.WithoutDate("Loading a configuration file '" + files.Config + "'")
 		sess.Stream.WithoutDate("Loading a cron job configuration '" + sess.Config.Common.ConfigurationJobs + "'")
 		sess.Stream.WithoutDate("Loading '" + strconv.Itoa(len(sess.Config.Modules)) + "' module(s) configuration(s)")
 	}
@@ -362,6 +325,13 @@ func main() {
 
 	// Run Operative Framework Menu
 	for {
+
+		sess.UpdatePrompt()
+		l, errP := readline.NewEx(sess.Prompt)
+		if errP != nil {
+			panic(errP)
+		}
+
 		line, err := l.Readline()
 		if err == readline.ErrInterrupt {
 			if len(line) == 0 {

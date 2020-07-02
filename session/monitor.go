@@ -161,6 +161,7 @@ func (m *Monitor) Checking() {
 											}
 
 											m.Session.NewEvent(MONITOR_MATCH, match)
+											m.Session.NewNotification("MONITOR MATCH RESULT: " + scope)
 										}
 									}
 								}

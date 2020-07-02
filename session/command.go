@@ -20,6 +20,7 @@ func (s *Session) ParseCommands(str string) {
 }
 
 func (s *Session) ParseCommand(line string) []string {
+	s.UpdatePrompt()
 	moduleName := strings.Split(line, " ")[0]
 	module, errModule := s.SearchModule(moduleName)
 	s.NewEvent(EXEC_COMMAND, "execute command '"+line+"'")
@@ -63,6 +64,9 @@ func (s *Session) ParseCommand(line string) []string {
 
 		} else if strings.HasPrefix(line, "interval ") {
 			LoadIntervalCommandMenu(line, module, s)
+
+		} else if strings.HasPrefix(line, "notification ") {
+			LoadNotificationCommandMenu(line, module, s)
 
 		} else if strings.HasPrefix(line, "modules ") {
 			LoadModuleByTypeMenu(line, module, s)
