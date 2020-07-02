@@ -67,6 +67,20 @@ func LoadTargetMenu(line string, module Module, s *Session) []string {
 		}
 	case "list":
 		s.ListTargets()
+	case "type":
+		t := s.Stream.GenerateTable()
+		t.SetOutputMirror(os.Stdout)
+		t.SetAllowedColumnLengths([]int{40, 30, 30, 30})
+		t.AppendHeader(table.Row{
+			"TYPE",
+		})
+		for _, tp := range s.ListType() {
+			t.AppendRow(table.Row{
+				tp,
+			})
+		}
+		s.Stream.Render(t)
+		return nil
 	case "link":
 		value := strings.SplitN(strings.TrimSpace(line), " ", 4)
 		if len(arguments) < 4 {
@@ -184,20 +198,18 @@ func LoadTargetMenu(line string, module Module, s *Session) []string {
 			t.SetOutputMirror(os.Stdout)
 			t.SetAllowedColumnLengths([]int{40, 30, 30, 30})
 			headerRow := table.Row{}
+			if len(results) > 0 {
+				for _, key := range results[0].GetKeys() {
+					headerRow = append(headerRow, key)
+				}
+				headerRow = append(headerRow, "result_id")
+				t.AppendHeader(headerRow)
+			}
+
 			for _, result := range results {
 				resRow := table.Row{}
-				separator := trg.GetSeparator()
-				header := strings.Split(result.Header, separator)
-				res := strings.Split(result.Value, separator)
-				if len(headerRow) < 1 {
-					for _, h := range header {
-						headerRow = append(headerRow, h)
-					}
-					headerRow = append(headerRow, "result_id")
-					t.AppendHeader(headerRow)
-				}
-				for _, r := range res {
-					resRow = append(resRow, r)
+				for _, value := range result.Values {
+					resRow = append(resRow, value.Value)
 				}
 				resRow = append(resRow, result.ResultId)
 				t.AppendRow(resRow)
@@ -220,17 +232,15 @@ func LoadTargetMenu(line string, module Module, s *Session) []string {
 			t := s.Stream.GenerateTable()
 			t.SetOutputMirror(os.Stdout)
 			t.SetAllowedColumnLengths([]int{40, 30, 30, 30})
-			separator := trg.GetSeparator()
-			header := strings.Split(result.Header, separator)
-			res := strings.Split(result.Value, separator)
 			headerRow := table.Row{}
 			resRow := table.Row{}
-			for _, h := range header {
+			for _, h := range result.GetKeys() {
 				headerRow = append(headerRow, h)
 			}
 			headerRow = append(headerRow, "RESULT ID")
-			for _, r := range res {
-				resRow = append(resRow, r)
+
+			for _, r := range result.Values {
+				resRow = append(resRow, r.Value)
 			}
 			resRow = append(resRow, result.ResultId)
 			t.AppendHeader(headerRow)
@@ -269,13 +279,15 @@ func LoadTargetMenu(line string, module Module, s *Session) []string {
 			"Type",
 		})
 		for _, mod := range s.Modules {
-			if mod.GetType() == trg.GetType() {
-				t.AppendRow(table.Row{
-					mod.Name(),
-					mod.Description(),
-					mod.Author(),
-					mod.GetType(),
-				})
+			for _, moduleType := range mod.GetType() {
+				if moduleType == trg.GetType() {
+					t.AppendRow(table.Row{
+						mod.Name(),
+						mod.Description(),
+						mod.Author(),
+						mod.GetType(),
+					})
+				}
 			}
 		}
 		s.Stream.Render(t)
@@ -314,17 +326,14 @@ func LoadResultMenu(line string, module Module, s *Session) []string {
 		t := s.Stream.GenerateTable()
 		t.SetOutputMirror(os.Stdout)
 		t.SetAllowedColumnLengths([]int{40, 30, 30, 30})
-		separator := s.GetSeparator()
-		header := strings.Split(result.Header, separator)
-		res := strings.Split(result.Value, separator)
 		headerRow := table.Row{}
 		resRow := table.Row{}
-		for _, h := range header {
-			headerRow = append(headerRow, h)
+		for key, _ := range result.Values {
+			headerRow = append(headerRow, key)
 		}
 		headerRow = append(headerRow, "RESULT ID")
-		for _, r := range res {
-			resRow = append(resRow, r)
+		for _, value := range result.Values {
+			resRow = append(resRow, value)
 		}
 		resRow = append(resRow, result.ResultId)
 		t.AppendHeader(headerRow)
@@ -383,14 +392,14 @@ func LoadModuleMenu(line string, module Module, s *Session) []string {
 	switch strings.ToLower(arguments[1]) {
 	case "target":
 		if len(arguments) < 3 {
-			s.Stream.Error("Please use <module> <set> <argument> <value>")
+			s.Stream.Error("Please use <module> <target> <value>")
 			return nil
 		}
 
 		_, err := s.GetTarget(arguments[2])
 		if err != nil {
 			newTarget := strings.SplitN(line, " ", 3)
-			arguments[2], err = s.AddTarget(module.GetType(), newTarget[2])
+			arguments[2], err = s.AddTarget(module.GetType()[0], newTarget[2])
 			if err != nil {
 				return nil
 			}
@@ -467,6 +476,13 @@ func LoadModuleMenu(line string, module Module, s *Session) []string {
 					s.Stream.Success("Module '" + module.Name() + "' executed")
 				}(s, module)
 			} else {
+
+				verboseValue := s.Stream.Verbose
+				output, err := module.GetParameter("DISABLE_OUTPUT")
+				if err == nil && s.StringToBoolean(output.Value) {
+					s.Stream.Verbose = false
+				}
+
 				startedAt := time.Now()
 				module.Start()
 				r := module.GetResults()
@@ -481,25 +497,28 @@ func LoadModuleMenu(line string, module Module, s *Session) []string {
 					flt.Start(module)
 				}
 
-				if s.Config.PushDriver == ONLY_SERVER ||
-					s.Config.PushDriver == SCREEN_AND_SERVER {
-
-					targetId, err := module.GetParameter("TARGET")
-					if err != nil {
-						s.Stream.Error("error with a push to webserver: " + err.Error())
-						return nil
-					}
-
-					target, err := s.GetTarget(targetId.Value)
-					if err != nil {
-						s.Stream.Error("error with a push to webserver: " + err.Error())
-						return nil
-					}
-
-					if _, ok := target.Results[module.Name()]; ok {
-						s.PushResultsToGate(target.Results[module.Name()], startedAt)
-					}
+				targetId, err := module.GetParameter("TARGET")
+				if err != nil {
+					s.Stream.Error("error with a target: " + err.Error())
+					return nil
 				}
+
+				target, err := s.GetTarget(targetId.Value)
+				if err != nil {
+					s.Stream.Error("error with a push to webserver: " + err.Error())
+					return nil
+				}
+
+				res := s.GetResultsAfter(target.Results[module.Name()], startedAt)
+				if len(res) > 0 {
+					s.NewEvent(RESULTS_ADD, ModuleEvent{
+						ModuleName: module.Name(),
+						Results:    res,
+					})
+				}
+
+				s.Stream.Verbose = verboseValue
+
 				return r
 			}
 		} else {
@@ -589,7 +608,7 @@ func LoadIntervalCommandMenu(line string, module Module, s *Session) []string {
 			return nil
 		}
 		interval.Up()
-		s.Stream.Success("interval '" + interval.Id + "' as started at '" + time.Now().Format("2006-01-02 15:04:05") + "'")
+		s.Stream.Success("'" + interval.Id + "' next execution at '" + interval.NextRun.Format("2006-01-02 15:04:05") + "'")
 		break
 	case "down":
 		if len(arguments) < 3 {
@@ -627,58 +646,20 @@ func LoadModuleByTypeMenu(line string, module Module, s *Session) []string {
 	t.AppendHeader(table.Row{
 		"NAME",
 		"DESCRIPTION",
+		"TYPE",
 	})
 	for _, module := range s.Modules {
-		if strings.ToLower(module.GetType()) == strings.ToLower(stype) {
-			t.AppendRow(table.Row{
-				module.Name(),
-				module.Description(),
-			})
+		for _, moduleType := range module.GetType() {
+			if strings.ToLower(moduleType) == strings.ToLower(stype) {
+				t.AppendRow(table.Row{
+					module.Name(),
+					module.Description(),
+					strings.Join(module.GetType(), ","),
+				})
+			}
 		}
 	}
 	s.Stream.Render(t)
-	return nil
-}
-
-func LoadAnalyticsWebBased(line string, module Module, s *Session) []string {
-	arguments := strings.Split(strings.TrimSpace(line), " ")
-	switch strings.ToLower(arguments[1]) {
-	case "up":
-		s.AnalyticsUp()
-		break
-	case "info":
-		t := s.Stream.GenerateTable()
-		t.SetOutputMirror(os.Stdout)
-		t.AppendRow(table.Row{
-			"URL",
-			s.Analytics.Link,
-		})
-		t.AppendRow(table.Row{
-			"TYPE",
-			s.Analytics.SessionType,
-		})
-		t.AppendRow(table.Row{
-			"PUBLIC",
-			s.Analytics.isPublic,
-		})
-		s.Stream.Render(t)
-		break
-	case "set":
-		if len(arguments) < 4 {
-			s.Stream.Error("Please use <module> <set> <argument> <value>")
-			return nil
-		}
-		expl := strings.SplitN(line, " ", 4)
-		setter := expl[2]
-		value := expl[3]
-		switch setter {
-		case "type":
-			s.Analytics.SessionType = value
-			s.Stream.Success("Session type as set to '" + value + "'")
-			break
-		}
-	}
-
 	return nil
 }
 
@@ -790,6 +771,109 @@ func LoadMonitorCommandMenu(line string, module Module, s *Session) []string {
 		monitor.ViewResults()
 		break
 
+	}
+
+	return nil
+}
+
+func LoadTrackerCommandMenu(line string, module Module, s *Session) []string {
+	arguments := strings.Split(strings.TrimSpace(line), " ")
+	switch arguments[1] {
+	case "list":
+		t := s.Stream.GenerateTable()
+		t.SetOutputMirror(os.Stdout)
+		t.SetAllowedColumnLengths([]int{30, 30, 30})
+		t.AppendHeader(table.Row{
+			"OPF ID",
+			"IDENTIFIER",
+			"DESCRIPTION",
+			"MEMORIES",
+		})
+
+		for _, track := range s.Tracker.Tracked {
+			t.AppendRow(table.Row{
+				track.Id,
+				track.Identifier,
+				track.Description,
+				len(track.Memories),
+			})
+		}
+
+		s.Stream.Render(t)
+		break
+	case "select":
+		if len(arguments) < 3 {
+			s.Stream.Error("Please use : tracker select <identifier>")
+			return nil
+		}
+		options := strings.SplitN(line, " ", 3)
+		tracker, err := s.GetTracker(options[2])
+		if err != nil {
+			s.Stream.Error(err.Error())
+			return nil
+		}
+
+		s.Tracker.Selected = tracker
+		s.Stream.Success("Tracker '" + tracker.Identifier + "' as selected at '" + time.Now().Format("2006-01-02 15:04:05") + "'")
+		break
+	case "positions":
+		if len(arguments) < 3 {
+			s.Stream.Error("Please use : tracker position <identifier>")
+			return nil
+		}
+		options := strings.SplitN(line, " ", 3)
+		tracker, err := s.GetTracker(options[2])
+		if err != nil {
+			s.Stream.Error(err.Error())
+			return nil
+		}
+
+		tracker.ViewPositions()
+		break
+
+	}
+
+	return nil
+}
+
+func LoadWebHookMenu(line string, module Module, s *Session) []string {
+	arguments := strings.Split(strings.TrimSpace(line), " ")
+	if len(arguments) < 2 {
+		s.Stream.Error("Please use : webhook <command> <webhookId>")
+		return nil
+	}
+	switch arguments[1] {
+	case "list":
+		s.ListWebHooks()
+		break
+	case "up":
+		if len(arguments) < 3 {
+			s.Stream.Error("Please use : webhook up <webhookId>")
+			return nil
+		}
+		options := strings.SplitN(line, " ", 3)
+		webhook, err := s.GetWebHook(options[2])
+		if err != nil {
+			s.Stream.Error(err.Error())
+			return nil
+		}
+		webhook.Up()
+		s.Stream.Success("Webhook '" + webhook.GetId() + "' as been started '" + time.Now().Format("2006-01-02 15:04:05") + "'")
+		break
+	case "down":
+		if len(arguments) < 3 {
+			s.Stream.Error("Please use : webhook down <webhookId>")
+			return nil
+		}
+		options := strings.SplitN(line, " ", 3)
+		webhook, err := s.GetWebHook(options[2])
+		if err != nil {
+			s.Stream.Error(err.Error())
+			return nil
+		}
+		webhook.Down()
+		s.Stream.Success("Webhook '" + webhook.GetId() + "' as stopped at '" + time.Now().Format("2006-01-02 15:04:05") + "'")
+		break
 	}
 
 	return nil

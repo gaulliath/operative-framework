@@ -40,8 +40,10 @@ func (module *DirectorySearchModule) Description() string {
 	return "Try to bust hidden directory"
 }
 
-func (module *DirectorySearchModule) GetType() string {
-	return "website"
+func (module *DirectorySearchModule) GetType() []string {
+	return []string{
+		session.T_TARGET_WEBSITE,
+	}
 }
 
 func (module *DirectorySearchModule) GetInformation() session.ModuleInformation {
@@ -110,28 +112,28 @@ func (module *DirectorySearchModule) Start() {
 			module.Stream.Error(err.Error())
 		} else {
 			if res.StatusCode == 200 {
-				result := session.TargetResults{
-					Header: "URL" + target.GetSeparator() + "STATUS",
-					Value:  url + target.GetSeparator() + strconv.Itoa(res.StatusCode),
-				}
+				result := target.NewResult()
+				result.Set("URL", url)
+				result.Set("STATUS", strconv.Itoa(res.StatusCode))
+				result.Save(module, target)
+
 				module.Results = append(module.Results, url)
-				target.Save(module, result)
 				module.sess.Stream.Success(url + " : " + strconv.Itoa(res.StatusCode))
 			} else if res.StatusCode == 404 {
-				result := session.TargetResults{
-					Header: "URL" + target.GetSeparator() + "STATUS",
-					Value:  url + target.GetSeparator() + strconv.Itoa(res.StatusCode),
-				}
+				result := target.NewResult()
+				result.Set("URL", url)
+				result.Set("STATUS", strconv.Itoa(res.StatusCode))
+				result.Save(module, target)
+
 				module.Results = append(module.Results, url)
-				target.Save(module, result)
 				module.sess.Stream.Standard(url + " : " + strconv.Itoa(res.StatusCode))
 			} else {
-				result := session.TargetResults{
-					Header: "URL" + target.GetSeparator() + "STATUS",
-					Value:  url + target.GetSeparator() + strconv.Itoa(res.StatusCode),
-				}
+				result := target.NewResult()
+				result.Set("URL", url)
+				result.Set("STATUS", strconv.Itoa(res.StatusCode))
+				result.Save(module, target)
+
 				module.Results = append(module.Results, url)
-				target.Save(module, result)
 				module.sess.Stream.Warning(url + " : " + strconv.Itoa(res.StatusCode))
 			}
 		}

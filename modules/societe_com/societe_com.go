@@ -39,8 +39,10 @@ func (module *SocieteComModule) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *SocieteComModule) GetType() string {
-	return "person"
+func (module *SocieteComModule) GetType() []string {
+	return []string{
+		session.T_TARGET_PERSON,
+	}
 }
 
 func (module *SocieteComModule) GetInformation() session.ModuleInformation {
@@ -59,11 +61,6 @@ func (module *SocieteComModule) Start() {
 	target, err := module.sess.GetTarget(paramPerson.Value)
 	if err != nil {
 		module.sess.Stream.Error(err.Error())
-		return
-	}
-
-	if target.GetType() != module.GetType() {
-		module.Stream.Error("Target with type '" + target.GetType() + "' isn't valid module need '" + module.GetType() + "' type.")
 		return
 	}
 
@@ -101,12 +98,11 @@ func (module *SocieteComModule) Start() {
 		line = strings.Split(line, "(")[0]
 		line = strings.TrimSpace(line)
 
-		result := session.TargetResults{
-			Header: "enterprise",
-			Value:  line,
-		}
+		result := target.NewResult()
+		result.Set("enterprise", line)
+		result.Save(module, target)
+
 		module.Results = append(module.Results, line)
-		target.Save(module, result)
 
 		t.AppendRow(table.Row{
 			line,

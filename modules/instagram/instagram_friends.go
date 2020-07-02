@@ -41,8 +41,10 @@ func (module *InstagramFriends) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *InstagramFriends) GetType() string {
-	return "instagram"
+func (module *InstagramFriends) GetType() []string {
+	return []string{
+		session.T_TARGET_INSTAGRAM,
+	}
 }
 
 func (module *InstagramFriends) GetInformation() session.ModuleInformation {
@@ -198,11 +200,9 @@ func (module *InstagramFriends) Start() {
 			})
 		}
 
-		result := session.TargetResults{
-			Header: "FRIEND",
-			Value:  username,
-		}
-		target.Save(module, result)
+		result := target.NewResult()
+		result.Set("FRIEND", username)
+		result.Save(module, target)
 	}
 
 	module.Sess.Stream.Render(t)

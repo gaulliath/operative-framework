@@ -39,8 +39,10 @@ func (module *LinkedinSearchModule) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *LinkedinSearchModule) GetType() string {
-	return "enterprise"
+func (module *LinkedinSearchModule) GetType() []string {
+	return []string{
+		session.T_TARGET_ENTERPRISE,
+	}
 }
 
 func (module *LinkedinSearchModule) GetInformation() session.ModuleInformation {
@@ -60,11 +62,6 @@ func (module *LinkedinSearchModule) Start() {
 	target, err := module.sess.GetTarget(paramEnterprise.Value)
 	if err != nil {
 		module.sess.Stream.Error(err.Error())
-		return
-	}
-
-	if target.GetType() != module.GetType() {
-		module.Stream.Error("Target with type '" + target.GetType() + "' isn't valid module need '" + module.GetType() + "' type.")
 		return
 	}
 
@@ -103,13 +100,12 @@ func (module *LinkedinSearchModule) Start() {
 			name := strings.Split(strings.TrimSpace(line), "-")[0]
 			work := strings.Split(strings.TrimSpace(line), "-")[1]
 			link, _ := s.Find("a[href]").First().Attr("href")
-			separator := target.GetSeparator()
 			t.AppendRow([]interface{}{name, work, link})
-			result := session.TargetResults{
-				Header: "Name" + separator + "Work" + separator + "Link",
-				Value:  name + separator + work + separator + link,
-			}
-			target.Save(module, result)
+			result := target.NewResult()
+			result.Set("Name", name)
+			result.Set("Work", work)
+			result.Set("Link", link)
+			result.Save(module, target)
 			resultFound = resultFound + 1
 
 		}

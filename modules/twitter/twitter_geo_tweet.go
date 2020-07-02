@@ -34,8 +34,10 @@ func (module *TwitterGeoTweet) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *TwitterGeoTweet) GetType() string {
-	return "text"
+func (module *TwitterGeoTweet) GetType() []string {
+	return []string{
+		session.T_TARGET_TEXT,
+	}
 }
 
 func (module *TwitterGeoTweet) GetInformation() session.ModuleInformation {

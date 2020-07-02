@@ -32,8 +32,10 @@ func (module *SessionStreamModule) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *SessionStreamModule) GetType() string {
-	return "session"
+func (module *SessionStreamModule) GetType() []string {
+	return []string{
+		session.T_TARGET_SESSION,
+	}
 }
 
 func (module *SessionStreamModule) GetInformation() session.ModuleInformation {
@@ -61,7 +63,7 @@ func (module *SessionStreamModule) Start() {
 	}
 
 	module.Stream.Verbose = module.sess.StringToBoolean(paramVerbosity.Value)
-	module.Stream.CSV  = module.sess.StringToBoolean(paramCSV.Value)
+	module.Stream.CSV = module.sess.StringToBoolean(paramCSV.Value)
 	return
 
 }

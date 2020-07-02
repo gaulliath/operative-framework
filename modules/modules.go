@@ -1,8 +1,10 @@
 package modules
 
 import (
+	"github.com/graniet/operative-framework/modules/abusech"
 	"github.com/graniet/operative-framework/modules/account_checker"
 	"github.com/graniet/operative-framework/modules/bing_vhost"
+	"github.com/graniet/operative-framework/modules/cookies"
 	"github.com/graniet/operative-framework/modules/darksearch"
 	"github.com/graniet/operative-framework/modules/directory_search"
 	"github.com/graniet/operative-framework/modules/find"
@@ -40,6 +42,7 @@ import (
 func LoadModules(s *session.Session) {
 	s.Modules = append(s.Modules, account_checker.PushAccountCheckerModule(s))
 	s.Modules = append(s.Modules, bing_vhost.PushBingVirtualHostModule(s))
+	s.Modules = append(s.Modules, abusech.PushAbuseChModule(s))
 	s.Modules = append(s.Modules, find.PushFindModule(s))
 	s.Modules = append(s.Modules, darksearch.PushDarkSearchModule(s))
 	s.Modules = append(s.Modules, directory_search.PushModuleDirectorySearch(s))
@@ -48,6 +51,7 @@ func LoadModules(s *session.Session) {
 	s.Modules = append(s.Modules, google.PushGoogleSearchModule(s))
 	s.Modules = append(s.Modules, google.PushGoogleTwitterModule(s))
 	s.Modules = append(s.Modules, google.PushGoogleDorkModule(s))
+	s.Modules = append(s.Modules, cookies.PushGetCookiesModule(s))
 	s.Modules = append(s.Modules, instagram.PushInstagramFollowersModule(s))
 	s.Modules = append(s.Modules, instagram.PushInstagramFeedModule(s))
 	s.Modules = append(s.Modules, instagram.PushInstagramFollowingModule(s))
@@ -86,8 +90,11 @@ func LoadModules(s *session.Session) {
 	s.Modules = append(s.Modules, whatsapp.PushWhatsappExtractorModule(s))
 
 	for _, mod := range s.Modules {
-		s.PushType(mod.GetType())
+		for _, tp := range mod.GetType() {
+			s.PushType(tp)
+		}
 		mod.CreateNewParam("FILTER", "Use module filter after execution", "", false, session.STRING)
 		mod.CreateNewParam("BACKGROUND", "Run this task in background", "false", false, session.BOOL)
+		mod.CreateNewParam("DISABLE_OUTPUT", "Display module result in stdout", "false", false, session.BOOL)
 	}
 }

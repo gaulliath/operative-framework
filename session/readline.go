@@ -49,6 +49,16 @@ func (s *Session) ReadLineAutoCompleteFilters() func(string) []string {
 	}
 }
 
+func (s *Session) ReadLineAutoCompleteTracker() func(string) []string {
+	return func(line string) []string {
+		trackers := make([]string, 0)
+		for _, track := range s.Tracker.Tracked {
+			trackers = append(trackers, track.Id)
+		}
+		return trackers
+	}
+}
+
 func (s *Session) ReadLineAutoCompleteTargets() func(string) []string {
 	return func(line string) []string {
 		targets := make([]string, 0)
@@ -107,6 +117,16 @@ func (s *Session) ReadLineAutoCompleteListAlias() func(string) []string {
 	}
 }
 
+func (s *Session) ReadLineAutoCompleteListWebHooks() func(string) []string {
+	return func(line string) []string {
+		var returnResult []string
+		for _, wh := range s.WebHooks {
+			returnResult = append(returnResult, wh.GetId())
+		}
+		return returnResult
+	}
+}
+
 func (s *Session) ReadLineAutoCompleteResults() func(string) []string {
 	return func(line string) []string {
 		value := strings.Split(line, " ")
@@ -116,7 +136,7 @@ func (s *Session) ReadLineAutoCompleteResults() func(string) []string {
 				for _, target := range s.Targets {
 					for _, module := range target.Results {
 						for _, result := range module {
-							if result.Value != "" {
+							if len(result.Values) > 0 {
 								returnResult = append(returnResult, result.ResultId)
 							}
 						}
@@ -132,7 +152,7 @@ func (s *Session) ReadLineAutoCompleteResults() func(string) []string {
 		}
 		for _, module := range target.Results {
 			for _, result := range module {
-				if result.Value != "" {
+				if len(result.Values) > 0 {
 					returnResult = append(returnResult, result.ResultId)
 				}
 			}
@@ -144,6 +164,12 @@ func (s *Session) ReadLineAutoCompleteResults() func(string) []string {
 func (s *Session) PushPrompt() {
 	var completer = readline.NewPrefixCompleter(
 		readline.PcItem("modules"),
+		readline.PcItem("webhooks"),
+		readline.PcItem("webhook",
+			readline.PcItem("up",
+				readline.PcItemDynamic(s.ReadLineAutoCompleteListWebHooks())),
+			readline.PcItem("down",
+				readline.PcItemDynamic(s.ReadLineAutoCompleteListWebHooks()))),
 		readline.PcItem("result",
 			readline.PcItem("delete",
 				readline.PcItemDynamic(s.ReadLineAutoCompleteResults()))),
@@ -186,6 +212,7 @@ func (s *Session) PushPrompt() {
 			readline.PcItem("update",
 				readline.PcItemDynamic(s.ReadLineAutoCompleteTargets())),
 			readline.PcItem("list"),
+			readline.PcItem("type"),
 			readline.PcItem("link",
 				readline.PcItemDynamic(s.ReadLineAutoCompleteTargets(),
 					readline.PcItemDynamic(s.ReadLineAutoCompleteTargets()))),
@@ -213,7 +240,8 @@ func (s *Session) PushPrompt() {
 			readline.PcItem("filter",
 				readline.PcItemDynamic(s.ReadLineAutoCompleteFilters())),
 			readline.PcItem("set",
-				readline.PcItem("TARGET")),
+				readline.PcItem("TARGET"),
+				readline.PcItem("DISABLE_OUTPUT")),
 			readline.PcItem("run"),
 		),
 		readline.PcItemDynamic(s.ReadLineAutoCompleteListModules(),
@@ -223,7 +251,8 @@ func (s *Session) PushPrompt() {
 			readline.PcItem("filter",
 				readline.PcItemDynamic(s.ReadLineAutoCompleteFilters())),
 			readline.PcItem("set",
-				readline.PcItem("TARGET")),
+				readline.PcItem("TARGET"),
+				readline.PcItem("DISABLE_OUTPUT")),
 			readline.PcItem("run"),
 		),
 		readline.PcItem("help"),
@@ -234,6 +263,15 @@ func (s *Session) PushPrompt() {
 		readline.PcItem("api",
 			readline.PcItem("run"),
 			readline.PcItem("stop")),
+		readline.PcItem("tracker",
+			readline.PcItem("run"),
+			readline.PcItem("stop"),
+			readline.PcItem("list"),
+			readline.PcItem("positions",
+				readline.PcItemDynamic(s.ReadLineAutoCompleteTracker())),
+			readline.PcItem("select",
+				readline.PcItemDynamic(s.ReadLineAutoCompleteTracker())),
+		),
 	)
 	s.Prompt = &readline.Config{
 		Prompt:            "\033[90m[OPF v" + s.Version + "]:\033[0m ",

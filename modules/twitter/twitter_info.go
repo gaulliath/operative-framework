@@ -36,8 +36,10 @@ func (module *TwitterInfo) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *TwitterInfo) GetType() string {
-	return "twitter"
+func (module *TwitterInfo) GetType() []string {
+	return []string{
+		session.T_TARGET_TWITTER,
+	}
 }
 
 func (module *TwitterInfo) GetInformation() session.ModuleInformation {
@@ -81,7 +83,6 @@ func (module *TwitterInfo) Start() {
 	}
 
 	t := module.Sess.Stream.GenerateTable()
-	separator := target.GetSeparator()
 	t.SetOutputMirror(os.Stdout)
 	t.SetAllowedColumnLengths([]int{30, 30})
 	t.AppendRow(table.Row{
@@ -113,11 +114,15 @@ func (module *TwitterInfo) Start() {
 		profile.Email,
 	})
 
-	result := session.TargetResults{
-		Header: "USERNAME" + separator + "FULLNAME" + separator + "PICS" + separator + "DESCRIPTION" + separator + "FOLLOWERS" + separator + "FOLLOWINGS" + separator + "EMAIL",
-		Value:  profile.ScreenName + separator + profile.Name + separator + profile.ProfileImageURL + separator + profile.Description + separator + strconv.Itoa(profile.FollowersCount) + separator + strconv.Itoa(profile.FriendsCount) + separator + separator + profile.Email,
-	}
-	target.Save(module, result)
+	result := target.NewResult()
+	result.Set("USERNAME", profile.ScreenName)
+	result.Set("FULLNAME", profile.Name)
+	result.Set("PICS", profile.ProfileImageURL)
+	result.Set("DESCRIPTION", profile.Description)
+	result.Set("FOLLOWERS", strconv.Itoa(profile.FollowersCount))
+	result.Set("FOLLOWINGS", strconv.Itoa(profile.FriendsCount))
+	result.Set("EMAIL", profile.Email)
+	result.Save(module, target)
 
 	module.Sess.Stream.Render(t)
 

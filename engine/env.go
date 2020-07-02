@@ -38,6 +38,8 @@ func GenerateEnv(path string) (string, error) {
 	Env.Add("API_HOST", "127.0.0.1")
 	Env.Add("API_PORT", "8888")
 	Env.Add("API_VERBOSE", "true")
+	Env.Add("TRACKING_HOST", "127.0.0.1")
+	Env.Add("TRACKING_PORT", "8181")
 	Env.Add("DB_NAME", database)
 	Env.Add("DB_DRIVER", "sqlite3")
 	Env.Add("DB_HOST", "")

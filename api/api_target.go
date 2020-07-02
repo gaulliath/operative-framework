@@ -23,10 +23,10 @@ type TargetLink struct {
 }
 
 type TargetInformationResponse struct {
-	TargetId      string                              `json:"target_id"`
-	TargetName    string                              `json:"target_name"`
-	TargetType    string                              `json:"target_type"`
-	TargetResults map[string][]*session.TargetResults `json:"target_results"`
+	TargetId   string                           `json:"target_id"`
+	TargetName string                           `json:"target_name"`
+	TargetType string                           `json:"target_type"`
+	OpfResults map[string][]*session.OpfResults `json:"target_results"`
 }
 
 func (api *ARestFul) Targets(w http.ResponseWriter, r *http.Request) {
@@ -66,10 +66,10 @@ func (api *ARestFul) Target(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	targetInformationR := TargetInformationResponse{
-		TargetId:      t.GetId(),
-		TargetName:    t.GetName(),
-		TargetType:    t.GetType(),
-		TargetResults: t.GetResults(),
+		TargetId:   t.GetId(),
+		TargetName: t.GetName(),
+		TargetType: t.GetType(),
+		OpfResults: t.GetResults(),
 	}
 	message := api.Core.PrintData("request executed", false, targetInformationR)
 	_ = json.NewEncoder(w).Encode(message)

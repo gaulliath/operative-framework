@@ -58,8 +58,10 @@ func (module *AccountCheckerModule) Description() string {
 	return "Identify the existence of a given acount on various sites"
 }
 
-func (module *AccountCheckerModule) GetType() string {
-	return "username"
+func (module *AccountCheckerModule) GetType() []string {
+	return []string{
+		session.T_TARGET_USERNAME,
+	}
 }
 
 func (module *AccountCheckerModule) GetInformation() session.ModuleInformation {
@@ -143,11 +145,11 @@ func (module *AccountCheckerModule) Start() {
 					}
 					if strings.Contains(string(bodyBytes), site.AccountExistenceString) {
 						module.sess.Stream.Success("Account found : " + url)
-						result := session.TargetResults{
-							Header: "URL" + target.GetSeparator() + "WEBSITE",
-							Value:  url + target.GetSeparator() + site.Name,
-						}
-						target.Save(module, result)
+						result := target.NewResult()
+						result.Set("URL", url)
+						result.Set("WEBSITE", site.Name)
+						result.Save(module, target)
+
 						module.Results = append(module.Results, url)
 					}
 				}

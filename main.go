@@ -7,7 +7,6 @@ import (
 	"github.com/chzyer/readline"
 	"github.com/fatih/color"
 	"github.com/graniet/operative-framework/api"
-	"github.com/graniet/operative-framework/compiler"
 	"github.com/graniet/operative-framework/cron"
 	"github.com/graniet/operative-framework/engine"
 	"github.com/graniet/operative-framework/export"
@@ -45,6 +44,11 @@ func main() {
 			if _, err := os.Stat(u.HomeDir + "/.opf/"); os.IsNotExist(err) {
 				_ = os.Mkdir(u.HomeDir+"/.opf/", os.ModePerm)
 			}
+
+			if _, err := os.Stat(u.HomeDir + "/.opf/webhooks"); os.IsNotExist(err) {
+				_ = os.Mkdir(u.HomeDir+"/.opf/webhooks", os.ModePerm)
+			}
+
 			log.Println("Generating default .env on '" + u.HomeDir + "' directory...")
 			path, errGeneration := engine.GenerateEnv(u.HomeDir + "/.opf/.env")
 			if errGeneration != nil {
@@ -97,7 +101,7 @@ func main() {
 		Required: false,
 		Help:     "Load specific session id",
 	})
-	onlyModuleOutput := parser.Flag("", "only-module-output", &argparse.Options{
+	onlyModuleOutput := parser.Flag("", "no-banner", &argparse.Options{
 		Required: false,
 		Help:     "Do not print a banner information",
 	})
@@ -107,9 +111,19 @@ func main() {
 		Help:     "Print help",
 	})
 
-	scripts := parser.String("f", "opf", &argparse.Options{
+	file := parser.String("f", "file", &argparse.Options{
 		Required: false,
-		Help:     "Run script before prompt starting",
+		Help:     "Source file",
+	})
+
+	mode := parser.String("m", "mode", &argparse.Options{
+		Required: false,
+		Help:     "Start in specific mode: (perception, tracking, api, console): default (console)",
+	})
+
+	wh := parser.String("", "webhook", &argparse.Options{
+		Required: false,
+		Help:     "Autostart webHook by name",
 	})
 
 	quiet := parser.Flag("q", "quiet", &argparse.Options{
@@ -132,9 +146,14 @@ func main() {
 		Help:     "Print result with a CSV format",
 	})
 
-	sendTo := parser.String("", "to", &argparse.Options{
+	autoloadWH := parser.Flag("", "autoload-webhooks", &argparse.Options{
 		Required: false,
-		Help:     "Send response to webservice (require --json)",
+		Help:     "Set active all 'web hooks' loaded in session",
+	})
+
+	eval := parser.String("", "eval", &argparse.Options{
+		Required: false,
+		Help:     "Execute commands while framework boot",
 	})
 
 	err = parser.Parse(os.Args)
@@ -156,7 +175,6 @@ func main() {
 	sess.Config.Common.BaseDirectory = opfBaseDirectory
 	sess.Config.Common.ExportDirectory = opfExport
 	sess.ParseModuleConfig()
-	sess.ParseWebServiceConfig()
 	apiRest := api.PushARestFul(sess)
 
 	// Load supervised cron job.
@@ -181,14 +199,6 @@ func main() {
 
 	if *verbose {
 		sess.Stream.Verbose = false
-	} else {
-		if !*onlyModuleOutput {
-			c := color.New(color.FgYellow)
-			_, _ = c.Println("OPERATIVE FRAMEWORK - DIGITAL INVESTIGATION FRAMEWORK")
-			sess.Stream.WithoutDate("Loading a configuration file '" + configFile + "'")
-			sess.Stream.WithoutDate("Loading a cron job configuration '" + sess.Config.Common.ConfigurationJobs + "'")
-			sess.Stream.WithoutDate("Loading '" + strconv.Itoa(len(sess.Config.Modules)) + "' module(s) configuration(s)")
-		}
 	}
 
 	if *execute != "" {
@@ -202,7 +212,7 @@ func main() {
 			return
 		}
 
-		target, err := sess.AddTarget(module.GetType(), *target)
+		target, err := sess.AddTarget(module.GetType()[0], *target)
 		if err != nil {
 			sess.Stream.Error(err.Error())
 			return
@@ -238,27 +248,13 @@ func main() {
 		if *csvExport {
 			sess.Stream.CSV = true
 		}
+		sess.NewInstance(module.Name())
 		module.Start()
 
 		if *jsonExport {
-			e := export.ExportNow(sess, module)
+			e := export.JSON(sess)
 			j, err := json.Marshal(e)
 			if err == nil {
-				if *sendTo != "" {
-					webservice, err := sess.GetWebService(*sendTo)
-					if err != nil {
-						sess.Stream.Error(err.Error())
-						return
-					}
-					opfClient := sess.Client
-					opfClient.Header.Add("Content-Type", "application/json")
-					opfClient.Data = j
-					_, err = opfClient.Perform("POST", webservice.URL)
-					if err != nil {
-						sess.Stream.Error(err.Error())
-						return
-					}
-				}
 				print(string(j))
 			}
 			return
@@ -280,12 +276,72 @@ func main() {
 		}
 	}
 
-	if *scripts != "" {
-		compiler.Run(sess, *scripts)
+	// Checking if source file exists in argv
+	if *file != "" {
+		sess.SetSourceFile(*file)
+		_ = sess.FromSourceFile()
+	}
+
+	// Load Webhooks configuration
+	sess.LoadWebHook()
+
+	if *wh != "" {
+		webHook, err := sess.GetWebHookByName(*wh)
+		if err != nil {
+			sess.Stream.Error(err.Error())
+			return
+		}
+		webHook.SetStatus(true)
+	}
+
+	if *autoloadWH {
+		for _, wh := range sess.WebHooks {
+			sess.Stream.Standard("Starting '" + wh.GetName() + "' web hooks")
+			wh.Up()
+		}
+	}
+
+	if *mode != "" {
+		switch strings.ToLower(*mode) {
+		case "perception":
+			if *file == "" {
+				sess.Stream.Error("Please select a source file (-f) with interval commands.")
+				return
+			}
+
+			sess.Stream.Standard("Mode '" + strings.ToLower(*mode) + "' as started now...")
+			select {}
+		case "tracking":
+			sess.Stream.Standard("running operative framework api...")
+			sess.Stream.Standard("[API] available : " + apiRest.Server.Addr)
+			go apiRest.Start()
+			sess.Stream.Standard("[GUI] Tracking : " + sess.GetTrackingUrlWithParam())
+			sess.ServeTrackerGUI()
+			break
+		case "console":
+			break
+		case "api":
+			sess.Stream.Standard("running operative framework api...")
+			sess.Stream.Standard("available at : " + apiRest.Server.Addr)
+			sess.Information.SetApi(true)
+			apiRest.Start()
+			break
+		default:
+			sess.Stream.Warning("Mode '" + *mode + "' as unknown, running 'console' mode...")
+			break
+		}
 	}
 
 	if *quiet {
 		return
+	}
+
+	if !*onlyModuleOutput && sess.Stream.Verbose {
+		c := color.New(color.FgYellow)
+		_, _ = c.Println("OPERATIVE FRAMEWORK - DIGITAL INVESTIGATION FRAMEWORK")
+		sess.Stream.WithoutDate("Loading a configuration file '" + configFile + "'")
+		sess.Stream.WithoutDate("Loading a cron job configuration '" + sess.Config.Common.ConfigurationJobs + "'")
+		sess.Stream.WithoutDate("Loading '" + strconv.Itoa(len(sess.Config.Modules)) + "' module(s) configuration(s)")
 	}
 
 	l, errP := readline.NewEx(sess.Prompt)
@@ -300,8 +356,9 @@ func main() {
 	// Checking in background available monitor
 	go sess.WaitMonitor()
 
-	// Checking interval in background
-	go sess.WaitAnalytics()
+	if *eval != "" {
+		sess.ParseCommands(*eval)
+	}
 
 	// Run Operative Framework Menu
 	for {
@@ -327,6 +384,13 @@ func main() {
 		} else if line == "api stop" {
 			_ = apiRest.Server.Close()
 			sess.Information.SetApi(false)
+		} else if line == "tracker run" {
+			sess.Stream.Success("[GUI] Tracking : " + sess.GetTrackingUrlWithParam())
+			go sess.ServeTrackerGUI()
+			sess.Information.SetTracker(true)
+		} else if line == "tracker stop" {
+			_ = sess.Tracker.Server.Close()
+			sess.Information.SetTracker(false)
 		} else {
 			if !engine.CommandBase(line, sess) {
 				sess.ParseCommand(line)

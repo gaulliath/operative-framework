@@ -37,8 +37,10 @@ func (module *FindWithRegexModule) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *FindWithRegexModule) GetType() string {
-	return "command"
+func (module *FindWithRegexModule) GetType() []string {
+	return []string{
+		session.T_TARGET_COMMAND,
+	}
 }
 
 func (module *FindWithRegexModule) GetInformation() session.ModuleInformation {
@@ -88,7 +90,7 @@ func (module *FindWithRegexModule) Start() {
 
 	targets := s.Targets
 	var separator string
-	var results []*session.TargetResults
+	var results []*session.OpfResults
 	var r = regexp.MustCompile(term.Value)
 
 	for _, target := range targets {
@@ -96,8 +98,8 @@ func (module *FindWithRegexModule) Start() {
 		modules := target.Results
 		for _, moduleResults := range modules {
 			for _, result := range moduleResults {
-				keys := strings.Split(result.Header, separator)
-				values := strings.Split(result.Value, separator)
+				keys := strings.Split(result.GetCompactKeys(), separator)
+				values := strings.Split(result.GetCompactValues(), separator)
 				found := false
 				for _, key := range keys {
 					if r.MatchString(key) {
@@ -130,8 +132,8 @@ func (module *FindWithRegexModule) Start() {
 			"RESULT",
 			result.ResultId,
 		})
-		keys := strings.Split(result.Header, separator)
-		values := strings.Split(result.Value, separator)
+		keys := strings.Split(result.GetCompactKeys(), separator)
+		values := strings.Split(result.GetCompactValues(), separator)
 		for index, key := range keys {
 			realValue := ""
 			if values[index] != "" {

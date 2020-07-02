@@ -1,6 +1,7 @@
 package session
 
 import (
+	"encoding/json"
 	"strconv"
 	"strings"
 )
@@ -34,4 +35,9 @@ func (s *Session) StringToInteger(element string) int {
 func (s *Session) StringToInt64(element string) int64 {
 	n, _ := strconv.ParseInt(element, 10, 64)
 	return n
+}
+
+func (s *Session) IsJSON(str string) bool {
+	var js json.RawMessage
+	return json.Unmarshal([]byte(str), &js) == nil
 }

@@ -38,8 +38,10 @@ func (module *TwitterFollower) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *TwitterFollower) GetType() string {
-	return "twitter"
+func (module *TwitterFollower) GetType() []string {
+	return []string{
+		session.T_TARGET_TWITTER,
+	}
 }
 
 func (module *TwitterFollower) GetInformation() session.ModuleInformation {
@@ -133,11 +135,10 @@ func (module *TwitterFollower) Start() {
 			t.AppendRow(table.Row{
 				ids,
 			})
-			result := session.TargetResults{
-				Header: "Twitter ID",
-				Value:  strconv.Itoa(int(ids)),
-			}
-			target.Save(module, result)
+
+			result := target.NewResult()
+			result.Set("Twitter ID", strconv.Itoa(int(ids)))
+			result.Save(module, target)
 		}
 	}
 

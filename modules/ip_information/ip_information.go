@@ -51,8 +51,10 @@ func (module *IpInformation) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *IpInformation) GetType() string {
-	return "ip_address"
+func (module *IpInformation) GetType() []string {
+	return []string{
+		session.T_TARGET_IP_ADDRESS,
+	}
 }
 
 func (module *IpInformation) GetInformation() session.ModuleInformation {
@@ -147,49 +149,16 @@ func (module *IpInformation) Start() {
 
 	module.Sess.Stream.Render(t)
 
-	result := session.TargetResults{
-		Header: "IP" +
-			target.GetSeparator() +
-			"CountryCode" +
-			target.GetSeparator() +
-			"CountryName" +
-			target.GetSeparator() +
-			"RegionCode" +
-			target.GetSeparator() +
-			"RegionName" +
-			target.GetSeparator() +
-			"City" +
-			target.GetSeparator() +
-			"ZipCode" +
-			target.GetSeparator() +
-			"TimeZone" +
-			target.GetSeparator() +
-			"Latitude" +
-			target.GetSeparator() +
-			"Longitude" +
-			target.GetSeparator() +
-			"MetroCode",
-		Value: IpAddressInformation.IP +
-			target.GetSeparator() +
-			IpAddressInformation.CountryCode +
-			target.GetSeparator() +
-			IpAddressInformation.CountryName +
-			target.GetSeparator() +
-			IpAddressInformation.RegionCode +
-			target.GetSeparator() +
-			IpAddressInformation.RegionName +
-			target.GetSeparator() +
-			IpAddressInformation.City +
-			target.GetSeparator() +
-			IpAddressInformation.ZipCode +
-			target.GetSeparator() +
-			IpAddressInformation.TimeZone +
-			target.GetSeparator() +
-			fmt.Sprintf("%f", IpAddressInformation.Latitude) +
-			target.GetSeparator() +
-			fmt.Sprintf("%f", IpAddressInformation.Longitude) +
-			target.GetSeparator() +
-			strconv.Itoa(IpAddressInformation.MetroCode),
-	}
-	target.Save(module, result)
+	result := target.NewResult()
+	result.Set("IP", IpAddressInformation.IP)
+	result.Set("CountryCode", IpAddressInformation.CountryCode)
+	result.Set("RegionCode", IpAddressInformation.RegionCode)
+	result.Set("RegionName", IpAddressInformation.RegionName)
+	result.Set("City", IpAddressInformation.City)
+	result.Set("ZipCode", IpAddressInformation.ZipCode)
+	result.Set("TimeZone", IpAddressInformation.TimeZone)
+	result.Set("Latitude", fmt.Sprintf("%f", IpAddressInformation.Latitude))
+	result.Set("Longitude", fmt.Sprintf("%f", IpAddressInformation.Longitude))
+	result.Set("MetroCode", strconv.Itoa(IpAddressInformation.MetroCode))
+	result.Save(module, target)
 }

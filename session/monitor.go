@@ -12,16 +12,30 @@ import (
 type Monitors []*Monitor
 
 type Monitor struct {
-	Session   *Session
-	MonitorId string
-	Search    string
-	Status    bool
-	Result    []*TargetResults
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	Session   *Session      `json:"-"`
+	MonitorId string        `json:"monitor_id"`
+	Search    []string      `json:"search"`
+	Strict    bool          `json:"strict"`
+	Status    bool          `json:"status"`
+	Result    []*OpfResults `json:"-"`
+	CreatedAt time.Time     `json:"created_at"`
+	UpdatedAt time.Time     `json:"updated_at"`
 }
 
-func (s *Session) NewMonitor(search string) *Monitor {
+type MonitorMatch struct {
+	Monitor *Monitor    `json:"monitor"`
+	Result  *OpfResults `json:"result"`
+}
+
+func (s *Session) NewMonitor(scope string) *Monitor {
+
+	var search []string
+
+	if strings.Contains(scope, ";") {
+		search = strings.Split(scope, ";")
+	} else {
+		search = append(search, scope)
+	}
 
 	newMonitor := Monitor{
 		MonitorId: "M_" + ksuid.New().String(),
@@ -70,6 +84,19 @@ func (s *Session) WaitMonitor() {
 	}
 }
 
+func (m *Monitor) SetSession(s *Session) {
+	m.Session = s
+}
+
+func (m *Monitor) SetId() *Monitor {
+	m.MonitorId = "M_" + ksuid.New().String()
+	return m
+}
+
+func (m *Monitor) getId() string {
+	return m.MonitorId
+}
+
 func (m *Monitor) Up() {
 	m.Status = true
 	m.UpdatedAt = time.Now()
@@ -85,21 +112,18 @@ func (m *Monitor) ViewResults() {
 	t.SetOutputMirror(os.Stdout)
 	t.SetAllowedColumnLengths([]int{40, 30, 30, 30})
 	headerRow := table.Row{}
+
 	for _, result := range m.Result {
 		resRow := table.Row{}
-		separator := m.Session.GetSeparator()
-		header := strings.Split(result.Header, separator)
-		res := strings.Split(result.Value, separator)
-		if len(headerRow) < 1 {
-			for _, h := range header {
-				headerRow = append(headerRow, h)
-			}
-			headerRow = append(headerRow, "result_id")
-			headerRow = append(headerRow, "target_id")
-			t.AppendHeader(headerRow)
+		for _, key := range result.GetKeys() {
+			headerRow = append(headerRow, key)
 		}
-		for _, r := range res {
-			resRow = append(resRow, r)
+		headerRow = append(headerRow, "result_id")
+		headerRow = append(headerRow, "target_id")
+		t.AppendHeader(headerRow)
+
+		for _, value := range result.Values {
+			resRow = append(resRow, value.Value)
 		}
 		resRow = append(resRow, result.ResultId)
 		resRow = append(resRow, result.TargetId)
@@ -124,11 +148,21 @@ func (m *Monitor) Checking() {
 				if len(results) > 0 {
 					for _, result := range results {
 						if result.CreatedAt.After(m.CreatedAt) {
-							if strings.Contains(strings.ToLower(result.Value), strings.ToLower(m.Search)) {
-								if !m.HasResult(result.ResultId) {
-									m.Result = append(m.Result, result)
-									m.UpdatedAt = time.Now()
-									m.Session.NewEvent(MONITOR_MATCH, "Monitor '"+m.MonitorId+"' as found new matching with result '"+result.ResultId+"'")
+							for _, scope := range m.Search {
+								for _, value := range result.Values {
+									if strings.Contains(strings.ToLower(value.Value), strings.ToLower(scope)) {
+										if !m.HasResult(result.ResultId) {
+											m.Result = append(m.Result, result)
+											m.UpdatedAt = time.Now()
+
+											match := MonitorMatch{
+												Monitor: m,
+												Result:  result,
+											}
+
+											m.Session.NewEvent(MONITOR_MATCH, match)
+										}
+									}
 								}
 							}
 						}

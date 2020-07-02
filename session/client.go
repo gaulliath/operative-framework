@@ -2,6 +2,9 @@ package session
 
 import (
 	"bytes"
+	"encoding/gob"
+	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
@@ -23,6 +26,22 @@ func GetOpfClient() OpfClient {
 		WithTor: false,
 		Header:  make(Headers),
 	}
+}
+
+func (c *OpfClient) SetUserAgent(user string) *OpfClient {
+	c.Header["User-Agent"] = user
+	return c
+}
+
+func (c *OpfClient) SetData(data interface{}) (*OpfClient, error) {
+	var buf bytes.Buffer
+	enc := gob.NewEncoder(&buf)
+	err := enc.Encode(data)
+	if err != nil {
+		return c, err
+	}
+	c.Data = buf.Bytes()
+	return c, nil
 }
 
 func (header Headers) Add(key string, value string) {
@@ -64,4 +83,8 @@ func (c *OpfClient) Perform(method string, uri string) (*http.Response, error) {
 		req.Header.Set(header, content)
 	}
 	return c.Client.Do(req)
+}
+
+func (c *OpfClient) Read(r io.ReadCloser) ([]byte, error) {
+	return ioutil.ReadAll(r)
 }

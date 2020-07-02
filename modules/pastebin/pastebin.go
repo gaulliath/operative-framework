@@ -39,8 +39,10 @@ func (module *PasteBin) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *PasteBin) GetType() string {
-	return "text"
+func (module *PasteBin) GetType() []string {
+	return []string{
+		session.T_TARGET_TEXT,
+	}
 }
 
 func (module *PasteBin) GetInformation() session.ModuleInformation {
@@ -59,11 +61,6 @@ func (module *PasteBin) Start() {
 	target, err := module.sess.GetTarget(paramEmail.Value)
 	if err != nil {
 		module.sess.Stream.Error(err.Error())
-		return
-	}
-
-	if target.GetType() != module.GetType() {
-		module.Stream.Error("Target with type '" + target.GetType() + "' isn't valid module need '" + module.GetType() + "' type.")
 		return
 	}
 
@@ -104,12 +101,12 @@ func (module *PasteBin) Start() {
 			t.AppendRow(table.Row{
 				link,
 			})
-			result := session.TargetResults{
-				Header: "link",
-				Value:  link,
-			}
+
+			result := target.NewResult()
+			result.Set("link", link)
+			result.Save(module, target)
+
 			module.Results = append(module.Results, link)
-			target.Save(module, result)
 			resultFound = resultFound + 1
 		}
 	}

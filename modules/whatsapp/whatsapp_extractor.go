@@ -52,8 +52,10 @@ func (module *WhatsappExtractor) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *WhatsappExtractor) GetType() string {
-	return "whatsapp"
+func (module *WhatsappExtractor) GetType() []string {
+	return []string{
+		session.T_TARGET_WHATSAPP,
+	}
 }
 
 func (module *WhatsappExtractor) GetInformation() session.ModuleInformation {

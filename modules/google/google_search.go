@@ -41,8 +41,10 @@ func (module *GoogleSearchModule) Description() string {
 	return "Find result from google search engine"
 }
 
-func (module *GoogleSearchModule) GetType() string {
-	return "search"
+func (module *GoogleSearchModule) GetType() []string {
+	return []string{
+		session.T_TARGET_SEARCH,
+	}
 }
 
 func (module *GoogleSearchModule) GetInformation() session.ModuleInformation {
@@ -61,11 +63,6 @@ func (module *GoogleSearchModule) Start() {
 	target, err := module.sess.GetTarget(paramEnterprise.Value)
 	if err != nil {
 		module.sess.Stream.Error(err.Error())
-		return
-	}
-
-	if target.GetType() != module.GetType() {
-		module.Stream.Error("Target with type '" + target.GetType() + "' isn't valid module need '" + module.GetType() + "' type.")
 		return
 	}
 
@@ -102,13 +99,11 @@ func (module *GoogleSearchModule) Start() {
 		line := s.Find("h3").Text()
 		name := strings.TrimSpace(line)
 		link, _ := s.Find("a[href]").First().Attr("href")
-		separator := target.GetSeparator()
 		t.AppendRow([]interface{}{name, link})
-		result := session.TargetResults{
-			Header: "Name" + separator + "Link",
-			Value:  name + separator + link,
-		}
-		target.Save(module, result)
+		result := target.NewResult()
+		result.Set("Name", name)
+		result.Set("Link", link)
+		result.Save(module, target)
 		resultFound = resultFound + 1
 		module.Results = append(module.Results, link)
 	})

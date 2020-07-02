@@ -20,8 +20,10 @@ func (module *WebArchiveModule) Description() string {
 	return "Search possible archive on site web"
 }
 
-func (module *WebArchiveModule) GetType() string {
-	return "website"
+func (module *WebArchiveModule) GetType() []string {
+	return []string{
+		session.T_TARGET_WEBSITE,
+	}
 }
 
 func (module *WebArchiveModule) GetInformation() session.ModuleInformation {

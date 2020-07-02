@@ -36,8 +36,10 @@ func (module *InstagramInfo) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *InstagramInfo) GetType() string {
-	return "instagram"
+func (module *InstagramInfo) GetType() []string {
+	return []string{
+		session.T_TARGET_INSTAGRAM,
+	}
 }
 
 func (module *InstagramInfo) GetInformation() session.ModuleInformation {
@@ -79,7 +81,6 @@ func (module *InstagramInfo) Start() {
 	}
 
 	t := module.Sess.Stream.GenerateTable()
-	separator := target.GetSeparator()
 	t.SetOutputMirror(os.Stdout)
 	t.SetAllowedColumnLengths([]int{30, 30})
 	t.AppendRow(table.Row{
@@ -115,11 +116,16 @@ func (module *InstagramInfo) Start() {
 		profil.Email,
 	})
 
-	result := session.TargetResults{
-		Header: "USERNAME" + separator + "FULLNAME" + separator + "PICS" + separator + "DESCRIPTION" + separator + "FOLLOWERS" + separator + "FOLLOWINGS" + separator + "IS PRIVATE" + separator + "EMAIL",
-		Value:  profil.Username + separator + profil.FullName + separator + profil.ProfilePicURL + separator + profil.Biography + separator + strconv.Itoa(profil.FollowerCount) + separator + strconv.Itoa(profil.FollowingCount) + separator + module.Sess.BooleanToString(profil.IsPrivate) + separator + profil.Email,
-	}
-	target.Save(module, result)
+	result := target.NewResult()
+	result.Set("USERNAME", profil.Username)
+	result.Set("FULLNAME", profil.FullName)
+	result.Set("PICS", profil.ProfilePicURL)
+	result.Set("DESCRIPTION", profil.Biography)
+	result.Set("FOLLOWERS", strconv.Itoa(profil.FollowerCount))
+	result.Set("FOLLOWING", strconv.Itoa(profil.FollowingCount))
+	result.Set("IS PRIVATE", module.Sess.BooleanToString(profil.IsPrivate))
+	result.Set("EMAIL", profil.Email)
+	result.Save(module, target)
 
 	module.Sess.Stream.Render(t)
 }

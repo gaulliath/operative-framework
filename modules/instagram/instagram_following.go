@@ -35,8 +35,10 @@ func (module *InstagramFollowing) Author() string {
 	return "Tristan Granier"
 }
 
-func (module *InstagramFollowing) GetType() string {
-	return "instagram"
+func (module *InstagramFollowing) GetType() []string {
+	return []string{
+		session.T_TARGET_INSTAGRAM,
+	}
 }
 
 func (module *InstagramFollowing) GetInformation() session.ModuleInformation {
@@ -84,18 +86,17 @@ func (module *InstagramFollowing) Start() {
 		"Full Name",
 	})
 	followings := profil.Following()
-	separator := target.GetSeparator()
 	for followings.Next() {
 		for _, following := range followings.Users {
 			t.AppendRow(table.Row{
 				following.Username,
 				following.FullName,
 			})
-			result := session.TargetResults{
-				Header: "username" + separator + "full_name",
-				Value:  following.Username + separator + following.FullName,
-			}
-			target.Save(module, result)
+
+			result := target.NewResult()
+			result.Set("username", following.Username)
+			result.Set("full_name", following.FullName)
+			result.Save(module, target)
 		}
 	}
 	module.Sess.Stream.Render(t)
