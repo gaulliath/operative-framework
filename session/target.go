@@ -29,6 +29,7 @@ const (
 	T_TARGET_COUNTRY    = "country"
 	T_TARGET_TWITTER    = "twitter"
 	T_TARGET_SESSION    = "session"
+	T_TARGET_IMPORT     = "import"
 	T_TARGET_PERSON     = "person"
 	T_TARGET_SOFTWARE   = "software"
 	T_TARGET_WHATSAPP   = "whatsapp"
@@ -111,12 +112,6 @@ func (target *Target) Link(target2 Linking) {
 		target.Sess.Stream.Error(err.Error())
 		return
 	}
-
-	/*for _, trg := range target.TargetLinked {
-		if trg.TargetId == t2.GetId() {
-			return
-		}
-	}*/
 
 	target2.TargetType = t2.GetType()
 	target2.TargetName = t2.GetName()

@@ -52,7 +52,7 @@ func LoadTargetMenu(line string, module Module, s *Session) []string {
 	case "add":
 		value := strings.SplitN(strings.TrimSpace(line), " ", 4)
 		if len(arguments) < 4 {
-			s.Stream.Error("Please use subject add <type> <name>")
+			s.Stream.Error("Please use target add <type> <name>")
 			return nil
 		}
 		id, err := s.AddTarget(value[2], value[3])
@@ -67,6 +67,32 @@ func LoadTargetMenu(line string, module Module, s *Session) []string {
 		}
 	case "list":
 		s.ListTargets()
+	case "convert":
+		value := strings.SplitN(strings.TrimSpace(line), " ", 4)
+		if len(arguments) < 4 {
+			s.Stream.Error("Please use target convert <target> <type>")
+			return nil
+		}
+
+		trg, err := s.GetTarget(value[2])
+		if err != nil {
+			s.Stream.Error(err.Error())
+			return nil
+		}
+
+		tp := value[3]
+
+		for _, t := range s.TypeLists {
+			if strings.ToLower(t) == strings.ToLower(tp) {
+				trg.Type = strings.ToLower(tp)
+				s.Stream.Success("Target type as converted to '" + strings.ToLower(tp) + "'")
+				return nil
+			}
+		}
+
+		s.Stream.Error("Target type is invalid please select one: [" + strings.Join(s.TypeLists, ",") + "]")
+		return nil
+
 	case "type":
 		t := s.Stream.GenerateTable()
 		t.SetOutputMirror(os.Stdout)
@@ -110,7 +136,7 @@ func LoadTargetMenu(line string, module Module, s *Session) []string {
 	case "links":
 		value := strings.SplitN(strings.TrimSpace(line), " ", 3)
 		if len(arguments) < 3 {
-			s.Stream.Error("Please use subject links <target>")
+			s.Stream.Error("Please use target links <target>")
 			return nil
 		}
 		trg, err := s.GetTarget(value[2])
