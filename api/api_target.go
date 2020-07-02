@@ -80,9 +80,7 @@ func (api *ARestFul) TargetByType(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
 
-	param := mux.Vars(r)
 	var targets []session.Target
-	api.sess.Connection.ORM.Where("target_type = ?", param["target_type"]).Where("session_id = ?", api.sess.GetId()).Find(&targets)
 	message := api.Core.PrintData("request executed", false, targets)
 	_ = json.NewEncoder(w).Encode(message)
 	return

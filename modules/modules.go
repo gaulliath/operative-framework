@@ -19,6 +19,7 @@ import (
 	"github.com/graniet/operative-framework/modules/mac_vendor"
 	"github.com/graniet/operative-framework/modules/metatag_spider"
 	"github.com/graniet/operative-framework/modules/module_base/session_help"
+	"github.com/graniet/operative-framework/modules/module_base/session_import"
 	"github.com/graniet/operative-framework/modules/module_base/session_stream"
 	"github.com/graniet/operative-framework/modules/pastebin"
 	"github.com/graniet/operative-framework/modules/pastebin_email"
@@ -59,6 +60,7 @@ func LoadModules(s *session.Session) {
 	s.Modules = append(s.Modules, instagram.PushInstagramInfoModule(s))
 	s.Modules = append(s.Modules, instagram.PushInstagramCommentsModule(s))
 	s.Modules = append(s.Modules, image_reverse_search.PushImageReverseModule(s))
+	s.Modules = append(s.Modules, session_import.PushModuleImport(s))
 	s.Modules = append(s.Modules, info_greffe.PushInfoGreffeRegistrationModule(s))
 	s.Modules = append(s.Modules, ip_information.PushIpInformationModule(s))
 	s.Modules = append(s.Modules, linkedin_search.PushLinkedinSearchModule(s))

@@ -52,7 +52,7 @@ func LoadTargetMenu(line string, module Module, s *Session) []string {
 	case "add":
 		value := strings.SplitN(strings.TrimSpace(line), " ", 4)
 		if len(arguments) < 4 {
-			s.Stream.Error("Please use subject add <type> <name>")
+			s.Stream.Error("Please use target add <type> <name>")
 			return nil
 		}
 		id, err := s.AddTarget(value[2], value[3])
@@ -61,12 +61,37 @@ func LoadTargetMenu(line string, module Module, s *Session) []string {
 			return nil
 		}
 		s.Stream.Success("target '" + value[3] + "' as successfully added with id '" + id + "'")
-		s.NewEvent(TARGET_ADD, "new target created '"+value[3]+"'")
 		return []string{
 			id,
 		}
 	case "list":
 		s.ListTargets()
+	case "convert":
+		value := strings.SplitN(strings.TrimSpace(line), " ", 4)
+		if len(arguments) < 4 {
+			s.Stream.Error("Please use target convert <target> <type>")
+			return nil
+		}
+
+		trg, err := s.GetTarget(value[2])
+		if err != nil {
+			s.Stream.Error(err.Error())
+			return nil
+		}
+
+		tp := value[3]
+
+		for _, t := range s.TypeLists {
+			if strings.ToLower(t) == strings.ToLower(tp) {
+				trg.Type = strings.ToLower(tp)
+				s.Stream.Success("Target type as converted to '" + strings.ToLower(tp) + "'")
+				return nil
+			}
+		}
+
+		s.Stream.Error("Target type is invalid please select one: [" + strings.Join(s.TypeLists, ",") + "]")
+		return nil
+
 	case "type":
 		t := s.Stream.GenerateTable()
 		t.SetOutputMirror(os.Stdout)
@@ -110,7 +135,7 @@ func LoadTargetMenu(line string, module Module, s *Session) []string {
 	case "links":
 		value := strings.SplitN(strings.TrimSpace(line), " ", 3)
 		if len(arguments) < 3 {
-			s.Stream.Error("Please use subject links <target>")
+			s.Stream.Error("Please use target links <target>")
 			return nil
 		}
 		trg, err := s.GetTarget(value[2])
@@ -457,6 +482,7 @@ func LoadModuleMenu(line string, module Module, s *Session) []string {
 					}
 				}
 			}
+			s.NewInstance(module.Name())
 			s.Information.ModuleLaunched = s.Information.ModuleLaunched + 1
 			background, errBack := module.GetParameter("BACKGROUND")
 			if errBack == nil && strings.ToLower(background.Value) == "true" {
@@ -629,6 +655,91 @@ func LoadIntervalCommandMenu(line string, module Module, s *Session) []string {
 	return nil
 }
 
+func LoadNotificationCommandMenu(line string, module Module, s *Session) []string {
+	arguments := strings.Split(strings.TrimSpace(line), " ")
+
+	switch arguments[1] {
+	case "read":
+		if len(arguments) < 3 {
+			s.Stream.Error("Please use notification read <notificationId>")
+			return nil
+		}
+		command := strings.SplitN(line, " ", 3)
+		notification, err := s.GetNotification(command[2])
+		if err != nil {
+			s.Stream.Error(err.Error())
+			break
+		}
+
+		t := s.Stream.GenerateTable()
+		t.SetOutputMirror(os.Stdout)
+		t.SetAllowedColumnLengths([]int{30, 30})
+		t.AppendHeader(table.Row{
+			"ID",
+			"TEXT",
+		})
+
+		t.AppendRow(table.Row{
+			notification.Id,
+			notification.Text,
+		})
+
+		notification.Read()
+		s.Stream.Render(t)
+		break
+	case "set":
+		if len(arguments) < 3 {
+			s.Stream.Error("Please use notification set 'event type' eg: notification set MONITOR_MATCH")
+			return nil
+		}
+		command := strings.SplitN(line, " ", 3)
+		event := command[2]
+		exist := false
+		for _, watcher := range s.Events.Watcher {
+			if strings.ToLower(watcher) == strings.ToLower(event) {
+				exist = true
+				break
+			}
+		}
+
+		if !exist {
+			s.Events.Watcher = append(s.Events.Watcher, strings.ToLower(event))
+		}
+		s.Stream.Success("Notification watcher as setup.")
+		s.Stream.Standard("Available watchers : [" + strings.Join(s.Events.Watcher, ",") + "]")
+		break
+
+	case "list":
+		t := s.Stream.GenerateTable()
+		t.SetOutputMirror(os.Stdout)
+		t.SetAllowedColumnLengths([]int{30, 30, 30})
+		t.AppendHeader(table.Row{
+			"ID",
+			"TEXT",
+			"READ ?",
+			"CREATED_AT",
+		})
+
+		for _, notification := range s.Notifications {
+			status := "OLD"
+			if !notification.IsRead {
+				status = color.GreenString("NEW")
+			}
+			t.AppendRow(table.Row{
+				notification.Id,
+				notification.Text,
+				status,
+				notification.CreatedAt.String(),
+			})
+		}
+		s.Stream.Render(t)
+		break
+
+	}
+
+	return nil
+}
+
 func LoadModuleByTypeMenu(line string, module Module, s *Session) []string {
 	arguments := strings.Split(strings.TrimSpace(line), " ")
 	if len(arguments) < 2 {
@@ -674,7 +785,7 @@ func LoadEventsMenu(line string, module Module, s *Session) []string {
 		"DATE",
 	})
 
-	for _, event := range s.Events {
+	for _, event := range s.Events.Lists {
 		t.AppendRow(table.Row{
 			event.EventId,
 			event.Type,
