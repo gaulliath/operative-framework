@@ -4,7 +4,9 @@ import (
 	"github.com/chzyer/readline"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
 )
 
@@ -89,6 +91,16 @@ func (s *Session) ReadLineAutoCompleteMonitor() func(string) []string {
 	}
 }
 
+func (s *Session) ReadLineAutoCompleteNotification() func(string) []string {
+	return func(line string) []string {
+		var notifications []string
+		for _, notification := range s.Notifications {
+			notifications = append(notifications, notification.Id)
+		}
+		return notifications
+	}
+}
+
 func (s *Session) ReadLineAutoCompleteModuleResults() func(string) []string {
 	return func(line string) []string {
 		value := strings.Split(line, " ")
@@ -114,6 +126,17 @@ func (s *Session) ReadLineAutoCompleteListAlias() func(string) []string {
 			returnResult = append(returnResult, name)
 		}
 		return returnResult
+	}
+}
+
+func (s *Session) ReadLineAutoCompleteCacheName() func(string) []string {
+	return func(line string) []string {
+		var cacheName []string
+		file, _ := filepath.Glob(s.Config.Common.BaseDirectory + "cache/*")
+		for _, name := range file {
+			cacheName = append(cacheName, name)
+		}
+		return cacheName
 	}
 }
 
@@ -209,6 +232,9 @@ func (s *Session) PushPrompt() {
 				readline.PcItemDynamic(s.ReadLineAutoCompleteType())),
 			readline.PcItem("delete",
 				readline.PcItemDynamic(s.ReadLineAutoCompleteTargets())),
+			readline.PcItem("convert",
+				readline.PcItemDynamic(s.ReadLineAutoCompleteTargets(),
+					readline.PcItemDynamic(s.ReadLineAutoCompleteType()))),
 			readline.PcItem("update",
 				readline.PcItemDynamic(s.ReadLineAutoCompleteTargets())),
 			readline.PcItem("list"),
@@ -257,6 +283,14 @@ func (s *Session) PushPrompt() {
 		),
 		readline.PcItem("help"),
 		readline.PcItem("env"),
+		readline.PcItem("notification",
+			readline.PcItem("list"),
+			readline.PcItem("set"),
+			readline.PcItem("read",
+				readline.PcItemDynamic(s.ReadLineAutoCompleteNotification()))),
+		readline.PcItem("save"),
+		readline.PcItem("load",
+			readline.PcItemDynamic(s.ReadLineAutoCompleteCacheName())),
 		readline.PcItem("info",
 			readline.PcItem("session"),
 			readline.PcItem("api")),
@@ -281,4 +315,15 @@ func (s *Session) PushPrompt() {
 		EOFPrompt:         "exit",
 		HistorySearchFold: true,
 	}
+}
+
+// Update a prompt
+func (s *Session) UpdatePrompt() {
+	notificationCount := s.CountUnReadNotifications()
+	if notificationCount > 0 {
+		s.Prompt.Prompt = "\033[90m[OPF v" + s.Version + "] (\033[0;31m" + strconv.Itoa(notificationCount) + "\033[0m\033[90m):\033[0m "
+	} else {
+		s.Prompt.Prompt = "\033[90m[OPF v" + s.Version + "] (0):\033[0m "
+	}
+	return
 }

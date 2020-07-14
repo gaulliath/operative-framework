@@ -10,37 +10,36 @@ import (
 )
 
 type Session struct {
-	Id          int         `json:"-" gorm:"primary_key:yes;column:id;AUTO_INCREMENT"`
 	SessionName string      `json:"session_name"`
 	Information Information `json:"information"`
 	Connection  Connection  `json:"-" sql:"-"`
-	Client      OpfClient
+	Client      OpfClient   `json:"-"`
 	Tracker     struct {
 		Position []Position   `json:"position"`
 		Selected *Tracking    `json:"selected"`
 		Tracked  []*Tracking  `json:"tracked"`
 		Server   *http.Server `json:"-"`
 	} `json:"tracker"`
-	Instances          []*Instance       `json:"instances"`
-	CurrentInstance    *Instance         `json:"current_instance"`
-	Events             Events            `json:"events"`
-	SourceFile         string            `json:"source_file"`
-	Config             config.Config     `json:"config" sql:"-"`
-	Version            string            `json:"version" sql:"-"`
-	Targets            []*Target         `json:"subjects" sql:"-"`
-	Modules            []Module          `json:"modules" sql:"-"`
-	Monitors           Monitors          `json:"monitors"`
-	Filters            []ModuleFilter    `json:"filters" sql:"-"`
-	Prompt             *readline.Config  `json:"-" sql:"-"`
-	Stream             Stream            `json:"-" sql:"-"`
-	TypeLists          []string          `json:"type_lists" sql:"-"`
-	ServiceFolder      string            `json:"home_folder"`
-	Services           []Listener        `json:"services"`
-	Alias              map[string]string `json:"-" sql:"-"`
-	Interval           []*Interval       `json:"-"`
-	LastAnalyticsModel string            `json:"analytics_model"`
-	LastAnalyticsLinks string            `json:"last_analytics_links"`
-	WebHooks           []*WebHook        `json:"web_hooks"`
+	Instances       []*Instance       `json:"instances"`
+	CurrentInstance *Instance         `json:"current_instance"`
+	Events          Events            `json:"events"`
+	SourceFile      string            `json:"source_file"`
+	Config          config.Config     `json:"config" sql:"-"`
+	Version         string            `json:"version" sql:"-"`
+	Targets         []*Target         `json:"targets" sql:"-"`
+	Modules         []Module          `json:"modules" sql:"-"`
+	Monitors        Monitors          `json:"monitors"`
+	Filters         []ModuleFilter    `json:"filters" sql:"-"`
+	Prompt          *readline.Config  `json:"-" sql:"-"`
+	Stream          Stream            `json:"-" sql:"-"`
+	TypeLists       []string          `json:"type_lists" sql:"-"`
+	ServiceFolder   string            `json:"home_folder"`
+	Services        []Listener        `json:"services"`
+	Alias           map[string]string `json:"-" sql:"-"`
+	Users           []*User           `json:"users"`
+	Interval        []*Interval       `json:"interval"`
+	WebHooks        []*WebHook        `json:"web_hooks"`
+	Notifications   []*Notification   `json:"notifications"`
 }
 
 type SessionExport struct {
@@ -58,13 +57,6 @@ type SessionExport struct {
 	Services      []Listener     `json:"services"`
 }
 
-type Information struct {
-	ApiStatus      bool `json:"api_status"`
-	TrackerStatus  bool `json:"tracker_status"`
-	ModuleLaunched int  `json:"module_launched"`
-	Event          int  `json:"event"`
-}
-
 type Listener struct {
 	ExecutedAt    time.Time `json:"executed_at"`
 	NextExecution time.Time `json:"next_execution"`
@@ -80,32 +72,8 @@ type CronJob interface {
 	GetRequired() []string
 }
 
-func (i *Information) AddEvent() {
-	i.Event = i.Event + 1
-	return
-}
-
-func (i *Information) AddModule() {
-	i.ModuleLaunched = i.ModuleLaunched + 1
-	return
-}
-
-func (i *Information) SetApi(s bool) {
-	i.ApiStatus = s
-	return
-}
-
-func (i *Information) SetTracker(s bool) {
-	i.TrackerStatus = s
-	return
-}
-
-func (Session) TableName() string {
-	return "sessions"
-}
-
-func (s *Session) GetId() int {
-	return s.Id
+func (s *Session) GetName() string {
+	return s.SessionName
 }
 
 func (s *Session) ListType() []string {
@@ -127,7 +95,6 @@ func (s *Session) AddService(service Listener) {
 
 func (s *Session) ExportNow() SessionExport {
 	export := SessionExport{
-		Id:            s.Id,
 		SessionName:   s.SessionName,
 		Information:   s.Information,
 		Config:        s.Config,

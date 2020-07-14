@@ -43,12 +43,11 @@ func (s *Session) GetResult(id string) (*OpfResults, error) {
 
 func (s *Session) AddTarget(t string, name string) (string, error) {
 	subject := Target{
-		SessionId: s.GetId(),
-		TargetId:  "T_" + ksuid.New().String(),
-		Name:      name,
-		Type:      t,
-		Results:   make(map[string][]*OpfResults),
-		Sess:      s,
+		TargetId: "T_" + ksuid.New().String(),
+		Name:     name,
+		Type:     t,
+		Results:  make(map[string][]*OpfResults),
+		Sess:     s,
 	}
 	if !subject.CheckType() {
 		t := s.Stream.GenerateTable()
@@ -73,6 +72,7 @@ func (s *Session) AddTarget(t string, name string) (string, error) {
 	s.Targets = append(s.Targets, &subject)
 	s.Connection.ORM.Create(&subject)
 	s.FindLinkedTargetByResult(&subject)
+	s.NewEvent(TARGET_ADD, "new target created '"+subject.GetId()+"'")
 	return subject.GetId(), nil
 }
 

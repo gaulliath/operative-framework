@@ -11,7 +11,7 @@ import (
 type Stream struct {
 	Sess    *Session          `json:"-"`
 	Verbose bool              `json:"verbose"`
-	CSV  	bool 			  `json:"csv"`
+	CSV     bool              `json:"csv"`
 	History map[string]string `json:"history"`
 }
 
@@ -38,6 +38,15 @@ func (stream *Stream) Success(text string) {
 		t := time.Now()
 		timeText := t.Format("2006-01-02 15:04:05")
 		color.Green("[%s] : %s\n", timeText, text)
+		stream.Sess.Information.AddEvent()
+	}
+}
+
+func (stream *Stream) Backgound(text string) {
+	if stream.Verbose {
+		t := time.Now()
+		timeText := t.Format("2006-01-02 15:04:05")
+		color.Blue("[%s] [BG] : %s\n", timeText, text)
 		stream.Sess.Information.AddEvent()
 	}
 }
