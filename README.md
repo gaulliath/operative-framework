@@ -6,10 +6,6 @@
 
 https://github.com/graniet/operative-framework/releases
 
-#### DOCUMENTATION
-
-Documentation as been updated [here](http://docs.operative-framework.com/) (*docs.operative-framework.com*)
-
 #### USE CASE
 
 [Comment un hacker peut utiliser une appli de rencontres pour suivre vos déplacements](https://www.bfmtv.com/tech/comment-un-hacker-peut-utiliser-une-appli-de-rencontres-pour-suivre-vos-deplacements_AN-202006270018.html)
