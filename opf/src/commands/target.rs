@@ -3,13 +3,13 @@ use std::str::FromStr;
 use super::{Command, CommandAction};
 use crate::common::search::Target as target_search;
 use crate::common::target as opf_target;
-use crate::common::Group as opf_group;
 use crate::core::session::Session;
+use crate::error::{ErrorKind, Target as TargetError};
 use crate::utils;
 use colored::*;
 use crossterm::style::Stylize;
 
-pub fn exec(session: &mut Session, cmd: Command) -> Result<(), opf_target::Error> {
+pub fn exec(session: &mut Session, cmd: Command) -> Result<(), ErrorKind> {
     match cmd.action {
         CommandAction::Add => add(session, cmd),
         CommandAction::Del => del(session, cmd),
@@ -20,7 +20,7 @@ pub fn exec(session: &mut Session, cmd: Command) -> Result<(), opf_target::Error
     }
 }
 
-fn help() -> Result<(), opf_target::Error> {
+fn help() -> Result<(), ErrorKind> {
     println!(
         "{}: this command add a new target into session.",
         "add target".bright_yellow()
@@ -54,7 +54,7 @@ fn help() -> Result<(), opf_target::Error> {
     Ok(())
 }
 
-fn list(session: &mut Session, cmd: Command) -> Result<(), opf_target::Error> {
+fn list(session: &mut Session, cmd: Command) -> Result<(), ErrorKind> {
     let params = cmd.params;
     let search = target_search::from(params.clone());
     let targets = &session.get_targets(search);
@@ -113,20 +113,17 @@ fn list(session: &mut Session, cmd: Command) -> Result<(), opf_target::Error> {
     Ok(())
 }
 
-fn add(session: &mut Session, cmd: Command) -> Result<(), opf_target::Error> {
+fn add(session: &mut Session, cmd: Command) -> Result<(), ErrorKind> {
     let mut params = cmd.params;
 
     let target_name = match params.get("name") {
         Some(name) => name.clone(),
-        None => return Err(opf_target::Error::ParamNameNotFound),
+        None => return Err(ErrorKind::Target(TargetError::ParamNameNotFound)),
     };
 
     let target_type = match params.get("type") {
-        Some(t) => match opf_target::validate_type(t.to_string()) {
-            Ok(t) => t,
-            Err(e) => return Err(e),
-        },
-        None => return Err(opf_target::Error::ParamTypeNotFound),
+        Some(t) => opf_target::validate_type(t)?,
+        None => return Err(ErrorKind::Target(TargetError::ParamTypeNotFound)),
     };
 
     params.remove("name");
@@ -137,13 +134,13 @@ fn add(session: &mut Session, cmd: Command) -> Result<(), opf_target::Error> {
             let mut search = target_search::default();
             search.target_uuid = Some(parent_uuid.clone());
             if !session.exist_target(&search) {
-                return Err(opf_target::Error::ParentUuidNotFound);
+                return Err(ErrorKind::Target(TargetError::ParentUuidNotFound));
             }
 
             match uuid::Uuid::from_str(&parent_uuid) {
                 Ok(uuid) => Some(uuid),
                 Err(_) => {
-                    return Err(opf_target::Error::ParentUuidNotValid);
+                    return Err(ErrorKind::Target(TargetError::ParentUuidNotValid));
                 }
             }
         }
@@ -188,7 +185,7 @@ fn add(session: &mut Session, cmd: Command) -> Result<(), opf_target::Error> {
     };
 
     if session.exist_target(&search_target) {
-        return Err(opf_target::Error::TargetExist);
+        return Err(ErrorKind::Target(TargetError::TargetExist));
     }
 
     let target_id = session.targets.len() as i32 + 1;
@@ -208,11 +205,11 @@ fn add(session: &mut Session, cmd: Command) -> Result<(), opf_target::Error> {
         "! id={}, uuid={}",
         new_target.target_id, new_target.target_uuid
     );
-    session.create_target(new_target);
+    let _ = session.create_target(new_target)?;
     Ok(())
 }
 
-fn del(session: &mut Session, cmd: Command) -> Result<(), opf_target::Error> {
+fn del(session: &mut Session, cmd: Command) -> Result<(), ErrorKind> {
     let params = cmd.params;
     let search = target_search::from(params);
     session.delete_targets(search);
@@ -220,7 +217,7 @@ fn del(session: &mut Session, cmd: Command) -> Result<(), opf_target::Error> {
     Ok(())
 }
 
-fn set(session: &mut Session, cmd: Command) -> Result<(), opf_target::Error> {
+fn set(session: &mut Session, cmd: Command) -> Result<(), ErrorKind> {
     println!("{:#?}", cmd);
     let params = cmd.params;
     let search = target_search::from(params);

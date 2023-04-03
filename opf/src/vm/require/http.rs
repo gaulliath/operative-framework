@@ -1,17 +1,17 @@
-use std::collections::HashMap;
 use reqwest::header;
 use rlua;
+use std::collections::HashMap;
 
-pub fn extends_http<'a>(ctx: &'a mut rlua::Context) {
+pub fn extends_http(ctx: &mut rlua::Context) {
     // extends here
     println!("extending module with http");
 
-    let http_get = match ctx.create_function(|_, (url): (String)| {
+    let http_get = match ctx.create_function(|_, url: String| {
         let mut headers = header::HeaderMap::new();
         headers.insert(
             "User-Agent",
             header::HeaderValue::from_static(
-                "Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101 Firefox/91.0",
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36",
             ),
         );
 
@@ -38,7 +38,7 @@ pub fn extends_http<'a>(ctx: &'a mut rlua::Context) {
 
     ctx.globals().set("http_get", http_get).unwrap();
 
-    let http_get_json = match ctx.create_function(|_, (url): (String)| {
+    let http_get_json = match ctx.create_function(|_, url: String| {
         let mut headers = header::HeaderMap::new();
         headers.insert(
             "User-Agent",

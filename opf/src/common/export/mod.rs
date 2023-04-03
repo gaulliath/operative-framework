@@ -1,4 +1,4 @@
-use strum_macros::{Display,EnumString};
+use strum_macros::{Display, EnumString};
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -14,5 +14,5 @@ pub enum Error {
 #[derive(Debug, Display, EnumString)]
 #[strum(serialize_all = "lowercase")]
 pub enum ExportType {
-    Dot
+    Dot,
 }

@@ -1,6 +1,7 @@
+use crate::error::{ErrorKind, Target as TargetError};
+use serde::{Deserialize, Serialize};
 use std::str::FromStr;
-use serde::{Serialize, Deserialize};
-use strum_macros::{Display,EnumString};
+use strum_macros::{Display, EnumString};
 use thiserror::Error;
 
 #[derive(Debug, PartialEq, EnumString, Display, Clone, Serialize, Deserialize)]
@@ -34,9 +35,9 @@ pub enum Error {
     ParentUuidNotValid,
 }
 
-pub fn validate_type(t: String) -> Result<TargetType, Error> {
+pub fn validate_type(t: &str) -> Result<TargetType, ErrorKind> {
     match TargetType::from_str(t.clone().to_lowercase().as_str()) {
         Ok(t) => Ok(t),
-        Err(_) => Err(Error::TypeNotAvailable(t))
+        Err(_) => Err(ErrorKind::Target(TargetError::ParamTypeNotFound)),
     }
 }

@@ -1,10 +1,10 @@
 use std::time::SystemTime;
 
 use crate::commands::{Command, CommandAction};
-use crate::common::action as opf_action;
 use crate::core::session::Session;
+use crate::error::ErrorKind;
 
-pub fn exec<'a>(session: &'a mut Session, cmd: Command) -> Result<(), opf_action::Error> {
+pub fn exec(session: &mut Session, cmd: Command) -> Result<(), ErrorKind> {
     match cmd.action {
         CommandAction::Accept => accept(session, cmd),
         CommandAction::List => list(session, cmd),
@@ -12,8 +12,8 @@ pub fn exec<'a>(session: &'a mut Session, cmd: Command) -> Result<(), opf_action
     }
 }
 
-fn list<'a>(session: &'a mut Session, cmd: Command) -> Result<(), opf_action::Error> {
-    let params = cmd.params;
+fn list(session: &mut Session, cmd: Command) -> Result<(), ErrorKind> {
+    let _params = cmd.params;
     let actions = &session.actions;
     let headers = vec![
         "id".to_string(),
@@ -35,7 +35,7 @@ fn list<'a>(session: &'a mut Session, cmd: Command) -> Result<(), opf_action::Er
     Ok(())
 }
 
-fn accept<'a>(session: &'a mut Session, cmd: Command) -> Result<(), opf_action::Error> {
+fn accept(session: &mut Session, cmd: Command) -> Result<(), ErrorKind> {
     println!("accept action ! {:?}", cmd.params);
     let action = crate::common::Action {
         action_id: 1,

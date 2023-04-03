@@ -13,7 +13,7 @@ impl Session {
         let group = Group {
             group_uuid,
             group_id,
-            group_name: group_name.clone()
+            group_name: group_name.clone(),
         };
 
         self.groups.push(group.clone());
@@ -23,7 +23,7 @@ impl Session {
     pub fn get_group<'a>(&self, group_name: &'a str) -> Result<Group, String> {
         for group in &self.groups {
             if group.group_name.eq(group_name) {
-                return Ok(group.clone())
+                return Ok(group.clone());
             }
         }
 
@@ -33,7 +33,7 @@ impl Session {
     pub fn get_group_by_id<'a>(&self, group_id: &'a str) -> Result<Group, String> {
         for group in &self.groups {
             if group.group_id.to_string().eq(group_id) {
-                return Ok(group.clone())
+                return Ok(group.clone());
             }
         }
 

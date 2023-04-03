@@ -11,7 +11,7 @@ strum_macros = "0.24"
 strum = { version = "0.24", features = ["derive"] }
 thiserror = "1.0.34"
 comfy-table = "6.1.0"
-scraper = "0.13.0"
+scraper = "0.15.0"
 reqwest = { version = "0.11.11", features = ["blocking", "json"] }
 nom = "7.0"
 rlua = "0.19.4"
@@ -29,3 +29,4 @@ rocket = { version = "=0.5.0-rc.2", features = ["json"]}
 rocket_codegen = { version = "=0.5.0-rc.2" }
 rocket_http = { version = "=0.5.0-rc.2"}
 serde_derive = "1.0"
+rustyline = "11.0.0"

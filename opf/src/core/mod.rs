@@ -1,14 +1,15 @@
+use session::{Session, SessionConfig};
+
+use crate::commands;
+use crate::error::ErrorKind;
+use crate::modules::Manager;
+use crate::modules::Module;
+
+pub mod group;
 pub mod link;
 pub mod output;
 pub mod session;
 pub mod target;
-pub mod group;
-
-use crate::commands;
-use crate::modules::Manager;
-use crate::modules::Module;
-use session::{Session, SessionConfig};
-use crate::error::Manager as ManagerError;
 
 #[derive(Debug)]
 pub struct Core {
@@ -36,21 +37,16 @@ impl Core {
         &&self.session
     }
 
-    pub fn init_manager<'a>(&mut self, path: &'a str) -> Result<(), ManagerError> {
+    pub fn init_manager(&mut self, path: &str) -> Result<(), ErrorKind> {
         crate::modules::register_modules(&mut self.manager, path)
     }
 
     pub fn get_modules(&self) -> Vec<Module> {
-        return self.manager.modules.clone()
+        return self.manager.modules.clone();
     }
 
-    pub fn run(&mut self, ask: String) -> Result<(), String> {
-        let command = match commands::format(ask.clone().as_str()) {
-            Ok(command) => command,
-            Err(e) => {
-                return Err(e.to_string());
-            }
-        };
+    pub fn run(&mut self, ask: &str) -> Result<(), ErrorKind> {
+        let command = commands::format(ask)?;
 
         if self.config.verbose {
             println!("{:?}", command);
@@ -59,11 +55,9 @@ impl Core {
         let module_manager = &mut self.manager;
         if command.action.eq(&commands::validator::CommandAction::Run) {}
 
-        if let Err(e) = commands::exec(&mut self.session, command, module_manager) {
-            return Err(e);
-        }
+        commands::exec(&mut self.session, command, module_manager)?;
 
-        self.commands.push(ask);
+        self.commands.push(ask.to_string());
         Ok(())
     }
 

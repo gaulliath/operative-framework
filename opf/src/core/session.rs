@@ -1,5 +1,6 @@
 use crate::common as opf_common;
 use serde::{Deserialize, Serialize};
+use std::fmt::Debug;
 use std::time::SystemTime;
 use uuid;
 
@@ -29,7 +30,6 @@ pub fn new() -> (Session, SessionConfig) {
             groups: vec![],
             links: vec![],
             actions: vec![],
-            //      vm: rlua::Lua::new(),
             created_at: SystemTime::now(),
         },
         SessionConfig::default(),

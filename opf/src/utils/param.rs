@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
-pub fn get_params<'a>(
-    params: &'a HashMap<String, String>,
+pub fn get_params(
+    params: &HashMap<String, String>,
     want: Vec<String>,
 ) -> Result<Vec<String>, String> {
     let mut ret: Vec<String> = vec![];

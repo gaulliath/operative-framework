@@ -15,7 +15,6 @@ pub struct Target {
 
 impl From<HashMap<String, String>> for Target {
     fn from(mut e: HashMap<String, String>) -> Self {
-
         let target_id = match e.get("id") {
             Some(id) => Some(id.clone()),
             None => None,
@@ -27,11 +26,9 @@ impl From<HashMap<String, String>> for Target {
         };
 
         let target_type = match e.get("type") {
-            Some(t) => {
-                match TargetType::from_str(t.clone().as_str()) {
-                    Ok(t) => Some(t),
-                    Err(_) => None,
-                }
+            Some(t) => match TargetType::from_str(t.clone().as_str()) {
+                Ok(t) => Some(t),
+                Err(_) => None,
             },
             None => None,
         };
@@ -88,7 +85,6 @@ pub struct Link {
 
 impl From<HashMap<String, String>> for Link {
     fn from(e: HashMap<String, String>) -> Self {
-
         let link_id = match e.get("id") {
             Some(id) => Some(id.clone()),
             None => None,
@@ -98,7 +94,6 @@ impl From<HashMap<String, String>> for Link {
             Some(source) => Some(source.clone()),
             None => None,
         };
-
 
         let link_target = match e.get("target") {
             Some(target) => Some(target.clone()),

@@ -8,6 +8,8 @@ edition = "2021"
 [dependencies]
 clap = "3.2.20"
 colored = "2.0.0"
-reedline = { version = "0.12" }
+#reedline = { version = "0.17.0" }
+rustyline = { version = "11.0.0", features = ["derive"] }
 crossterm = "*"
+rand = "0.8.5"
 opf = {path = "../opf", version = "0.1.0"}

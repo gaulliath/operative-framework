@@ -1,6 +1,6 @@
+use crate::error::ErrorKind;
 use std::str::FromStr;
 use strum_macros::EnumString;
-use super::error::Error;
 
 #[derive(Debug, PartialEq, EnumString)]
 #[strum(serialize_all = "lowercase")]
@@ -33,32 +33,27 @@ pub enum CommandObject {
     Module(String),
 }
 
-
-pub fn validate_action(action: String) -> Result<CommandAction, Error> {
+pub fn validate_action(action: String) -> Result<CommandAction, ErrorKind> {
     match CommandAction::from_str(action.to_lowercase().as_str()) {
         Ok(action) => Ok(action),
-        Err(_) => Err(Error::ActionNotAvailable)
+        Err(_) => Err(ErrorKind::ActionNotAvailable),
     }
 }
 
-pub fn validate_object(action: &CommandAction, object: String) -> Result<CommandObject, Error> {
+pub fn validate_object(action: &CommandAction, object: String) -> Result<CommandObject, ErrorKind> {
     match CommandObject::from_str(object.to_lowercase().as_str()) {
         Ok(object) => Ok(object),
         Err(_) => {
             if object.len() > 0 {
                 match action {
-                    CommandAction::Run => {
-                        return Ok(CommandObject::Module(object))
-                    },
-                    CommandAction::Export => {
-                        return Ok(CommandObject::Export(object))
-                    }
+                    CommandAction::Run => return Ok(CommandObject::Module(object)),
+                    CommandAction::Export => return Ok(CommandObject::Export(object)),
                     _ => {}
                 }
 
                 return Ok(CommandObject::Module(object));
             }
-            Err(Error::ObjectNotAvailable)
+            Err(ErrorKind::ObjectNotAvailable)
         }
     }
 }

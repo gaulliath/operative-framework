@@ -1,14 +1,14 @@
-pub mod target;
-pub mod search;
+pub mod action;
+pub mod export;
+pub mod groups;
 pub mod link;
 pub mod module;
-pub mod export;
-pub mod action;
-pub mod groups;
+pub mod search;
+pub mod target;
 
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::time::SystemTime;
-use serde::{Serialize, Deserialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Target {
@@ -28,7 +28,6 @@ pub struct Group {
     pub group_id: i32,
     pub group_name: String,
 }
-
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Link {
@@ -51,6 +50,19 @@ pub struct Action {
     pub action_created_at: SystemTime,
 }
 
+impl Link {
+    pub fn new(link_source: uuid::Uuid, link_target: uuid::Uuid, by: &str, label: &str) -> Self {
+        Self {
+            link_id: uuid::Uuid::new_v4(),
+            link_label: label.to_string(),
+            link_color: None,
+            link_source,
+            link_target,
+            link_created_by: by.to_string(),
+            link_created_at: SystemTime::now(),
+        }
+    }
+}
 
 impl TryFrom<HashMap<String, String>> for Target {
     type Error = String;
@@ -65,13 +77,9 @@ impl TryFrom<HashMap<String, String>> for Target {
         };
 
         let target_type = match params.get("type") {
-            Some(t) => {
-                match target::validate_type(t.to_string()) {
-                    Ok(t) => t,
-                    Err(e) => {
-                        return Err(e.to_string())
-                    },
-                }
+            Some(t) => match target::validate_type(t) {
+                Ok(t) => t,
+                Err(e) => return Err(e.to_string()),
             },
             None => {
                 let e = target::Error::ParamTypeNotFound.to_string();
@@ -81,14 +89,12 @@ impl TryFrom<HashMap<String, String>> for Target {
 
         let target_custom_id = match params.get("custom_id") {
             Some(custom_id) => Some(custom_id.clone()),
-            None => None
+            None => None,
         };
 
         params.remove("name");
         params.remove("type");
         params.remove("custom_id");
-
-
 
         Ok(Self {
             target_uuid: uuid::Uuid::new_v4(),
@@ -98,11 +104,10 @@ impl TryFrom<HashMap<String, String>> for Target {
             target_groups: vec![],
             target_custom_id,
             target_parent: None,
-            meta: params.clone()
+            meta: params.clone(),
         })
     }
 }
-
 
 #[cfg(test)]
 mod tests {

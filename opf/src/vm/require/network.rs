@@ -1,9 +1,8 @@
 use dns_lookup;
 
 /// checking if domain is valid
-fn is_domain_valid<'a>(ctx: &'a mut rlua::Context) {
-
-    let valid_domain = match ctx.create_function(|this, domain: String| {
+fn is_domain_valid(ctx: &mut rlua::Context) {
+    let valid_domain = match ctx.create_function(|_this, domain: String| {
         if let Ok(_) = addr::parse_domain_name(&domain) {
             return Ok(true);
         }
@@ -19,8 +18,8 @@ fn is_domain_valid<'a>(ctx: &'a mut rlua::Context) {
     ctx.globals().set("is_valid_domain", valid_domain).unwrap();
 }
 
-fn get_ip_address<'a>(ctx: &'a mut rlua::Context) {
-    let get_ip_address = match ctx.create_function(|this, domain: String| {
+fn get_ip_address(ctx: &mut rlua::Context) {
+    let get_ip_address = match ctx.create_function(|_this, domain: String| {
         let ips = match dns_lookup::lookup_host(domain.as_str()) {
             Ok(ips) => ips,
             Err(_) => return Ok(vec![]),
@@ -43,7 +42,7 @@ fn get_ip_address<'a>(ctx: &'a mut rlua::Context) {
     ctx.globals().set("get_ip", get_ip_address).unwrap();
 }
 
-pub fn extends_network<'a, 'b>(ctx: &'a mut rlua::Context) {
+pub fn extends_network(ctx: &mut rlua::Context) {
     // extends here
     is_domain_valid(ctx);
     get_ip_address(ctx);

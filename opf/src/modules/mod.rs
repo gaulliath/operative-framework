@@ -1,6 +1,6 @@
 pub mod metadata;
 
-use crate::error;
+use crate::error::{ErrorKind, Manager as ManagerError};
 
 #[derive(Debug, Default)]
 pub struct Manager {
@@ -13,19 +13,20 @@ pub struct Module {
     pub metadata: metadata::Metadata,
 }
 
-pub fn register_modules<'a>(
-    manager: &'a mut Manager,
-    directory: &'a str,
-) -> Result<(), error::Manager> {
+pub fn register_modules<'a>(manager: &'a mut Manager, directory: &'a str) -> Result<(), ErrorKind> {
     let paths = match std::fs::read_dir(directory) {
         Ok(paths) => paths,
-        Err(_) => return Err(error::Manager::CantOpenDirectory(directory.to_string())),
+        Err(_) => {
+            return Err(ErrorKind::Manager(ManagerError::CantOpenDirectory(
+                directory.to_string(),
+            )))
+        }
     };
 
     for p in paths {
         let path = match p {
             Ok(path) => path,
-            Err(_) => return Err(error::Manager::CantProcessFile),
+            Err(_) => return Err(ErrorKind::Manager(ManagerError::CantProcessFile)),
         };
 
         let file_name = path.path().display().to_string();
@@ -33,14 +34,17 @@ pub fn register_modules<'a>(
         let content = match std::fs::read_to_string(String::from(&file_name)) {
             Ok(content) => content,
             Err(_) => {
-                let name = file_name.clone();
-                return Err(error::Manager::CantReadContent(name));
+                return Err(ErrorKind::Manager(ManagerError::CantReadContent(file_name)));
             }
         };
 
         let metadata = match metadata::parse(content.as_str()) {
             Ok(meta) => meta,
-            Err(_) => return Err(error::Manager::CantParseMetadata(String::from(&file_name))),
+            Err(_) => {
+                return Err(ErrorKind::Manager(ManagerError::CantParseMetadata(
+                    String::from(&file_name),
+                )))
+            }
         };
 
         manager.modules.push(Module {

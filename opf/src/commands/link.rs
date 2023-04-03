@@ -1,13 +1,13 @@
-use std::str::FromStr;
-use std::time::SystemTime;
-use colored::*;
 use super::{Command, CommandAction};
-use crate::common::link as opf_link;
 use crate::common::search::Link as link_search;
 use crate::core::session::Session;
+use crate::error::{ErrorKind, Link as LinkError};
+use colored::*;
 use crossterm::style::Stylize;
+use std::str::FromStr;
+use std::time::SystemTime;
 
-pub fn exec<'a>(session: &'a mut Session, cmd: Command) -> Result<(), opf_link::Error> {
+pub fn exec(session: &mut Session, cmd: Command) -> Result<(), ErrorKind> {
     match cmd.action {
         CommandAction::Add => add(session, cmd),
         CommandAction::Del => del(session, cmd),
@@ -18,7 +18,7 @@ pub fn exec<'a>(session: &'a mut Session, cmd: Command) -> Result<(), opf_link::
     }
 }
 
-fn help() -> Result<(), opf_link::Error<'static>> {
+fn help() -> Result<(), ErrorKind> {
     println!(
         "{}: this command add a new link into session.",
         "add link".bright_yellow()
@@ -46,13 +46,12 @@ fn help() -> Result<(), opf_link::Error<'static>> {
     );
     println!(
         "{}",
-        "- list link metadata=true: this command print all link available with metadata."
-            .grey()
+        "- list link metadata=true: this command print all link available with metadata.".grey()
     );
     Ok(())
 }
 
-fn list(session: &mut Session, cmd: Command) -> Result<(), opf_link::Error> {
+fn list(session: &mut Session, cmd: Command) -> Result<(), ErrorKind> {
     let params = cmd.params;
     let search = link_search::from(params);
 
@@ -81,12 +80,16 @@ fn list(session: &mut Session, cmd: Command) -> Result<(), opf_link::Error> {
     Ok(())
 }
 
-fn add(session: &mut Session, cmd: Command) -> Result<(), opf_link::Error> {
+fn add(session: &mut Session, cmd: Command) -> Result<(), ErrorKind> {
     let params = cmd.params;
 
     let link_label = match params.get("label") {
         Some(label) => label.clone(),
-        None => return Err(opf_link::Error::ParamNotFound("label")),
+        None => {
+            return Err(ErrorKind::Link(LinkError::ParamNotFound(
+                "label".to_string(),
+            )))
+        }
     };
 
     let link_color = match params.get("color") {
@@ -96,27 +99,43 @@ fn add(session: &mut Session, cmd: Command) -> Result<(), opf_link::Error> {
 
     let link_created_by = match params.get("created_by") {
         Some(created_by) => created_by.clone(),
-        None => return Err(opf_link::Error::ParamNotFound("created_by")),
+        None => {
+            return Err(ErrorKind::Link(LinkError::ParamNotFound(
+                "created_by".to_string(),
+            )))
+        }
     };
 
     let link_source = match params.get("source") {
         Some(source) => match uuid::Uuid::from_str(source) {
             Ok(uuid) => uuid,
             Err(_) => {
-                return Err(opf_link::Error::ParamFormatInvalid("source"));
+                return Err(ErrorKind::Link(LinkError::ParamFormatInvalid(
+                    "source".to_string(),
+                )));
             }
         },
-        None => return Err(opf_link::Error::ParamNotFound("source")),
+        None => {
+            return Err(ErrorKind::Link(LinkError::ParamNotFound(
+                "source".to_string(),
+            )))
+        }
     };
 
     let link_target = match params.get("target") {
         Some(target) => match uuid::Uuid::from_str(target) {
             Ok(uuid) => uuid,
             Err(_) => {
-                return Err(opf_link::Error::ParamFormatInvalid("target"));
+                return Err(ErrorKind::Link(LinkError::ParamFormatInvalid(
+                    "target".to_string(),
+                )));
             }
         },
-        None => return Err(opf_link::Error::ParamNotFound("target")),
+        None => {
+            return Err(ErrorKind::Link(LinkError::ParamNotFound(
+                "target".to_string(),
+            )))
+        }
     };
 
     let search_link = link_search {
@@ -129,7 +148,7 @@ fn add(session: &mut Session, cmd: Command) -> Result<(), opf_link::Error> {
     };
 
     if session.exist_link(search_link) {
-        return Err(opf_link::Error::LinkExist);
+        return Err(ErrorKind::Link(LinkError::LinkExist));
     }
 
     let new_link = crate::common::Link {
@@ -147,7 +166,7 @@ fn add(session: &mut Session, cmd: Command) -> Result<(), opf_link::Error> {
     Ok(())
 }
 
-fn del(session: &mut Session, cmd: Command) -> Result<(), opf_link::Error> {
+fn del(session: &mut Session, cmd: Command) -> Result<(), ErrorKind> {
     let params = cmd.params;
     let search = link_search::from(params);
     session.delete_links(search);
@@ -155,7 +174,7 @@ fn del(session: &mut Session, cmd: Command) -> Result<(), opf_link::Error> {
     Ok(())
 }
 
-fn set(session: &mut Session, cmd: Command) -> Result<(), opf_link::Error> {
+fn set(session: &mut Session, cmd: Command) -> Result<(), ErrorKind> {
     let params = cmd.params;
     let search = link_search::from(params);
     _ = session.update_links(search);

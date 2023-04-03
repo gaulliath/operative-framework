@@ -1,6 +1,6 @@
 use super::session::Session;
 use crate::common::search::Link as LinkSearch;
-use crate::common::{self, Link};
+use crate::common::Link;
 use std::str::FromStr;
 
 impl Session {

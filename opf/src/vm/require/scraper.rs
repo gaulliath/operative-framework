@@ -3,7 +3,6 @@ use scraper::{Html, Selector};
 pub fn extends_scraper<'a>(ctx: &'a mut rlua::Context) {
     // extends here
     let scraper_get = match ctx.create_function(|_, (select, html): (String, String)| {
-
         let fragment = Html::parse_fragment(html.as_str());
         let selector = match Selector::parse(select.as_str()) {
             Ok(res) => res,
@@ -18,7 +17,6 @@ pub fn extends_scraper<'a>(ctx: &'a mut rlua::Context) {
             results.push(element.inner_html())
         }
         Ok(results)
-
     }) {
         Ok(f) => f,
         Err(_) => {
@@ -28,5 +26,4 @@ pub fn extends_scraper<'a>(ctx: &'a mut rlua::Context) {
     };
 
     ctx.globals().set("scraper_get", scraper_get).unwrap();
-
 }

@@ -1,30 +1,29 @@
 use std::str::FromStr;
 
 use super::session::Session;
-use crate::common::search::{self, Target as TargetSearch};
+use crate::common::search::Target as TargetSearch;
 use crate::common::{self, Group, Target};
+use crate::error::{ErrorKind, Target as TargetError};
 
 impl Session {
     /// create a new target
-    pub fn create_target(&mut self, mut target: common::Target) -> bool {
+    pub fn create_target(&mut self, mut target: common::Target) -> Result<Target, ErrorKind> {
         let mut target_search = TargetSearch::default();
         target_search.target_name = Some(target.target_name.clone());
         target_search.target_type = Some(target.target_type.clone());
 
         if self.exist_target(&target_search) {
-            return false;
+            return Err(ErrorKind::Target(TargetError::CantBeCreated));
         }
 
         let target_id = self.targets.len() as i32 + 1;
         target.target_id = target_id;
-        self.targets.push(target);
-        true
+        self.targets.push(target.clone());
+        Ok(target)
     }
 
     /// validate target search structure
     pub fn validate_target<'a>(&self, target: &'a Target, params: &'a TargetSearch) -> bool {
-        let mut validate = true;
-
         if params.target_custom_id.is_some() {
             if target.target_custom_id.ne(&params.target_custom_id) {
                 return false;
@@ -66,7 +65,7 @@ impl Session {
                 return false;
             }
         }
-        validate
+        true
     }
 
     /// checking if target exist

@@ -1,14 +1,15 @@
 use super::{Command, CommandAction, CommandObject};
-use crate::core::session::Session;
 use crate::common::export as opf_export;
-use std::str::FromStr;
+use crate::core::session::Session;
+use crate::error::{ErrorKind, Export as ExportError};
 use colored::*;
 use crossterm::style::Stylize;
-use std::collections::HashMap;
 use petgraph::dot::Dot;
 use petgraph::graph::Graph;
+use std::collections::HashMap;
+use std::str::FromStr;
 
-pub fn exec<'a>(session: &'a mut Session, cmd: Command) -> Result<(), opf_export::Error> {
+pub fn exec(session: &mut Session, cmd: Command) -> Result<(), ErrorKind> {
     match cmd.action {
         CommandAction::Export => export(session, cmd),
         CommandAction::Help => help(),
@@ -16,28 +17,27 @@ pub fn exec<'a>(session: &'a mut Session, cmd: Command) -> Result<(), opf_export
     }
 }
 
-fn help() -> Result<(), opf_export::Error> {
+fn help() -> Result<(), ErrorKind> {
     println!(
         "{} : export session in specified type",
         "export <type>".bright_yellow()
     );
     println!(
         "{}",
-        "- export dot : this command export session in dot graph format."
-            .grey()
+        "- export dot : this command export session in dot graph format.".grey()
     );
     Ok(())
 }
 
-pub fn export<'a>(session: &'a mut Session, cmd: Command) -> Result<(), opf_export::Error> {
+pub fn export(session: &mut Session, cmd: Command) -> Result<(), ErrorKind> {
     let export_type = match cmd.object {
         CommandObject::Export(export_type) => export_type,
-        _ => return Err(opf_export::Error::ExportType),
+        _ => return Err(ErrorKind::Export(ExportError::ExportType)),
     };
 
     let export_type = match opf_export::ExportType::from_str(export_type.as_str()) {
         Ok(t) => t,
-        Err(_) => return Err(opf_export::Error::ExportType),
+        Err(_) => return Err(ErrorKind::Export(ExportError::ExportType)),
     };
 
     match export_type {
@@ -47,7 +47,7 @@ pub fn export<'a>(session: &'a mut Session, cmd: Command) -> Result<(), opf_expo
     Ok(())
 }
 
-fn export_dot<'a, 'b>(session: &'a Session, _params: &'b HashMap<String, String>) {
+fn export_dot(session: &Session, _params: &HashMap<String, String>) {
     let mut graph = Graph::<String, String>::new();
     let mut index = HashMap::new();
 
@@ -57,7 +57,11 @@ fn export_dot<'a, 'b>(session: &'a Session, _params: &'b HashMap<String, String>
 
         if let Some(parent) = target.target_parent {
             if let Some(parent_id) = index.get(&parent) {
-                graph.add_edge(parent_id.clone(), id, target.target_type.to_string().clone());
+                graph.add_edge(
+                    parent_id.clone(),
+                    id,
+                    target.target_type.to_string().clone(),
+                );
             }
         }
     }
