@@ -9,6 +9,7 @@ pub mod target;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::time::SystemTime;
+use crate::error::{ErrorKind, Target as  TargetError};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Target {
@@ -65,25 +66,25 @@ impl Link {
 }
 
 impl TryFrom<HashMap<String, String>> for Target {
-    type Error = String;
+    type Error = ErrorKind;
 
     fn try_from(mut params: HashMap<String, String>) -> Result<Self, Self::Error> {
         let target_name = match params.get("name") {
             Some(name) => name.clone(),
             None => {
                 let e = target::Error::ParamNameNotFound.to_string();
-                return Err(e);
+                return Err(ErrorKind::Target(TargetError::Parsing(e)));
             }
         };
 
         let target_type = match params.get("type") {
             Some(t) => match target::validate_type(t) {
                 Ok(t) => t,
-                Err(e) => return Err(e.to_string()),
+                Err(e) => return Err(ErrorKind::Target(TargetError::Parsing(e.to_string()))),
             },
             None => {
                 let e = target::Error::ParamTypeNotFound.to_string();
-                return Err(e);
+                return Err(ErrorKind::Target(TargetError::Parsing(e)));
             }
         };
 

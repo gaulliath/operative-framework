@@ -4,6 +4,7 @@ use super::session::Session;
 use crate::common::search::Target as TargetSearch;
 use crate::common::{self, Group, Target};
 use crate::error::{ErrorKind, Target as TargetError};
+use crate::modules::OpfModule;
 
 impl Session {
     /// create a new target
@@ -129,6 +130,16 @@ impl Session {
             }
         }
         results
+    }
+
+    /// get target by target_id
+    pub fn get_target_by_id(&self, target_id: i32) -> Option<Target> {
+        for target in &self.targets {
+            if target.target_id == target_id {
+                return Some(target.clone());
+            }
+        }
+        None
     }
 
     /// get targets by group uuid

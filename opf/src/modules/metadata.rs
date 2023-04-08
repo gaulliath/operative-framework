@@ -1,3 +1,4 @@
+use crate::error::{ErrorKind, Metadata as MetadataError};
 use nom::bytes::complete::{tag, take_until};
 use nom::combinator::map_res;
 use nom::multi::fold_many0;
@@ -21,6 +22,9 @@ pub struct Arg {
     pub name: String,
     pub value: Option<String>,
 }
+
+#[derive(Debug, Clone)]
+pub struct Args(Vec<Arg>);
 
 #[derive(Debug, PartialEq, EnumString, Display, Clone)]
 #[strum(serialize_all = "lowercase")]
@@ -62,12 +66,12 @@ fn parse_fields(input: &str) -> IResult<&str, Vec<(Field, &str)>> {
     Ok((input, lines))
 }
 
-pub fn parse(input: &str) -> Result<Metadata, String> {
+pub fn parse(input: &str) -> Result<Metadata, ErrorKind> {
     let mut metadata = Metadata::default();
-    let results: Vec<(Field, &str)> = match parse_fields(input) {
-        Ok(res) => res.1,
-        Err(_) => return Err("can't parse metadata".to_string()),
-    };
+
+    let results: Vec<(Field, &str)> = parse_fields(input)
+        .map(|res| res.1)
+        .map_err(|_| ErrorKind::Metadata(MetadataError::FormatField))?;
 
     for (meta, value) in results {
         match meta {
@@ -110,13 +114,30 @@ pub fn parse(input: &str) -> Result<Metadata, String> {
                 let elements = value.split(",").collect::<Vec<&str>>();
                 for element in elements {
                     let name = element.trim();
-                    match Requirements::from_str(name) {
-                        Ok(extend) => metadata.extends.push(extend),
-                        Err(_) => return Err("requirements not available".to_string()),
-                    }
+                    Requirements::from_str(name)
+                        .map(|extend| metadata.extends.push(extend))
+                        .map_err(|_| {
+                            ErrorKind::Metadata(MetadataError::Requirement(name.to_string()))
+                        })?;
                 }
             }
         }
     }
     Ok(metadata)
+}
+
+impl From<Vec<Arg>> for Args {
+    fn from(value: Vec<Arg>) -> Self {
+        Self(value)
+    }
+}
+impl Args {
+    pub fn get(&self, name: &str) -> Option<Arg> {
+        for arg in &self.0 {
+            if arg.name.eq(name) {
+                return Some(arg.clone());
+            }
+        }
+        None
+    }
 }

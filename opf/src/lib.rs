@@ -1,6 +1,7 @@
 pub mod action;
 pub mod commands;
 pub mod common;
+pub mod compiled;
 pub mod core;
 pub mod error;
 pub mod modules;

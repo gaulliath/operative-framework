@@ -84,9 +84,7 @@ pub fn exec<'a>(
         CommandObject::Link => link::exec(session, cmd)?,
         CommandObject::Group => group::exec(session, cmd)?,
         CommandObject::Export(_) => export::exec(session, cmd)?,
-        CommandObject::Api => {
-            println!("API !");
-        }
+        CommandObject::Api => {}
         CommandObject::Module(_) => module::exec(session, cmd, module_manager)?,
         CommandObject::Action => action::exec(session, cmd)?,
         CommandObject::Save => save::exec(session, cmd)?,

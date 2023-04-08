@@ -81,7 +81,7 @@ pub fn main() -> Result<()> {
     let mut opf = opf::core::new(session, config);
     let module_path = matches.value_of("modules").unwrap_or("~/.opf/modules/");
     if let Err(e) = opf.init_manager(module_path) {
-        println!("error on module loading : {}", e);
+        println!("ERR {}", e);
     }
 
     let config = Config::builder()

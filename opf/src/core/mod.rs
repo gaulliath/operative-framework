@@ -3,7 +3,6 @@ use session::{Session, SessionConfig};
 use crate::commands;
 use crate::error::ErrorKind;
 use crate::modules::Manager;
-use crate::modules::Module;
 
 pub mod group;
 pub mod link;
@@ -12,10 +11,10 @@ pub mod session;
 pub mod target;
 
 #[derive(Debug)]
+#[allow(dead_code)]
 pub struct Core {
     pub session: Session,
     config: SessionConfig,
-    commands: Vec<String>,
     manager: Manager,
 }
 
@@ -23,7 +22,6 @@ pub fn new(session: Session, config: SessionConfig) -> Core {
     Core {
         session,
         config,
-        commands: vec![],
         manager: Manager::default(),
     }
 }
@@ -38,30 +36,19 @@ impl Core {
     }
 
     pub fn init_manager(&mut self, path: &str) -> Result<(), ErrorKind> {
-        crate::modules::register_modules(&mut self.manager, path)
-    }
-
-    pub fn get_modules(&self) -> Vec<Module> {
-        return self.manager.modules.clone();
-    }
-
-    pub fn run(&mut self, ask: &str) -> Result<(), ErrorKind> {
-        let command = commands::format(ask)?;
-
-        if self.config.verbose {
-            println!("{:?}", command);
-        }
-
-        let module_manager = &mut self.manager;
-        if command.action.eq(&commands::validator::CommandAction::Run) {}
-
-        commands::exec(&mut self.session, command, module_manager)?;
-
-        self.commands.push(ask.to_string());
+        crate::compiled::registers(
+            &mut self.manager,
+            vec![
+                crate::compiled::sample::SampleCompiled::new(),
+                crate::compiled::linkedin_search::LinkedinSearch::new(),
+            ],
+        )?;
+        crate::modules::register(&mut self.manager, path)?;
         Ok(())
     }
 
-    pub fn commands(&self) -> Vec<String> {
-        self.commands.clone()
+    pub fn run(&mut self, ask: &str) -> Result<(), ErrorKind> {
+        commands::exec(&mut self.session, commands::format(ask)?, &mut self.manager)?;
+        Ok(())
     }
 }

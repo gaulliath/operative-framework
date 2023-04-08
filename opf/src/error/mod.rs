@@ -26,6 +26,18 @@ pub enum ErrorKind {
     Target(Target),
     #[error(transparent)]
     Export(Export),
+    #[error(transparent)]
+    Metadata(Metadata),
+}
+
+#[derive(Error, Debug)]
+pub enum Metadata {
+    #[error("field required : {0}")]
+    Required(String),
+    #[error("field format incorrect")]
+    FormatField,
+    #[error("extender requirement not available : {0}")]
+    Requirement(String),
 }
 
 #[derive(Error, Debug)]
@@ -52,6 +64,10 @@ pub enum Group {
     GenericError(String),
     #[error("link already found in this session")]
     LinkExist,
+    #[error("group can't retrieve group {0}")]
+    Get(String),
+    #[error("group already exist {0}")]
+    Exist(String),
 }
 
 #[derive(Error, Debug)]
@@ -80,6 +96,8 @@ pub enum Module {
     ParamNotAvailable(String),
     #[error("target not available in current session")]
     TargetNotAvailable,
+    #[error("execution error {0}")]
+    Execution(String),
 }
 
 #[derive(Error, Debug)]
@@ -98,6 +116,8 @@ pub enum Target {
     ParentUuidNotValid,
     #[error("Target can't be created")]
     CantBeCreated,
+    #[error("{0}")]
+    Parsing(String),
 }
 
 #[derive(Error, Debug)]

@@ -1,11 +1,12 @@
 use super::{Command, CommandAction, CommandObject};
-use crate::common::{Link, module as opf_module};
 use crate::common::search::Target as TargetSearch;
+use crate::common::Link;
 use crate::common::Target;
+use crate::compiled::Compiled;
 use crate::core::session::Session;
 use crate::error::{ErrorKind, Module as ModuleError};
-use crate::modules::metadata::Arg;
-use crate::modules::{Manager, Module};
+use crate::modules::metadata::{Arg, Args};
+use crate::modules::{Manager, Module, OpfModule};
 use crate::vm;
 use std::collections::HashMap;
 use std::ops::Add;
@@ -31,16 +32,8 @@ pub fn list<'a>(session: &'a Session, manager: &'a Manager) -> Result<(), ErrorK
     ];
     let mut rows = vec![];
 
-    for module in &manager.modules {
-        let fields = vec![
-            module.metadata.name.clone().unwrap_or("-".to_string()),
-            module.metadata.author.clone().unwrap_or("-".to_string()),
-            module
-                .metadata
-                .description
-                .clone()
-                .unwrap_or("-".to_string()),
-        ];
+    for (_, module) in &manager.modules {
+        let fields = vec![module.name(), module.author(), module.resume()];
         rows.push(fields);
     }
 
@@ -58,48 +51,37 @@ pub fn help<'a>(
         _ => return Err(ErrorKind::Module(ModuleError::ModuleNameNotFound)),
     };
 
-    for module in &manager.modules {
-        if let Some(ref name) = module.metadata.name {
-            if name.eq(&module_name) {
-                let headers = vec![
-                    "name".to_string(),
-                    "author".to_string(),
-                    "description".to_string(),
-                ];
-                let mut rows = vec![];
+    for (_, module) in &manager.modules {
+        if module_name.eq(&module.name()) {
+            let headers = vec![
+                "name".to_string(),
+                "author".to_string(),
+                "description".to_string(),
+            ];
+            let mut rows = vec![];
 
-                let fields = vec![
-                    module.metadata.name.clone().unwrap_or("-".to_string()),
-                    module.metadata.author.clone().unwrap_or("-".to_string()),
-                    module
-                        .metadata
-                        .description
-                        .clone()
-                        .unwrap_or("-".to_string()),
-                ];
-                rows.push(fields);
-                session.output_table(headers, rows);
+            let fields = vec![module.name(), module.author(), module.resume()];
+            rows.push(fields);
+            session.output_table(headers, rows);
 
-                let headers = vec![
-                    "Argument".to_string(),
-                    "default".to_string(),
-                    "optional".to_string(),
-                ];
+            let headers = vec![
+                "Argument".to_string(),
+                "default".to_string(),
+                "optional".to_string(),
+            ];
 
-                let rows = module
-                    .metadata
-                    .args
-                    .iter()
-                    .map(|arg| {
-                        vec![
-                            arg.name.clone(),
-                            arg.value.clone().unwrap_or("<None>".to_string()),
-                            format!("{}", arg.is_optional),
-                        ]
-                    })
-                    .collect::<Vec<Vec<String>>>();
-                session.output_table(headers, rows);
-            }
+            let rows = module
+                .args()
+                .iter()
+                .map(|arg| {
+                    vec![
+                        arg.name.clone(),
+                        arg.value.clone().unwrap_or("<None>".to_string()),
+                        format!("{}", arg.is_optional),
+                    ]
+                })
+                .collect::<Vec<Vec<String>>>();
+            session.output_table(headers, rows);
         }
     }
 
@@ -112,39 +94,33 @@ pub fn run<'a>(
     manager: &'a Manager,
 ) -> Result<(), ErrorKind> {
     let module_name = match cmd.object {
-        CommandObject::Module(ref module_name) => module_name.clone(),
+        CommandObject::Module(module_name) => module_name,
         _ => return Err(ErrorKind::Module(ModuleError::ModuleNameNotFound)),
     };
 
-    for module in &manager.modules {
-        if let Some(ref name) = module.metadata.name {
-            if name.eq(&module_name) {
-                println!("arguments : {:?}", cmd.params);
-                if let Some(group_id) = cmd.params.get("group_id") {
-                    if !session.exist_group_id(group_id) {
-                        return Err(ErrorKind::Module(ModuleError::GroupNotFound));
-                    }
-                    let get_group = session.get_group_by_id(group_id.as_str());
-                    if get_group.is_err() {
-                        return Err(ErrorKind::Module(ModuleError::GroupNotFound));
-                    }
-
-                    let group = get_group.unwrap();
-                    let targets = session.get_targets_by_group(&group);
-
-                    for target in targets {
-                        let mut new_param = cmd.params.clone();
-                        new_param.insert("target".to_string(), target.target_id.to_string());
-                        execute_module(session, &module, new_param);
-                    }
-                    return Ok(());
-                }
-                execute_module(session, &module, cmd.params.clone());
-                return Ok(());
+    if let Some(module) = manager.modules.get(module_name.as_str()) {
+        if let Some(group_id) = cmd.params.get("group_id") {
+            if !session.exist_group_id(group_id) {
+                return Err(ErrorKind::Module(ModuleError::GroupNotFound));
             }
-        }
-    }
+            let get_group = session.get_group_by_id(group_id.as_str());
+            if get_group.is_err() {
+                return Err(ErrorKind::Module(ModuleError::GroupNotFound));
+            }
 
+            let group = get_group.unwrap();
+            let targets = session.get_targets_by_group(&group);
+
+            for target in targets {
+                let mut new_param = cmd.params.clone();
+                new_param.insert("target".to_string(), target.target_id.to_string());
+                execute_module(session, &module, &new_param)?;
+            }
+            return Ok(());
+        }
+        execute_module(session, &module, &cmd.params)?;
+        return Ok(());
+    }
     Err(ErrorKind::Module(ModuleError::ModuleNameNotFound))
 }
 
@@ -163,12 +139,10 @@ fn verify_arguments(
                     search.target_id = Some(value.clone());
 
                     if !session.exist_target(&search) {
-                        println!("not exist with id, searching with custom_id...");
                         search.target_id = None;
                         search.target_custom_id = Some(value.clone());
 
                         if session.exist_target(&search) {
-                            println!("found with custom id = {:?}", search);
                             break;
                         }
 
@@ -206,31 +180,29 @@ fn verify_arguments(
     Ok(target.unwrap())
 }
 
-fn execute_module(sess: &mut Session, module: &Module, args: HashMap<String, String>) {
+fn execute_lua(
+    sess: &mut Session,
+    module: &Module,
+    mut params: Vec<Arg>,
+) -> Result<Vec<Target>, ErrorKind> {
     let mut targets: Vec<HashMap<String, String>> = vec![];
-
-    // checking arguments
-    let mut params = module.metadata.args.clone();
-
-    let target_parent = match verify_arguments(sess, &mut params, &args) {
-        Ok(target) => target,
-        Err(e) => {
-            println!("ERR {}", e);
-            return;
-        }
-    };
-
     let vm = rlua::Lua::new();
 
     let _ = vm.context(|mut vm_context| {
         let _ = vm_context.globals().set("targets", targets.clone());
 
         let arguments = vm::arg::Args::from(params);
-        vm_context.globals().set("args", arguments).unwrap();
+        vm_context.globals().set("args", arguments).map_err(|_| {
+            ErrorKind::Module(ModuleError::Execution("can't retrieve args".to_string()))
+        })?;
         vm_context
             .globals()
             .set("sess_targets", sess.targets.clone())
-            .unwrap();
+            .map_err(|_| {
+                ErrorKind::Module(ModuleError::Execution(
+                    "can't retrieve session targets".to_string(),
+                ))
+            })?;
 
         for extend in &module.metadata.extends {
             vm::extends(&mut vm_context, extend, sess);
@@ -238,10 +210,8 @@ fn execute_module(sess: &mut Session, module: &Module, args: HashMap<String, Str
 
         vm::require::common::extends_common(&mut vm_context);
 
-        let content = match std::fs::read(&module.file_name) {
-            Ok(c) => c,
-            Err(_) => return Err(opf_module::Error::CantLoadContent),
-        };
+        let content = std::fs::read(&module.file_name)
+            .map_err(|_| ErrorKind::Module(ModuleError::CantLoadContent))?;
 
         _ = vm_context.load(content.as_slice()).exec();
 
@@ -252,22 +222,37 @@ fn execute_module(sess: &mut Session, module: &Module, args: HashMap<String, Str
             targets = new_targets;
         });
         Ok(())
-    });
+    })?;
+
+    let mut results = vec![];
+    for target in targets {
+        let mut new_target = Target::try_from(target).map_err(|_| {
+            ErrorKind::Module(ModuleError::Execution(
+                "missing argument in target creation".to_string(),
+            ))
+        })?;
+
+        results.push(new_target);
+    }
+    Ok(results)
+}
+
+fn execute_module(
+    sess: &mut Session,
+    module: &OpfModule,
+    args: &HashMap<String, String>,
+) -> Result<(), ErrorKind> {
+    let mut params = module.args();
+    let target_parent = verify_arguments(sess, &mut params, args)?;
+
+    let targets  = match module {
+        OpfModule::Lua(ref lua_module) => execute_lua(sess, lua_module, module.args())?,
+        OpfModule::Compiled(ref module) => module.run(sess, Args::from(params))?,
+    };
 
     let mut inserted = 0;
-    for target in targets {
-        let mut new_target = match Target::try_from(target) {
-            Ok(target) => target,
-            Err(e) => {
-                println!("ERR target::try_from {}", e);
-                continue;
-            }
-        };
-
-        let module_name = match module.metadata.name.clone() {
-            Some(name) => name,
-            None => continue,
-        };
+    let module_name = module.name();
+    for mut target in targets {
 
         let group_name = String::from(&target_parent.target_name)
             .add(".")
@@ -281,10 +266,10 @@ fn execute_module(sess: &mut Session, module: &Module, args: HashMap<String, Str
             },
         };
 
-        new_target.target_parent = Some(target_parent.target_uuid);
-        new_target.target_groups.push(group.group_uuid);
+        target.target_parent = Some(target_parent.target_uuid);
+        target.target_groups.push(group.group_uuid);
 
-        if let Ok(target) = sess.create_target(new_target) {
+        if let Ok(target) = sess.create_target(target) {
             if let Some(parent) = target.target_parent {
                 let _ = Link::new(parent, target.target_uuid, &module_name, &module_name);
             }
@@ -292,5 +277,7 @@ fn execute_module(sess: &mut Session, module: &Module, args: HashMap<String, Str
         }
     }
 
-    println!("! {} new targets", inserted);
+    println!("INF   new targets {}", inserted);
+
+    Ok(())
 }

@@ -36,7 +36,7 @@ pub enum Error {
 }
 
 pub fn validate_type(t: &str) -> Result<TargetType, ErrorKind> {
-    match TargetType::from_str(t.clone().to_lowercase().as_str()) {
+    match TargetType::from_str(t.to_lowercase().as_str()) {
         Ok(t) => Ok(t),
         Err(_) => Err(ErrorKind::Target(TargetError::ParamTypeNotFound)),
     }

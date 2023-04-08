@@ -1,10 +1,20 @@
 pub mod metadata;
 
-use crate::error::{ErrorKind, Manager as ManagerError};
+use crate::compiled::Compiled;
+use crate::error::{ErrorKind, Manager as ManagerError, Metadata as MetadataError};
+use crate::modules::metadata::Arg;
+use std::collections::HashMap;
+use std::fmt::{Debug, Formatter};
 
-#[derive(Debug, Default)]
+#[derive(Default)]
 pub struct Manager {
-    pub modules: Vec<Module>,
+    pub modules: HashMap<String, OpfModule>,
+    //pub compiled: HashMap<String, Box<dyn Compiled>>,
+}
+
+pub enum OpfModule {
+    Lua(Module),
+    Compiled(Box<dyn Compiled>),
 }
 
 #[derive(Debug, Clone)]
@@ -13,44 +23,72 @@ pub struct Module {
     pub metadata: metadata::Metadata,
 }
 
-pub fn register_modules<'a>(manager: &'a mut Manager, directory: &'a str) -> Result<(), ErrorKind> {
-    let paths = match std::fs::read_dir(directory) {
-        Ok(paths) => paths,
-        Err(_) => {
-            return Err(ErrorKind::Manager(ManagerError::CantOpenDirectory(
-                directory.to_string(),
-            )))
+impl OpfModule {
+    pub fn name(&self) -> String {
+        match &self {
+            Self::Lua(ref module) => module.metadata.name.clone().unwrap_or("-".to_string()),
+            Self::Compiled(ref module) => module.name(),
         }
-    };
+    }
+
+    pub fn author(&self) -> String {
+        match &self {
+            Self::Lua(ref module) => module.metadata.author.clone().unwrap_or("-".to_string()),
+            Self::Compiled(ref module) => module.author(),
+        }
+    }
+
+    pub fn resume(&self) -> String {
+        match &self {
+            Self::Lua(ref module) => module
+                .metadata
+                .description
+                .clone()
+                .unwrap_or("-".to_string()),
+            Self::Compiled(ref module) => module.resume(),
+        }
+    }
+
+    pub fn args(&self) -> Vec<Arg> {
+        match &self {
+            Self::Lua(ref module) => module.metadata.args.clone(),
+            Self::Compiled(ref module) => module.args(),
+        }
+    }
+}
+
+pub fn register(manager: &mut Manager, directory: &str) -> Result<(), ErrorKind> {
+    let paths = std::fs::read_dir(directory)
+        .map_err(|_| ErrorKind::Manager(ManagerError::CantOpenDirectory(directory.to_string())))?;
 
     for p in paths {
-        let path = match p {
-            Ok(path) => path,
-            Err(_) => return Err(ErrorKind::Manager(ManagerError::CantProcessFile)),
-        };
+        let path = p.map_err(|_| ErrorKind::Manager(ManagerError::CantProcessFile))?;
 
         let file_name = path.path().display().to_string();
 
-        let content = match std::fs::read_to_string(String::from(&file_name)) {
-            Ok(content) => content,
-            Err(_) => {
-                return Err(ErrorKind::Manager(ManagerError::CantReadContent(file_name)));
-            }
-        };
+        let content = std::fs::read_to_string(String::from(&file_name))
+            .map_err(|_| ErrorKind::Manager(ManagerError::CantReadContent(file_name.clone())))?;
 
-        let metadata = match metadata::parse(content.as_str()) {
-            Ok(meta) => meta,
-            Err(_) => {
-                return Err(ErrorKind::Manager(ManagerError::CantParseMetadata(
-                    String::from(&file_name),
-                )))
-            }
-        };
+        let metadata = metadata::parse(content.as_str())?;
+        if metadata.name.is_none() {
+            return Err(ErrorKind::Metadata(MetadataError::Required(
+                "name".to_string(),
+            )));
+        }
 
-        manager.modules.push(Module {
-            file_name,
-            metadata,
-        })
+        manager.modules.insert(
+            metadata.name.clone().unwrap(),
+            OpfModule::Lua(Module {
+                file_name,
+                metadata,
+            }),
+        );
     }
     Ok(())
+}
+
+impl Debug for Manager {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "manager: modules {}", self.modules.len(),)
+    }
 }
