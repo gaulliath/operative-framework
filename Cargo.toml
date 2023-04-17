@@ -1,5 +1,9 @@
 [workspace]
 members = [
-"opf",
-"opf-cli",
+    "opf-cli",
+    "opf-node",
+    "opf-db",
+    "opf-models",
+    "opf-network",
+    "opf-modules"
 ]

@@ -1,5 +1,5 @@
 [package]
-name = "opf-cli"
+name = "opf"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,9 +7,14 @@ edition = "2021"
 
 [dependencies]
 clap = "3.2.20"
-colored = "2.0.0"
-#reedline = { version = "0.17.0" }
 rustyline = { version = "11.0.0", features = ["derive"] }
 crossterm = "*"
-rand = "0.8.5"
-opf = {path = "../opf", version = "0.1.0"}
+colored = "2.0.0"
+fern = "0.6.2"
+log = "0.4.17"
+humantime = "2.1.0"
+opf-node = { version = "1.0.0", path = "../opf-node" }
+opf-models = { version = "1.0.0", path = "../opf-models" }
+tokio = { version = "1", features = ["full"] }
+comfy-table = "6.1.0"
+lazy_static = "1.4.0"

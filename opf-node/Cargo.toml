@@ -1,0 +1,15 @@
+[package]
+name = "opf-node"
+version = "1.0.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+tokio = {version = "1", features = ["full"]}
+opf-models = { version = "1.0.0", path = "../opf-models" }
+opf-db = { version = "1.0.0", path = "../opf-db" }
+opf-modules = { version = "1.0.0", path = "../opf-modules" }
+log = "0.4.17"
+strum_macros = "0.24"
+strum = { version = "0.24", features = ["derive"] }
