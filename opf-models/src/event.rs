@@ -14,9 +14,12 @@ pub enum Event {
     CommandLink(Command),
     CommandModule(Command),
     CommandWorkspace(Command),
+    CommandExport(Command),
     // Module variant
     PrepareModule((String, Command)),
     ExecuteModule((String, HashMap<String, String>)),
+    ListModules,
+    HelpModule(String),
     ResultsModule(Vec<Target>),
     // response variants
     ResponseSimple(String),

@@ -17,12 +17,12 @@ use opf_models::{
 use crate::CompiledModule;
 
 #[derive(Clone)]
-pub struct LinkedinSearch {}
+pub struct CrtSH {}
 
 #[async_trait]
-impl CompiledModule for LinkedinSearch {
+impl CompiledModule for CrtSH {
     fn name(&self) -> String {
-        "linkedin.search".to_string()
+        "crt.sh".to_string()
     }
 
     fn author(&self) -> String {
@@ -30,19 +30,18 @@ impl CompiledModule for LinkedinSearch {
     }
 
     fn resume(&self) -> String {
-        "Search employee on selected enterprise with Linkedin".to_string()
+        "search (sub)domain name by SSL certificate".to_string()
     }
 
     fn args(&self) -> Vec<Arg> {
         vec![
             Arg::new("target_id", true, false, None),
             Arg::new("target", false, false, None),
-            Arg::new("limit", false, true, Some("10".to_string())),
         ]
     }
 
     fn target_type(&self) -> TargetType {
-        TargetType::Company
+        TargetType::Domain
     }
 
     async fn run(
@@ -51,14 +50,14 @@ impl CompiledModule for LinkedinSearch {
         _tx: Option<UnboundedSender<Event>>,
     ) -> Result<Vec<Target>, ErrorKind> {
         let company = params.get("target").unwrap();
-        let target_id = params.get("target_id").unwrap();
-        let limit = params.get("limit").unwrap();
+        let target_id = params
+            .get("target_id")
+            .ok_or(ErrorKind::Module(ModuleError::TargetNotAvailable))?
+            .value
+            .ok_or(ErrorKind::Module(ModuleError::TargetNotAvailable))?;
         let target = company.value.unwrap();
 
-        let url = String::from("https://www.google.com/search?num=")
-            .add(&limit.value.unwrap().as_str())
-            .add("&start=0&hl=en&q=site:linkedin.com/in+")
-            .add(&target.replace(" ", "+").as_str());
+        let url = String::from("https://crt.sh/?q=").add(&target.replace(" ", "+").as_str());
 
         let mut headers = header::HeaderMap::new();
         headers.insert(
@@ -78,41 +77,55 @@ impl CompiledModule for LinkedinSearch {
             .send()
             .await
             .map_err(|e| ErrorKind::Module(ModuleError::Execution(e.to_string())))?;
+
         let res = res
             .text()
             .await
             .map_err(|e| ErrorKind::Module(ModuleError::Execution(e.to_string())))?;
+
         let fragment = Html::parse_fragment(res.as_str());
-        let selector = Selector::parse(".g h3").map_err(|_| {
+        let selector = Selector::parse(".outer tr>td").map_err(|_| {
             ErrorKind::Module(ModuleError::Execution(
                 "invalid selector from scrapping".to_string(),
             ))
         })?;
         let mut results = vec![];
+        let mut tmp_results = vec![];
+
         for element in fragment.select(&selector) {
-            let mut result = HashMap::new();
+            let html = element.inner_html();
+            if html.contains(&target) {
+                if html.contains(&"<br>") {
+                    for res in html.split(&"<br>") {
+                        let res = res.trim().to_string();
+                        if !tmp_results.contains(&res) {
+                            tmp_results.push(res);
+                        }
+                    }
+                    continue;
+                }
 
-            let element = element.inner_html().replace(&target, "");
+                let res = html.trim().to_string();
+                if !tmp_results.contains(&res) {
+                    tmp_results.push(res);
+                }
+            }
+        }
 
-            let elements: Vec<&str> = element.split("-").collect();
-
-            result.insert(String::from("name"), elements[0].trim().to_string());
-            result.insert(String::from("type"), String::from("person"));
-            result.insert(String::from("job_title"), elements[1].trim().to_string());
-            result.insert(
-                String::from("parent"),
-                target_id.value.as_ref().unwrap().clone(),
-            );
-
-            results.push(Target::try_from(result)?);
+        for domain in tmp_results {
+            let mut target = HashMap::new();
+            target.insert(String::from("name"), domain);
+            target.insert(String::from("type"), String::from("domain"));
+            target.insert(String::from("parent"), target_id.clone());
+            results.push(Target::try_from(target)?);
         }
 
         Ok(results)
     }
 }
 
-impl LinkedinSearch {
+impl CrtSH {
     pub fn new() -> Box<dyn CompiledModule> {
-        Box::new(LinkedinSearch {})
+        Box::new(CrtSH {})
     }
 }

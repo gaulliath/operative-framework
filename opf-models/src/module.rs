@@ -1,2 +1,10 @@
 pub const TARGET_ID: &str = "target_id";
 pub const TARGET: &str = "target";
+pub const TARGET_TYPE: &str = "target_type";
+pub const ARGUMENTS: &str = "arguments";
+pub const ARGUMENT: &str = "arguments";
+pub const ARGUMENT_DEFAULT: &str = "default_value";
+pub const ARGUMENT_OPTIONAL: &str = "is_optional";
+pub const NAME: &str = "name";
+pub const RESUME: &str = "description";
+pub const AUTHOR: &str = "author";

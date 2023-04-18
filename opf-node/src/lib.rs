@@ -5,9 +5,10 @@ use tokio::sync::mpsc::{UnboundedReceiver, UnboundedSender};
 
 use opf_models::error::ErrorKind;
 use opf_models::event::{send_event, Domain, Event};
-use opf_models::CommandObject;
+use opf_models::{CommandAction, CommandObject};
 
 mod parse;
+mod help;
 
 #[derive(Debug)]
 pub struct Node {
@@ -56,6 +57,7 @@ impl Node {
                         Domain::Module => {
                             match event {
                                 Event::ExecuteModule(_) => send_event(&self.module_tx, event).await,
+                                Event::ListModules => send_event(&self.module_tx, event).await,
                                 _ => Ok(())
                             }
                         },
@@ -73,13 +75,23 @@ impl Node {
     async fn on_command(&mut self, cmd: String) -> Result<(), ErrorKind> {
         match parse::format(cmd.as_str()) {
             Ok(command) => match command.object {
-                CommandObject::None => Ok(()),
-                CommandObject::Module(ref module_name) => {
-                    send_event(
-                        &self.db_tx,
-                        Event::PrepareModule((module_name.clone(), command)),
-                    )
-                    .await
+                CommandObject::Module(ref module_name) => match &command.action {
+                    CommandAction::Help => {
+                        send_event(&self.module_tx, Event::HelpModule(module_name.to_string()))
+                            .await
+                    }
+                    CommandAction::List => send_event(&self.module_tx, Event::ListModules).await,
+                    CommandAction::Run => {
+                        send_event(
+                            &self.db_tx,
+                            Event::PrepareModule((module_name.clone(), command)),
+                        )
+                        .await
+                    }
+                    _ => Ok(()),
+                },
+                CommandObject::Export(_) => {
+                    send_event(&self.db_tx, Event::CommandExport(command)).await
                 }
                 CommandObject::Target => {
                     send_event(&self.db_tx, Event::CommandTarget(command)).await
@@ -88,6 +100,12 @@ impl Node {
                     send_event(&self.db_tx, Event::CommandWorkspace(command)).await
                 }
                 CommandObject::Link => send_event(&self.db_tx, Event::CommandLink(command)).await,
+                CommandObject::None => {
+                    match command.action {
+                        CommandAction::Help => self.on_help().await,
+                        _ => Ok(())
+                    }
+                }
                 _ => Ok(()),
             },
             Err(e) => self

@@ -12,6 +12,7 @@ use opf_models::Workspace;
 use crate::store::DB;
 
 mod store;
+mod store_export;
 mod store_link;
 mod store_module;
 mod store_target;
@@ -90,6 +91,11 @@ impl DBStore {
                     match event {
                         Event::CommandTarget(command) => {
                             if let Err(e) = db.on_target_command(command).await {
+                                let _ = send_event_to(&self.node_tx, (Domain::CLI, ResponseError(e.to_string()))).await;
+                            }
+                        },
+                        Event::CommandExport(command) => {
+                            if let Err(e) = db.on_export_command(command).await {
                                 let _ = send_event_to(&self.node_tx, (Domain::CLI, ResponseError(e.to_string()))).await;
                             }
                         },

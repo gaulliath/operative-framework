@@ -11,11 +11,12 @@ use opf_models::metadata::{Arg, Args, Metadata};
 use opf_models::{
     error::ErrorKind,
     event::{Domain, Event},
-    Target,
+    Target, TargetType,
 };
 
 mod account_search;
 mod command;
+mod crtsh;
 mod linkedin_search;
 mod port_scanner;
 mod worker;
@@ -44,6 +45,7 @@ pub trait CompiledModule: Sync + Send + DynClone {
     fn author(&self) -> String;
     fn resume(&self) -> String;
     fn args(&self) -> Vec<Arg>;
+    fn target_type(&self) -> TargetType;
     fn is_threaded(&self) -> bool {
         false
     }
@@ -86,6 +88,13 @@ impl Module {
             Self::Compiled(ref module) => module.args(),
         }
     }
+
+    pub fn target_type(&self) -> TargetType {
+        match &self {
+            Self::Lua(ref _module) => TargetType::Person,
+            Self::Compiled(ref module) => module.target_type(),
+        }
+    }
 }
 
 impl ModuleController {
@@ -97,6 +106,16 @@ impl ModuleController {
                     match event {
                         Event::ExecuteModule(data) => {
                             if let Err(e) = self.on_execute_module(data).await {
+                                let _ = send_event_to(&self.node_tx, (Domain::CLI, ResponseError(e.to_string()))).await;
+                            }
+                        }
+                        Event::ListModules => {
+                            if let Err(e) = self.on_list_modules().await {
+                                let _ = send_event_to(&self.node_tx, (Domain::CLI, ResponseError(e.to_string()))).await;
+                            }
+                        }
+                        Event::HelpModule(module_name) => {
+                            if let Err(e) = self.on_help_module(module_name).await {
                                 let _ = send_event_to(&self.node_tx, (Domain::CLI, ResponseError(e.to_string()))).await;
                             }
                         }
@@ -125,10 +144,12 @@ pub fn new(
     let linkedin = linkedin_search::LinkedinSearch::new();
     let account_search = account_search::AccountSearch::new();
     let port_scanner = port_scanner::PortScanner::new();
+    let crt_sh = crtsh::CrtSH::new();
 
     modules.insert(linkedin.name(), Module::Compiled(linkedin));
     modules.insert(account_search.name(), Module::Compiled(account_search));
     modules.insert(port_scanner.name(), Module::Compiled(port_scanner));
+    modules.insert(crt_sh.name(), Module::Compiled(crt_sh));
 
     (
         tx,

@@ -14,7 +14,7 @@ impl DBStore {
     pub async fn on_workspace_command(&mut self, command: Command) -> Result<(), ErrorKind> {
         match command.action {
             CommandAction::Add => self.add_workspace(command).await,
-            CommandAction::Connect => self.connect_workspace(command).await,
+            CommandAction::Switch => self.switch_workspace(command).await,
             CommandAction::List => self.list_workspaces(command).await,
             //CommandAction::Del => self.delete_target(command).await,
             CommandAction::Set => self.update_workspace(command).await,
@@ -58,7 +58,7 @@ impl DBStore {
         .await
     }
 
-    async fn connect_workspace(&mut self, cmd: Command) -> Result<(), ErrorKind> {
+    async fn switch_workspace(&mut self, cmd: Command) -> Result<(), ErrorKind> {
         let workspace_id = cmd
             .params
             .get(workspace::ID)

@@ -1,3 +1,4 @@
+use std::fmt::{Display, Formatter};
 use std::str::FromStr;
 
 use nom::bytes::complete::{tag, take_until};
@@ -144,6 +145,7 @@ impl From<Vec<Arg>> for Args {
         Self(value)
     }
 }
+
 impl Args {
     pub fn get(&self, name: &str) -> Option<Arg> {
         for arg in &self.0 {
@@ -152,5 +154,18 @@ impl Args {
             }
         }
         None
+    }
+}
+
+impl Display for Arg {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let default = "".to_string();
+        write!(
+            f,
+            "name={}, required={}, default={}",
+            self.name,
+            self.is_optional == false,
+            &self.value.as_ref().unwrap_or(&default)
+        )
     }
 }

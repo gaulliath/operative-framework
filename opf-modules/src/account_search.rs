@@ -11,7 +11,7 @@ use opf_models::error::{ErrorKind, Module as ModuleError};
 use opf_models::event::{send_event, Event};
 use opf_models::{
     metadata::{Arg, Args},
-    Target,
+    Target, TargetType,
 };
 
 use crate::CompiledModule;
@@ -98,6 +98,10 @@ impl CompiledModule for AccountSearch {
             ));
         }
         Ok(vec![])
+    }
+
+    fn target_type(&self) -> TargetType {
+        TargetType::Username
     }
 }
 

@@ -1,9 +1,8 @@
 use std::collections::HashMap;
 use std::str::FromStr;
 use std::time::SystemTime;
-
 use serde::{Deserialize, Serialize};
-use strum_macros::{Display, EnumString};
+use strum_macros::{Display, EnumString, EnumIter};
 
 use error::ErrorKind;
 
@@ -15,6 +14,7 @@ pub mod metadata;
 pub mod module;
 pub mod target;
 pub mod workspace;
+pub mod command;
 
 #[derive(Debug)]
 pub struct Command {
@@ -36,6 +36,7 @@ pub enum CommandAction {
     Load,
     Export,
     Connect,
+    Switch,
     Stop,
     Help,
 }
@@ -67,7 +68,7 @@ pub struct Target {
     pub meta: HashMap<String, String>,
 }
 
-#[derive(Debug, PartialEq, EnumString, Display, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, EnumString, EnumIter, Display, Clone, Serialize, Deserialize)]
 #[strum(serialize_all = "lowercase")]
 pub enum TargetType {
     Person,
