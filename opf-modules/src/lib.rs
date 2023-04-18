@@ -11,12 +11,14 @@ use opf_models::metadata::{Arg, Args, Metadata};
 use opf_models::{
     error::ErrorKind,
     event::{Domain, Event},
-    Target, TargetType,
+    ModuleAction, Target, TargetType,
 };
 
 mod account_search;
 mod command;
 mod crtsh;
+mod email_to_domain;
+mod insee_search;
 mod linkedin_search;
 mod port_scanner;
 mod worker;
@@ -46,6 +48,9 @@ pub trait CompiledModule: Sync + Send + DynClone {
     fn resume(&self) -> String;
     fn args(&self) -> Vec<Arg>;
     fn target_type(&self) -> TargetType;
+    fn module_action(&self) -> ModuleAction {
+        ModuleAction::CreateTarget
+    }
     fn is_threaded(&self) -> bool {
         false
     }
@@ -145,11 +150,15 @@ pub fn new(
     let account_search = account_search::AccountSearch::new();
     let port_scanner = port_scanner::PortScanner::new();
     let crt_sh = crtsh::CrtSH::new();
+    let email_to_domain = email_to_domain::EmailToDomain::new();
+    let insee_search = insee_search::InseeSearch::new();
 
     modules.insert(linkedin.name(), Module::Compiled(linkedin));
     modules.insert(account_search.name(), Module::Compiled(account_search));
     modules.insert(port_scanner.name(), Module::Compiled(port_scanner));
     modules.insert(crt_sh.name(), Module::Compiled(crt_sh));
+    modules.insert(email_to_domain.name(), Module::Compiled(email_to_domain));
+    modules.insert(insee_search.name(), Module::Compiled(insee_search));
 
     (
         tx,

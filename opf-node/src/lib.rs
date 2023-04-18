@@ -7,8 +7,8 @@ use opf_models::error::ErrorKind;
 use opf_models::event::{send_event, Domain, Event};
 use opf_models::{CommandAction, CommandObject};
 
-mod parse;
 mod help;
+mod parse;
 
 #[derive(Debug)]
 pub struct Node {
@@ -100,12 +100,10 @@ impl Node {
                     send_event(&self.db_tx, Event::CommandWorkspace(command)).await
                 }
                 CommandObject::Link => send_event(&self.db_tx, Event::CommandLink(command)).await,
-                CommandObject::None => {
-                    match command.action {
-                        CommandAction::Help => self.on_help().await,
-                        _ => Ok(())
-                    }
-                }
+                CommandObject::None => match command.action {
+                    CommandAction::Help => self.on_help().await,
+                    _ => Ok(()),
+                },
                 _ => Ok(()),
             },
             Err(e) => self

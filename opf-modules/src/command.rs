@@ -18,7 +18,12 @@ impl ModuleController {
                 ];
                 let mut rows = vec![];
 
-                let fields = vec![module.name(), module.author(), module.resume(), module.target_type().to_string()];
+                let fields = vec![
+                    module.name(),
+                    module.author(),
+                    module.resume(),
+                    module.target_type().to_string(),
+                ];
                 rows.push(fields);
                 let _ = send_event(&self.self_tx, Event::ResponseTable((headers, rows))).await;
 

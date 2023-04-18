@@ -64,7 +64,7 @@ async fn main() -> Result<()> {
     let _ = log::init();
     let (tx, rx) = std::sync::mpsc::channel::<Event>();
     let (node_tx, node) = Node::new(tx).await;
-    let workspace = Arc::new(RwLock::new(String::from("test-123")));
+    let workspace = Arc::new(RwLock::new(String::from("")));
 
     let config = Config::builder()
         .history_ignore_space(true)

@@ -1,11 +1,12 @@
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::str::FromStr;
 use std::time::SystemTime;
-use serde::{Deserialize, Serialize};
-use strum_macros::{Display, EnumString, EnumIter};
+use strum_macros::{Display, EnumIter, EnumString};
 
 use error::ErrorKind;
 
+pub mod command;
 pub mod error;
 pub mod event;
 mod impl_model;
@@ -14,7 +15,6 @@ pub mod metadata;
 pub mod module;
 pub mod target;
 pub mod workspace;
-pub mod command;
 
 #[derive(Debug)]
 pub struct Command {
@@ -73,6 +73,7 @@ pub struct Target {
 pub enum TargetType {
     Person,
     Company,
+    Address,
     Alias,
     Email,
     Username,
@@ -83,6 +84,13 @@ pub enum TargetType {
     Account,
     IpAddress,
     Domain,
+}
+
+#[derive(Debug, PartialEq, EnumString, EnumIter, Display, Clone, Serialize, Deserialize)]
+#[strum(serialize_all = "lowercase")]
+pub enum ModuleAction {
+    CreateTarget,
+    UpdateTarget,
 }
 
 #[derive(Debug, PartialEq, EnumString, Display, Clone, Serialize, Deserialize)]

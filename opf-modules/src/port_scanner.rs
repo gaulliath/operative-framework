@@ -1,21 +1,16 @@
-use std::collections::HashMap;
-use std::net::{SocketAddr, ToSocketAddrs};
-
-use std::time::Duration;
-
+use crate::CompiledModule;
 use async_trait::async_trait;
-
-use tokio::net::TcpStream;
-use tokio::sync::mpsc::UnboundedSender;
-
 use opf_models::error::{ErrorKind, Module as ModuleError};
 use opf_models::event::{send_event, Event};
 use opf_models::{
     metadata::{Arg, Args},
     Target, TargetType,
 };
-
-use crate::CompiledModule;
+use std::collections::HashMap;
+use std::net::{SocketAddr, ToSocketAddrs};
+use std::time::Duration;
+use tokio::net::TcpStream;
+use tokio::sync::mpsc::UnboundedSender;
 
 const MOST_COMMON_PORTS: &[u16] = &[
     80, 23, 443, 21, 22, 25, 3389, 110, 445, 139, 143, 53, 135, 3306, 8080, 1723, 111, 995, 993,
@@ -104,10 +99,11 @@ impl PortScanner {
 
     async fn scan_port(tx: UnboundedSender<Event>, hostname: String, port: u16, parent: String) {
         let timeout = Duration::from_secs(3);
-        let socket_addresses: Vec<SocketAddr> = format!("{}:{}", hostname, port)
-            .to_socket_addrs()
-            .expect("port scanner: Creating socket address")
-            .collect();
+        let socket_addresses: Vec<SocketAddr> =
+            match format!("{}:{}", hostname, port).to_socket_addrs() {
+                Ok(socket) => socket.collect(),
+                Err(_) => return,
+            };
 
         if socket_addresses.len() == 0 {
             return;
