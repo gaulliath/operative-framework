@@ -2,6 +2,27 @@
 
 **operative framework** is a digital investigation framework, you can interact with multiple targets, execute multiple modules, create links with target, export rapport to PDF file, add note to target or results, interact with RESTFul API, write your own modules.
 
+### important
+
+The project has undergone a redesign in Rust and is now in active development for the past few months. PRs are welcome.
+
+#### ROADMAP
+
+| Feature                          | Status   |
+|----------------------------------|----------|
+| CRUD Targets                     | Complete |
+| CRUD Links                       | Complete |
+| CRUD workspace                   | Complete |
+| export in dot format             | Complete |
+| Asynchronous Core Implementation | Complete |
+| Compiled Module                  | Complete |
+| Lua Interface                    | Pending  |
+| P2P Node                         | Pending  |
+| REST API                         | Pending  |
+| TOML Configuration               | Pending  |
+
+
+
 #### DOWNLOAD LATEST RELEASE
 
 https://github.com/graniet/operative-framework/releases
