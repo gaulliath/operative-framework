@@ -10,12 +10,12 @@ The project has undergone a redesign in Rust and is now in active development fo
 
 | Feature                          | Status   |
 |----------------------------------|----------|
-| CRUD Targets                     | Complete |
-| CRUD Links                       | Complete |
-| CRUD workspace                   | Complete |
-| export in dot format             | Complete |
-| Asynchronous Core Implementation | Complete |
-| Compiled Module                  | Complete |
+| CRUD Targets                     | ✓ |
+| CRUD Links                       | ✓ |
+| CRUD workspace                   | ✓ |
+| export in dot format             | ✓ |
+| Asynchronous Core Implementation | ✓ |
+| Compiled Module                  | ✓ |
 | Lua Interface                    | Pending  |
 | P2P Node                         | Pending  |
 | REST API                         | Pending  |
