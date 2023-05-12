@@ -6,11 +6,14 @@ use opf_models::error::ErrorKind;
 use opf_models::event::send_event;
 use opf_models::event::Event;
 use opf_models::metadata::Args;
+use opf_models::Target;
 
 use crate::CompiledModule;
 
 pub async fn run(
     controller_tx: UnboundedSender<Event>,
+    group_id: i32,
+    target: Target,
     module: Box<dyn CompiledModule>,
     args: HashMap<String, String>,
 ) -> Result<(), ErrorKind> {
@@ -32,7 +35,12 @@ pub async fn run(
 
     if module.is_threaded() {
         return match module
-            .run(Args::from(params), Some(controller_tx.clone()))
+            .run(
+                group_id,
+                target,
+                Args::from(params),
+                Some(controller_tx.clone()),
+            )
             .await
         {
             Ok(_) => {
@@ -46,7 +54,15 @@ pub async fn run(
         };
     }
 
-    match module.run(Args::from(params), None).await {
+    match module
+        .run(
+            group_id,
+            target,
+            Args::from(params),
+            Some(controller_tx.clone()),
+        )
+        .await
+    {
         Ok(targets) => {
             let _ = send_event(
                 &controller_tx,
@@ -57,7 +73,7 @@ pub async fn run(
                 )),
             )
             .await;
-            send_event(&controller_tx, Event::ResultsModule(targets)).await
+            send_event(&controller_tx, Event::ResultsModule(group_id, targets)).await
         }
         Err(e) => send_event(&controller_tx, Event::ResponseError(e.to_string())).await,
     }

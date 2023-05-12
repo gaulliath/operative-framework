@@ -47,18 +47,19 @@ impl CompiledModule for LinkedinSearch {
 
     async fn run(
         &self,
+        _group_id: i32,
+        target: Target,
         params: Args,
         _tx: Option<UnboundedSender<Event>>,
     ) -> Result<Vec<Target>, ErrorKind> {
-        let company = params.get("target").unwrap();
-        let target_id = params.get("target_id").unwrap();
+        let target_id = target.target_id.to_string();
         let limit = params.get("limit").unwrap();
-        let target = company.value.unwrap();
+        let target = target.target_name.clone();
 
         let url = String::from("https://www.google.com/search?num=")
-            .add(&limit.value.unwrap().as_str())
+            .add(limit.value.unwrap().as_str())
             .add("&start=0&hl=en&q=site:linkedin.com/in+")
-            .add(&target.replace(" ", "+").as_str());
+            .add(target.replace(" ", "+").as_str());
 
         let mut headers = header::HeaderMap::new();
         headers.insert(
@@ -94,15 +95,44 @@ impl CompiledModule for LinkedinSearch {
 
             let element = element.inner_html().replace(&target, "");
 
-            let elements: Vec<&str> = element.split("-").collect();
+            let elements: Vec<&str> = element.split(" - ").collect();
 
-            result.insert(String::from("name"), elements[0].trim().to_string());
-            result.insert(String::from("type"), String::from("person"));
-            result.insert(String::from("job_title"), elements[1].trim().to_string());
+            let (first_name, last_name, full_name) = {
+                let full_name = elements[0].clone().trim();
+                let mut first_name = "";
+                let mut last_name = "";
+                let separate = full_name.split(" ").collect::<Vec<&str>>();
+                if separate.len() > 1 {
+                    first_name = separate[0];
+                    last_name = separate[1];
+                }
+
+                (first_name, last_name, full_name)
+            };
+
             result.insert(
-                String::from("parent"),
-                target_id.value.as_ref().unwrap().clone(),
+                String::from(opf_models::target::NAME),
+                full_name.to_string(),
             );
+            result.insert(
+                String::from(opf_models::target::FIRST_NAME),
+                first_name.to_string(),
+            );
+            result.insert(
+                String::from(opf_models::target::LAST_NAME),
+                last_name.to_string(),
+            );
+            result.insert(
+                String::from(opf_models::target::TYPE),
+                TargetType::Person.to_string(),
+            );
+            result.insert(
+                String::from(opf_models::target::JOB_TITLE),
+                elements[1].trim().to_string(),
+            );
+            result.insert(String::from(opf_models::target::ENTERPRISE), target.clone());
+
+            result.insert(String::from(opf_models::target::PARENT), target_id.clone());
 
             results.push(Target::try_from(result)?);
         }

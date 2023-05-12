@@ -4,13 +4,14 @@ use tokio::sync::mpsc::UnboundedSender;
 use tokio::sync::RwLock;
 
 use opf_models::event::Event;
-use opf_models::{Link, Target};
+use opf_models::{Group, Link, Target};
 
 #[derive(Debug)]
 pub struct DB {
     pub db_tx: UnboundedSender<Event>,
     pub db_id: i32,
     pub targets: RwLock<HashMap<i32, Target>>,
+    pub groups: RwLock<HashMap<i32, Group>>,
     pub links: RwLock<HashMap<i32, Link>>,
 }
 
@@ -20,6 +21,7 @@ impl DB {
             db_tx,
             db_id: 0,
             targets: RwLock::new(HashMap::new()),
+            groups: RwLock::new(HashMap::new()),
             links: RwLock::new(HashMap::new()),
         }
     }

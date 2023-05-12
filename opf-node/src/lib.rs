@@ -96,8 +96,12 @@ impl Node {
                 CommandObject::Target => {
                     send_event(&self.db_tx, Event::CommandTarget(command)).await
                 }
+                CommandObject::Group => send_event(&self.db_tx, Event::CommandGroup(command)).await,
                 CommandObject::Workspace => {
                     send_event(&self.db_tx, Event::CommandWorkspace(command)).await
+                }
+                CommandObject::Keystore => {
+                    send_event(&self.db_tx, Event::CommandKeystore(command)).await
                 }
                 CommandObject::Link => send_event(&self.db_tx, Event::CommandLink(command)).await,
                 CommandObject::None => match command.action {

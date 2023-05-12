@@ -1,5 +1,9 @@
 pub const ID: &str = "id";
 pub const TYPE: &str = "type";
 pub const NAME: &str = "name";
+pub const FIRST_NAME: &str = "first_name";
+pub const LAST_NAME: &str = "last_name";
+pub const JOB_TITLE: &str = "job_title";
+pub const ENTERPRISE: &str = "enterprise";
 pub const CUSTOM_ID: &str = "custom_id";
 pub const PARENT: &str = "parent";
