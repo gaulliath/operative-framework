@@ -217,14 +217,12 @@ impl CompiledModule for InseeSearch {
 
     async fn run(
         &self,
+        _group_id: i32,
+        target: Target,
         params: Args,
         _tx: Option<UnboundedSender<Event>>,
     ) -> Result<Vec<Target>, ErrorKind> {
-        let target_id = params
-            .get("target_id")
-            .ok_or(ErrorKind::Module(ModuleError::TargetNotAvailable))?
-            .value
-            .ok_or(ErrorKind::Module(ModuleError::TargetNotAvailable))?;
+        let target_id = target.target_id.to_string();
         let siren = params
             .get("siren")
             .ok_or(ErrorKind::Module(ModuleError::ParamNotAvailable(
@@ -314,9 +312,12 @@ impl CompiledModule for InseeSearch {
 
             let mut result = HashMap::new();
 
-            result.insert(String::from("name"), final_address);
-            result.insert(String::from("type"), String::from("address"));
-            result.insert(String::from("parent"), target_id.clone());
+            result.insert(String::from(opf_models::target::NAME), final_address);
+            result.insert(
+                String::from(opf_models::target::TYPE),
+                TargetType::Address.to_string(),
+            );
+            result.insert(String::from(opf_models::target::PARENT), target_id.clone());
 
             results.push(Target::try_from(result)?);
         }

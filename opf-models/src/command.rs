@@ -1,4 +1,4 @@
-pub const LISTS: [(&str, &str, &str); 16] = [
+pub const LISTS: [(&str, &str, &str); 17] = [
     // target
     (
         "list target",
@@ -65,6 +65,12 @@ pub const LISTS: [(&str, &str, &str); 16] = [
         "set workspace",
         "update a workspace name",
         "set workspace id=, name=NAME",
+    ),
+    // links
+    (
+        "list keystore",
+        "list available key in current keystore",
+        "list keystore",
     ),
     // export
     ("export dot", "export workspace in dot format", "export dot"),

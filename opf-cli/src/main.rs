@@ -66,6 +66,16 @@ async fn main() -> Result<()> {
     let (node_tx, node) = Node::new(tx).await;
     let workspace = Arc::new(RwLock::new(String::from("")));
 
+    let configuration =
+        opf_models::Config::from_file("config.toml").expect("can't parse configuration file");
+
+    send_event_to(
+        &node_tx,
+        (Domain::Data, Event::LoadKeystore(configuration.keystore)),
+    )
+    .await
+    .expect("can't send configuration file to data controller.");
+
     let config = Config::builder()
         .history_ignore_space(true)
         .completion_type(CompletionType::List)
@@ -93,10 +103,10 @@ async fn main() -> Result<()> {
         for event in rx.iter() {
             match event {
                 Event::ResponseSimple(res) => {
-                    let _ = external_printer.print(format!("INF {}", res));
+                    let _ = external_printer.print(format!("{} {}", "INF".blue(), res));
                 }
                 Event::ResponseError(res) => {
-                    let _ = external_printer.print(format!("ERR {}", res));
+                    let _ = external_printer.print(format!("{} {}", "ERR".red(), res));
                 }
                 Event::ResponseTable((headers, rows)) => {
                     let mut table = Table::new();
@@ -107,7 +117,6 @@ async fn main() -> Result<()> {
                 Event::SetWorkspace(new_workspace) => {
                     let mut workspace = workspace_clone.write().unwrap();
                     *workspace = new_workspace.clone();
-                    let _ = external_printer.print(format!("workspace => {}", new_workspace));
                 }
                 _ => {}
             }

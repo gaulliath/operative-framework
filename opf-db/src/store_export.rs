@@ -19,9 +19,6 @@ impl DB {
         let mut index = HashMap::new();
         let targets = self.targets.read().await;
         for (target_id, target) in targets.iter() {
-            if target.target_parent.is_some() {
-                continue;
-            }
             let id = graph.add_node(target.target_name.clone());
             index.insert(target_id, id.clone());
         }
@@ -30,16 +27,15 @@ impl DB {
             if target.target_parent.is_none() {
                 continue;
             }
-            let id = graph.add_node(target.target_name.clone());
-            index.insert(target_id, id.clone());
-
             if let Some(parent) = target.target_parent {
                 if let Some(parent_id) = index.get(&parent) {
-                    graph.add_edge(
-                        parent_id.clone(),
-                        id,
-                        target.target_type.to_string().clone(),
-                    );
+                    if let Some(id) = index.get(&target_id) {
+                        graph.add_edge(
+                            parent_id.clone(),
+                            *id,
+                            target.target_type.to_string().clone(),
+                        );
+                    }
                 }
             }
         }

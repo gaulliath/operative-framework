@@ -17,7 +17,11 @@ use opf_models::{
 mod account_search;
 mod command;
 mod crtsh;
+mod dehashed;
+mod domain_alive;
 mod email_to_domain;
+mod enterprise_domain;
+mod gen_email_enterprise;
 mod insee_search;
 mod linkedin_search;
 mod port_scanner;
@@ -56,6 +60,8 @@ pub trait CompiledModule: Sync + Send + DynClone {
     }
     async fn run(
         &self,
+        group_id: i32,
+        target: Target,
         params: Args,
         tx: Option<UnboundedSender<Event>>,
     ) -> Result<Vec<Target>, ErrorKind>;
@@ -119,13 +125,18 @@ impl ModuleController {
                                 let _ = send_event_to(&self.node_tx, (Domain::CLI, ResponseError(e.to_string()))).await;
                             }
                         }
+                        Event::UpdateTargetMeta(data) => {
+                            if let Err(e) = send_event_to(&self.node_tx, (Domain::Data, Event::UpdateTargetMeta(data))).await {
+                                let _ = send_event_to(&self.node_tx, (Domain::CLI, ResponseError(e.to_string()))).await;
+                            }
+                        }
                         Event::HelpModule(module_name) => {
                             if let Err(e) = self.on_help_module(module_name).await {
                                 let _ = send_event_to(&self.node_tx, (Domain::CLI, ResponseError(e.to_string()))).await;
                             }
                         }
-                        Event::ResultsModule(targets) => {
-                            let _ = send_event_to(&self.node_tx, (Domain::Data, ResultsModule(targets))).await;
+                        Event::ResultsModule(group_id, targets) => {
+                            let _ = send_event_to(&self.node_tx, (Domain::Data, ResultsModule(group_id, targets))).await;
                         }
                         _ => {
                             if let Err(e) = send_event_to(&self.node_tx, (Domain::CLI, event)).await {
@@ -152,6 +163,10 @@ pub fn new(
     let crt_sh = crtsh::CrtSH::new();
     let email_to_domain = email_to_domain::EmailToDomain::new();
     let insee_search = insee_search::InseeSearch::new();
+    let dehashed = dehashed::DeHashed::new();
+    let generate_email_enterprise = gen_email_enterprise::GenerateEmailEnterprise::new();
+    let domain_is_alive = domain_alive::DomainAlive::new();
+    let enterprise_domain = enterprise_domain::EnterpriseDomain::new();
 
     modules.insert(linkedin.name(), Module::Compiled(linkedin));
     modules.insert(account_search.name(), Module::Compiled(account_search));
@@ -159,6 +174,16 @@ pub fn new(
     modules.insert(crt_sh.name(), Module::Compiled(crt_sh));
     modules.insert(email_to_domain.name(), Module::Compiled(email_to_domain));
     modules.insert(insee_search.name(), Module::Compiled(insee_search));
+    modules.insert(dehashed.name(), Module::Compiled(dehashed));
+    modules.insert(domain_is_alive.name(), Module::Compiled(domain_is_alive));
+    modules.insert(
+        enterprise_domain.name(),
+        Module::Compiled(enterprise_domain),
+    );
+    modules.insert(
+        generate_email_enterprise.name(),
+        Module::Compiled(generate_email_enterprise),
+    );
 
     (
         tx,

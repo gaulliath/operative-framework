@@ -6,13 +6,20 @@ use strum_macros::{Display, EnumIter, EnumString};
 
 use error::ErrorKind;
 
+pub mod account;
+pub mod breach;
 pub mod command;
+pub mod domain;
+pub mod email;
 pub mod error;
 pub mod event;
+pub mod group;
 mod impl_model;
+pub mod keystore;
 pub mod link;
 pub mod metadata;
 pub mod module;
+pub mod port;
 pub mod target;
 pub mod workspace;
 
@@ -53,9 +60,18 @@ pub enum CommandObject {
     Group,
     Api,
     Workspace,
+    Keystore,
     Export(String),
     Module(String),
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Config {
+    pub keystore: KeyStore,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct KeyStore(pub HashMap<String, String>);
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Target {
@@ -84,6 +100,7 @@ pub enum TargetType {
     Account,
     IpAddress,
     Domain,
+    Breach,
 }
 
 #[derive(Debug, PartialEq, EnumString, EnumIter, Display, Clone, Serialize, Deserialize)]
@@ -114,6 +131,7 @@ pub enum LinkFrom {
 pub struct Group {
     pub group_id: i32,
     pub group_name: String,
+    pub targets: Vec<i32>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

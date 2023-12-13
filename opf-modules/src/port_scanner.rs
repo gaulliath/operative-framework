@@ -248,18 +248,13 @@ impl CompiledModule for PortScanner {
 
     async fn run(
         &self,
-        params: Args,
+        group_id: i32,
+        target: Target,
+        _params: Args,
         tx: Option<UnboundedSender<Event>>,
     ) -> Result<Vec<Target>, ErrorKind> {
-        let company = params.get("target").unwrap();
-        let target_id = params
-            .get("target_id")
-            .ok_or(ErrorKind::Module(ModuleError::TargetNotAvailable))?
-            .value
-            .ok_or(ErrorKind::Module(ModuleError::TargetNotAvailable))?;
-        let target = company
-            .value
-            .ok_or(ErrorKind::Module(ModuleError::TargetNotAvailable))?;
+        let target_id = target.target_id.to_string();
+        let target = target.target_name.clone();
         let tx = tx.ok_or(ErrorKind::Module(ModuleError::ParamNotAvailable(
             "tx is mandatory for threaded module".to_string(),
         )))?;
@@ -268,6 +263,7 @@ impl CompiledModule for PortScanner {
             let port = port.clone();
             let _ = tokio::spawn(PortScanner::scan_port(
                 tx.clone(),
+                group_id,
                 target.clone(),
                 port,
                 service,
@@ -288,7 +284,14 @@ impl PortScanner {
         Box::new(PortScanner {})
     }
 
-    async fn scan_port(tx: UnboundedSender<Event>, hostname: String, port: u16, service: &str, parent: String) {
+    async fn scan_port(
+        tx: UnboundedSender<Event>,
+        group_id: i32,
+        hostname: String,
+        port: u16,
+        service: &str,
+        parent: String,
+    ) {
         let timeout = Duration::from_secs(3);
         let socket_addresses: Vec<SocketAddr> =
             match format!("{}:{}", hostname, port).to_socket_addrs() {
@@ -304,13 +307,16 @@ impl PortScanner {
         match tokio::time::timeout(timeout, TcpStream::connect(&socket_addresses[0])).await {
             Ok(Ok(_)) => {
                 let mut target = HashMap::new();
-                target.insert(String::from("name"), port.to_string());
-                target.insert(String::from("type"), String::from("port"));
-                target.insert(String::from("parent"), parent);
-                target.insert(String::from("service"), service.to_string());
+                target.insert(String::from(opf_models::target::NAME), port.to_string());
+                target.insert(
+                    String::from(opf_models::target::TYPE),
+                    TargetType::Port.to_string(),
+                );
+                target.insert(String::from(opf_models::target::PARENT), parent);
+                target.insert(String::from(opf_models::port::SERVICE), service.to_string());
 
                 if let Ok(target) = Target::try_from(target) {
-                    let _ = send_event(&tx, Event::ResultsModule(vec![target])).await;
+                    let _ = send_event(&tx, Event::ResultsModule(group_id, vec![target])).await;
                     let _ = send_event(
                         &tx,
                         Event::ResponseSimple(format!(

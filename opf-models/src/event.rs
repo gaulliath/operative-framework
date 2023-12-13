@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use tokio::sync::mpsc::UnboundedSender;
 
 use crate::error::ErrorKind;
-use crate::{Command, Target};
+use crate::{Command, KeyStore, Target};
 
 #[derive(Debug)]
 pub enum Event {
@@ -14,19 +14,25 @@ pub enum Event {
     CommandLink(Command),
     CommandModule(Command),
     CommandWorkspace(Command),
+    CommandKeystore(Command),
     CommandExport(Command),
+    CommandGroup(Command),
     // Module variant
     PrepareModule((String, Command)),
-    ExecuteModule((String, HashMap<String, String>)),
+    ExecuteModule((i32, Target, String, HashMap<String, String>)),
     ListModules,
     HelpModule(String),
-    ResultsModule(Vec<Target>),
+    ResultsModule(i32, Vec<Target>),
     // response variants
     ResponseSimple(String),
     ResponseError(String),
     ResponseInfo(String),
     ResponseTable((Vec<String>, Vec<Vec<String>>)),
     SetWorkspace(String),
+    // keystore
+    LoadKeystore(KeyStore),
+    // target
+    UpdateTargetMeta((String, (String, String))),
 }
 
 #[derive(Debug)]
