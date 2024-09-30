@@ -1,7 +1,7 @@
 use opf_models::error::{ErrorKind, Module as ModuleError};
 use opf_models::event::Event::ResponseSimple;
 use opf_models::event::{send_event, send_event_to, Domain, Event};
-use opf_models::module;
+use opf_models::{module, Target};
 use std::collections::HashMap;
 
 use crate::{Module, ModuleController};
@@ -87,10 +87,10 @@ impl ModuleController {
 
     pub async fn on_execute_module(
         &mut self,
-        data: (String, HashMap<String, String>),
+        data: (i32, Target, String, HashMap<String, String>),
     ) -> Result<(), ErrorKind> {
         for (_, module) in self.modules.iter() {
-            if module.name().eq(&data.0) {
+            if module.name().eq(&data.2) {
                 if let Module::Compiled(compiled) = module {
                     let _ = send_event_to(
                         &self.node_tx,
@@ -102,8 +102,10 @@ impl ModuleController {
                     .await;
                     tokio::spawn(crate::worker::run(
                         self.self_tx.clone(),
-                        dyn_clone::clone_box(&**compiled),
+                        data.0,
                         data.1.clone(),
+                        dyn_clone::clone_box(&**compiled),
+                        data.3.clone(),
                     ));
                 }
             }

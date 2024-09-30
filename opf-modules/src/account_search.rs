@@ -74,24 +74,21 @@ impl CompiledModule for AccountSearch {
 
     async fn run(
         &self,
-        params: Args,
+        group_id: i32,
+        target: Target,
+        _params: Args,
         tx: Option<UnboundedSender<Event>>,
     ) -> Result<Vec<Target>, ErrorKind> {
-        let company = params.get("target").unwrap();
-        let target_id = params
-            .get("target_id")
-            .ok_or(ErrorKind::Module(ModuleError::TargetNotAvailable))?
-            .value
-            .ok_or(ErrorKind::Module(ModuleError::TargetNotAvailable))?;
-        let target = company
-            .value
-            .ok_or(ErrorKind::Module(ModuleError::TargetNotAvailable))?;
+        let target_id = target.target_id.to_string();
+        let target = target.target_name.clone();
+
         let tx = tx.ok_or(ErrorKind::Module(ModuleError::ParamNotAvailable(
             "tx is mandatory for threaded module".to_string(),
         )))?;
         let websites = self.get_accounts().await?;
         for site in websites {
             let _ = tokio::spawn(AccountSearch::check_website(
+                group_id,
                 site,
                 (target.clone(), target_id.clone()),
                 tx.clone(),
@@ -138,7 +135,12 @@ impl AccountSearch {
         Ok(res.sites)
     }
 
-    async fn check_website(site: Site, account: (String, String), tx: UnboundedSender<Event>) {
+    async fn check_website(
+        group_id: i32,
+        site: Site,
+        account: (String, String),
+        tx: UnboundedSender<Event>,
+    ) {
         let mut headers = header::HeaderMap::new();
         headers.insert(
             "User-Agent",
@@ -168,14 +170,20 @@ impl AccountSearch {
                     }
 
                     let mut result = HashMap::new();
-                    result.insert(String::from("name"), site.name.clone());
-                    result.insert(String::from("type"), String::from("account"));
-                    result.insert(String::from("category"), site.cat.clone());
-                    result.insert(String::from("parent"), target_id.clone());
-                    result.insert(String::from("link"), url);
+                    result.insert(String::from(opf_models::target::NAME), site.name.clone());
+                    result.insert(
+                        String::from(opf_models::target::TYPE),
+                        TargetType::Account.to_string(),
+                    );
+                    result.insert(
+                        String::from(opf_models::account::CATEGORY),
+                        site.cat.clone(),
+                    );
+                    result.insert(String::from(opf_models::target::PARENT), target_id.clone());
+                    result.insert(String::from(opf_models::account::LINK), url);
 
                     if let Ok(target) = Target::try_from(result) {
-                        let _ = send_event(&tx, Event::ResultsModule(vec![target])).await;
+                        let _ = send_event(&tx, Event::ResultsModule(group_id, vec![target])).await;
                         let _ = send_event(
                             &tx,
                             Event::ResponseSimple(format!(

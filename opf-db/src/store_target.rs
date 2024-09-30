@@ -18,6 +18,24 @@ impl DB {
         }
     }
 
+    pub async fn on_target_meta_update(
+        &self,
+        target_id: String,
+        meta: (String, String),
+    ) -> Result<(), ErrorKind> {
+        let mut targets = self.targets.write().await;
+        let target_id = target_id
+            .parse::<i32>()
+            .map_err(|_| ErrorKind::GenericError(format!("invalid target_id '{}'", target_id)))?;
+
+        let target = targets
+            .get_mut(&target_id)
+            .ok_or(ErrorKind::Target(TargetError::TargetExist))?;
+
+        target.meta.insert(meta.0, meta.1);
+        Ok(())
+    }
+
     pub async fn target_exist(&self, name: &str, target_type: &TargetType) -> bool {
         let targets = self.targets.read().await;
         for (_, target) in targets.iter() {
@@ -106,7 +124,7 @@ impl DB {
 
         send_event(
             &self.db_tx,
-            Event::ResponseSimple(format!("{:#?}", new_target)),
+            Event::ResponseSimple(format!("target_id => {}", new_target.target_id)),
         )
         .await
     }

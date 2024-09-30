@@ -13,6 +13,18 @@ impl crate::Command {
     }
 }
 
+impl crate::Config {
+    /// load a configuration from file
+    pub fn from_file(config_file: &str) -> Result<Self, ErrorKind> {
+        toml::from_str(
+            std::fs::read_to_string(config_file)
+                .map_err(|_| ErrorKind::GenericError(format!("can't read configuration file")))?
+                .as_str(),
+        )
+        .map_err(|_| ErrorKind::GenericError(format!("parsing configuration file failed")))
+    }
+}
+
 impl TryFrom<HashMap<String, String>> for crate::Target {
     type Error = ErrorKind;
 
@@ -119,5 +131,15 @@ impl TryFrom<HashMap<String, String>> for crate::Link {
             link_meta: params.clone(),
             link_created_at: SystemTime::now(),
         })
+    }
+}
+
+impl crate::Group {
+    pub fn new(group_id: i32, group_name: String) -> Self {
+        Self {
+            group_id,
+            group_name,
+            targets: vec![],
+        }
     }
 }

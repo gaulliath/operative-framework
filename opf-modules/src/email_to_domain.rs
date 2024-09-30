@@ -46,19 +46,16 @@ impl CompiledModule for EmailToDomain {
 
     async fn run(
         &self,
-        params: Args,
+        _group_id: i32,
+        target: Target,
+        _params: Args,
         _tx: Option<UnboundedSender<Event>>,
     ) -> Result<Vec<Target>, ErrorKind> {
-        let email = params.get("target").unwrap();
-        let target_id = params
-            .get("target_id")
-            .ok_or(ErrorKind::Module(ModuleError::TargetNotAvailable))?
-            .value
-            .ok_or(ErrorKind::Module(ModuleError::TargetNotAvailable))?;
-        let target = email.value.unwrap();
+        let target_id = target.target_id.to_string();
+        let target = target.target_name.clone();
 
         let url = String::from("https://viewdns.info/reversewhois/?q=")
-            .add(&target.replace(" ", "+").as_str());
+            .add(target.replace(" ", "+").as_str());
         let mut headers = header::HeaderMap::new();
         headers.insert(
             "User-Agent",
@@ -132,12 +129,18 @@ impl CompiledModule for EmailToDomain {
 
                 for (k, e) in elements.enumerate() {
                     if k == 0 {
-                        result.insert(String::from("name"), e.inner_html().trim().to_string());
-                        result.insert(String::from("type"), String::from("domain"));
-                        result.insert(String::from("parent"), target_id.clone());
+                        result.insert(
+                            String::from(opf_models::target::NAME),
+                            e.inner_html().trim().to_string(),
+                        );
+                        result.insert(
+                            String::from(opf_models::target::TYPE),
+                            TargetType::Domain.to_string(),
+                        );
+                        result.insert(String::from(opf_models::target::PARENT), target_id.clone());
                     } else if k == 1 {
                         result.insert(
-                            String::from("registered_at"),
+                            String::from(opf_models::domain::REGISTERED_AT),
                             e.inner_html().trim().to_string(),
                         );
                     }
